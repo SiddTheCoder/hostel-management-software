@@ -1,7 +1,7 @@
 # Graph Report - hostel-management-software  (2026-06-21)
 
 ## Corpus Check
-- 7 files · ~9,189 words
+- 7 files · ~9,190 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

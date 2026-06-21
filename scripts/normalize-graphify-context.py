@@ -22,7 +22,7 @@ def normalize(root: Path) -> bool:
         if data.get("built_at_commit") != NORMALIZED_COMMIT:
             data["built_at_commit"] = NORMALIZED_COMMIT
             graph_json.write_text(
-                json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+                json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
             changed = True
