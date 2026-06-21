@@ -1,16 +1,16 @@
 # Graph Report - hostel-management-software  (2026-06-21)
 
 ## Corpus Check
-- 6 files · ~8,797 words
+- 6 files · ~9,036 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 223 nodes · 217 edges · 17 communities (15 shown, 2 thin omitted)
+- 223 nodes · 218 edges · 17 communities (15 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `90f16473`
+- Built from commit: `87a78df5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -111,7 +111,7 @@ Cohesion: 0.4
 Nodes (4): graphify - READ THIS FIRST, Keeping the graph fresh, What you MUST do at the start of every session, What you MUST NOT do
 
 ## Knowledge Gaps
-- **157 isolated node(s):** `What you MUST do at the start of every session`, `What you MUST NOT do`, `Keeping the graph fresh`, `What you MUST do at the start of every session`, `What you MUST NOT do` (+152 more)
+- **155 isolated node(s):** `What you MUST do at the start of every session`, `What you MUST NOT do`, `Keeping the graph fresh`, `What you MUST do at the start of every session`, `What you MUST NOT do` (+150 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -125,7 +125,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Phase 3 — Resident System + Payments + Food` connect `Community 2` to `Community 5`?**
   _High betweenness centrality (0.111) - this node is a cross-community bridge._
 - **What connects `What you MUST do at the start of every session`, `What you MUST NOT do`, `Keeping the graph fresh` to the rest of the system?**
-  _157 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _155 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

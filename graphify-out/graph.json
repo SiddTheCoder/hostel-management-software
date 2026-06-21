@@ -34,7 +34,7 @@
       "label": "What you MUST NOT do",
       "file_type": "document",
       "source_file": "AGENTS.md",
-      "source_location": "L12",
+      "source_location": "L13",
       "id": "hostel_management_software_agents_what_you_must_not_do",
       "community": 13,
       "norm_label": "what you must not do"
@@ -43,7 +43,7 @@
       "label": "Keeping the graph fresh",
       "file_type": "document",
       "source_file": "AGENTS.md",
-      "source_location": "L17",
+      "source_location": "L18",
       "id": "hostel_management_software_agents_keeping_the_graph_fresh",
       "community": 13,
       "norm_label": "keeping the graph fresh"
@@ -79,7 +79,7 @@
       "label": "What you MUST NOT do",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L12",
+      "source_location": "L13",
       "id": "hostel_management_software_claude_what_you_must_not_do",
       "community": 14,
       "norm_label": "what you must not do"
@@ -88,7 +88,7 @@
       "label": "Keeping the graph fresh",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L17",
+      "source_location": "L18",
       "id": "hostel_management_software_claude_keeping_the_graph_fresh",
       "community": 14,
       "norm_label": "keeping the graph fresh"
@@ -661,22 +661,22 @@
       "norm_label": "readme.md"
     },
     {
-      "label": "Agent Context",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L1",
-      "id": "hostel_management_software_readme_agent_context",
-      "community": 15,
-      "norm_label": "agent context"
-    },
-    {
       "label": "hostel-management-software",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L10",
+      "source_location": "L1",
       "id": "hostel_management_software_readme_hostel_management_software",
       "community": 15,
       "norm_label": "hostel-management-software"
+    },
+    {
+      "label": "Agent Context",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L3",
+      "id": "hostel_management_software_readme_agent_context",
+      "community": 15,
+      "norm_label": "agent context"
     },
     {
       "label": "step_plans.md",
@@ -2018,9 +2018,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents_md",
-      "target": "hostel_management_software_agents_graphify_read_this_first",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_agents_graphify_read_this_first"
     },
     {
       "relation": "contains",
@@ -2028,9 +2028,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_agents_graphify_read_this_first",
-      "target": "hostel_management_software_agents_what_you_must_do_at_the_start_of_every_session",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_agents_what_you_must_do_at_the_start_of_every_session"
     },
     {
       "relation": "contains",
@@ -2038,9 +2038,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_agents_graphify_read_this_first",
-      "target": "hostel_management_software_agents_what_you_must_not_do",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_agents_what_you_must_not_do"
     },
     {
       "relation": "contains",
@@ -2048,9 +2048,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_agents_graphify_read_this_first",
-      "target": "hostel_management_software_agents_keeping_the_graph_fresh",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_agents_keeping_the_graph_fresh"
     },
     {
       "relation": "contains",
@@ -2058,9 +2058,9 @@
       "source_file": "CLAUDE.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "claude_md",
-      "target": "hostel_management_software_claude_graphify_read_this_first",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_claude_graphify_read_this_first"
     },
     {
       "relation": "contains",
@@ -2068,9 +2068,9 @@
       "source_file": "CLAUDE.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_claude_graphify_read_this_first",
-      "target": "hostel_management_software_claude_what_you_must_do_at_the_start_of_every_session",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_claude_what_you_must_do_at_the_start_of_every_session"
     },
     {
       "relation": "contains",
@@ -2078,9 +2078,9 @@
       "source_file": "CLAUDE.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_claude_graphify_read_this_first",
-      "target": "hostel_management_software_claude_what_you_must_not_do",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_claude_what_you_must_not_do"
     },
     {
       "relation": "contains",
@@ -2088,9 +2088,9 @@
       "source_file": "CLAUDE.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_claude_graphify_read_this_first",
-      "target": "hostel_management_software_claude_keeping_the_graph_fresh",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_claude_keeping_the_graph_fresh"
     },
     {
       "relation": "contains",
@@ -2098,9 +2098,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "cleint_features_md",
-      "target": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth"
     },
     {
       "relation": "contains",
@@ -2108,9 +2108,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_1_product_summary",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_1_product_summary"
     },
     {
       "relation": "contains",
@@ -2118,9 +2118,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_2_core_product_principle",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_2_core_product_principle"
     },
     {
       "relation": "contains",
@@ -2128,9 +2128,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_3_main_portals",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_3_main_portals"
     },
     {
       "relation": "contains",
@@ -2138,9 +2138,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_4_user_roles",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_user_roles"
     },
     {
       "relation": "contains",
@@ -2148,9 +2148,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L222",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_5_public_portal_features",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_5_public_portal_features"
     },
     {
       "relation": "contains",
@@ -2158,9 +2158,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L239",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_6_platform_owner_portal_features",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_6_platform_owner_portal_features"
     },
     {
       "relation": "contains",
@@ -2168,9 +2168,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L257",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features"
     },
     {
       "relation": "contains",
@@ -2178,9 +2178,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L542",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_8_resident_portal_features",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_8_resident_portal_features"
     },
     {
       "relation": "contains",
@@ -2188,9 +2188,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L561",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_9_guardian_trust_dashboard",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_9_guardian_trust_dashboard"
     },
     {
       "relation": "contains",
@@ -2198,9 +2198,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L583",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_10_rating_and_review_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_10_rating_and_review_system"
     },
     {
       "relation": "contains",
@@ -2208,9 +2208,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L604",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_11_hostel_verification_and_trust_features",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_11_hostel_verification_and_trust_features"
     },
     {
       "relation": "contains",
@@ -2218,9 +2218,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L655",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_12_hostel_comparison_mode",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_12_hostel_comparison_mode"
     },
     {
       "relation": "contains",
@@ -2228,9 +2228,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L673",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_13_referral_loop",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_13_referral_loop"
     },
     {
       "relation": "contains",
@@ -2238,9 +2238,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L692",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_14_user_joining_flow",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_14_user_joining_flow"
     },
     {
       "relation": "contains",
@@ -2248,9 +2248,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L715",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_15_service_provider_joining_flow",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_15_service_provider_joining_flow"
     },
     {
       "relation": "contains",
@@ -2258,9 +2258,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L727",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_16_privacy_and_data_access_rules",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_16_privacy_and_data_access_rules"
     },
     {
       "relation": "contains",
@@ -2268,9 +2268,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L744",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_17_payment_scope",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_17_payment_scope"
     },
     {
       "relation": "contains",
@@ -2278,9 +2278,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L774",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_18_notifications",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_18_notifications"
     },
     {
       "relation": "contains",
@@ -2288,9 +2288,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L800",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_19_technical_stack",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_19_technical_stack"
     },
     {
       "relation": "contains",
@@ -2298,9 +2298,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L820",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_20_suggested_core_database_entities",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_20_suggested_core_database_entities"
     },
     {
       "relation": "contains",
@@ -2308,9 +2308,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L859",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_21_important_non_functional_requirements",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_21_important_non_functional_requirements"
     },
     {
       "relation": "contains",
@@ -2318,9 +2318,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L876",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_22_what_is_not_included_by_default",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_22_what_is_not_included_by_default"
     },
     {
       "relation": "contains",
@@ -2328,9 +2328,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L896",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_23_recommended_development_order",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_23_recommended_development_order"
     },
     {
       "relation": "contains",
@@ -2338,9 +2338,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L947",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_multi_hostel_saas_platform_final_source_of_truth",
-      "target": "hostel_management_software_cleint_features_24_final_scope_summary",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_24_final_scope_summary"
     },
     {
       "relation": "contains",
@@ -2348,9 +2348,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_1_platform_owner_super_admin",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_1_platform_owner_super_admin"
     },
     {
       "relation": "contains",
@@ -2358,9 +2358,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_2_hostel_owner_hostel_admin",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_2_hostel_owner_hostel_admin"
     },
     {
       "relation": "contains",
@@ -2368,9 +2368,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_3_warden_staff",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_3_warden_staff"
     },
     {
       "relation": "contains",
@@ -2378,9 +2378,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_4_resident_student",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_4_resident_student"
     },
     {
       "relation": "contains",
@@ -2388,9 +2388,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_5_public_visitor",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_5_public_visitor"
     },
     {
       "relation": "contains",
@@ -2398,9 +2398,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L171",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_6_guardian",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_6_guardian"
     },
     {
       "relation": "contains",
@@ -2408,9 +2408,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L190",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_4_user_roles",
-      "target": "hostel_management_software_cleint_features_4_7_service_provider_side_hustle_worker",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_4_7_service_provider_side_hustle_worker"
     },
     {
       "relation": "contains",
@@ -2418,9 +2418,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_hostel_feature_index_admin_warden_scope",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_hostel_feature_index_admin_warden_scope"
     },
     {
       "relation": "contains",
@@ -2428,9 +2428,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L276",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_1_hostel_profile_management",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_1_hostel_profile_management"
     },
     {
       "relation": "contains",
@@ -2438,9 +2438,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L293",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_2_room_bed_digital_map",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_2_room_bed_digital_map"
     },
     {
       "relation": "contains",
@@ -2448,9 +2448,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L311",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_3_resident_management",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_3_resident_management"
     },
     {
       "relation": "contains",
@@ -2458,9 +2458,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L329",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_4_qr_activation",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_4_qr_activation"
     },
     {
       "relation": "contains",
@@ -2468,9 +2468,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L343",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_5_payments_records",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_5_payments_records"
     },
     {
       "relation": "contains",
@@ -2478,9 +2478,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L366",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_6_food_quality_proof_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_6_food_quality_proof_system"
     },
     {
       "relation": "contains",
@@ -2488,9 +2488,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L387",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_7_notices_and_updates",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_7_notices_and_updates"
     },
     {
       "relation": "contains",
@@ -2498,9 +2498,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L402",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_8_complaint_issue_resolution_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_8_complaint_issue_resolution_system"
     },
     {
       "relation": "contains",
@@ -2508,9 +2508,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L417",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_9_attendance_night_safety_status",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_9_attendance_night_safety_status"
     },
     {
       "relation": "contains",
@@ -2518,9 +2518,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L441",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_10_emergency_sos",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_10_emergency_sos"
     },
     {
       "relation": "contains",
@@ -2528,9 +2528,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L455",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_11_move_in_move_out_checklist",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_11_move_in_move_out_checklist"
     },
     {
       "relation": "contains",
@@ -2538,9 +2538,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L478",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_hostel_admin_warden_portal_features",
-      "target": "hostel_management_software_cleint_features_7_12_maintenance_local_service_provider_network",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_7_12_maintenance_local_service_provider_network"
     },
     {
       "relation": "contains",
@@ -2548,9 +2548,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L486",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_12_maintenance_local_service_provider_network",
-      "target": "hostel_management_software_cleint_features_service_provider_side_hustle_registration_page",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_service_provider_side_hustle_registration_page"
     },
     {
       "relation": "contains",
@@ -2558,9 +2558,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L516",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_12_maintenance_local_service_provider_network",
-      "target": "hostel_management_software_cleint_features_hostel_admin_maintenance_features",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_hostel_admin_maintenance_features"
     },
     {
       "relation": "contains",
@@ -2568,9 +2568,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L528",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_12_maintenance_local_service_provider_network",
-      "target": "hostel_management_software_cleint_features_platform_owner_controls",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_platform_owner_controls"
     },
     {
       "relation": "contains",
@@ -2578,9 +2578,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L536",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_7_12_maintenance_local_service_provider_network",
-      "target": "hostel_management_software_cleint_features_responsibility_rule",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_responsibility_rule"
     },
     {
       "relation": "contains",
@@ -2588,9 +2588,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L606",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_11_hostel_verification_and_trust_features",
-      "target": "hostel_management_software_cleint_features_11_1_owner_identity_ownership_proof",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_11_1_owner_identity_ownership_proof"
     },
     {
       "relation": "contains",
@@ -2598,9 +2598,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L619",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_11_hostel_verification_and_trust_features",
-      "target": "hostel_management_software_cleint_features_11_2_verified_hostel_badge_compliance_checklist",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_11_2_verified_hostel_badge_compliance_checklist"
     },
     {
       "relation": "contains",
@@ -2608,9 +2608,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L637",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_11_hostel_verification_and_trust_features",
-      "target": "hostel_management_software_cleint_features_11_3_duplicate_ghost_listing_detection",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_11_3_duplicate_ghost_listing_detection"
     },
     {
       "relation": "contains",
@@ -2618,9 +2618,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L748",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_17_payment_scope",
-      "target": "hostel_management_software_cleint_features_17_1_hostel_to_platform",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_17_1_hostel_to_platform"
     },
     {
       "relation": "contains",
@@ -2628,9 +2628,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L755",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_17_payment_scope",
-      "target": "hostel_management_software_cleint_features_17_2_resident_to_hostel",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_17_2_resident_to_hostel"
     },
     {
       "relation": "contains",
@@ -2638,9 +2638,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L898",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_23_recommended_development_order",
-      "target": "hostel_management_software_cleint_features_phase_1_foundation",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_phase_1_foundation"
     },
     {
       "relation": "contains",
@@ -2648,9 +2648,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L907",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_23_recommended_development_order",
-      "target": "hostel_management_software_cleint_features_phase_2_public_hostel_core",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_phase_2_public_hostel_core"
     },
     {
       "relation": "contains",
@@ -2658,9 +2658,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L917",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_23_recommended_development_order",
-      "target": "hostel_management_software_cleint_features_phase_3_resident_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_phase_3_resident_system"
     },
     {
       "relation": "contains",
@@ -2668,9 +2668,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L927",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_23_recommended_development_order",
-      "target": "hostel_management_software_cleint_features_phase_4_trust_safety_and_daily_use",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_phase_4_trust_safety_and_daily_use"
     },
     {
       "relation": "contains",
@@ -2678,9 +2678,9 @@
       "source_file": "cleint_features.md",
       "source_location": "L936",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_cleint_features_23_recommended_development_order",
-      "target": "hostel_management_software_cleint_features_phase_5_growth_and_maintenance",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_cleint_features_phase_5_growth_and_maintenance"
     },
     {
       "relation": "contains",
@@ -2688,19 +2688,9 @@
       "source_file": "CODEX.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "codex_md",
-      "target": "hostel_management_software_codex_codex_context",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L1",
-      "weight": 1.0,
-      "source": "readme_md",
-      "target": "hostel_management_software_readme_agent_context",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_codex_codex_context"
     },
     {
       "relation": "contains",
@@ -2708,9 +2698,29 @@
       "source_file": "README.md",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_md",
-      "target": "hostel_management_software_readme_hostel_management_software",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_readme_hostel_management_software"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_md",
+      "target": "hostel_management_software_readme_agent_context"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hostel_management_software_readme_hostel_management_software",
+      "target": "hostel_management_software_readme_agent_context"
     },
     {
       "relation": "contains",
@@ -2718,9 +2728,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan"
     },
     {
       "relation": "contains",
@@ -2728,9 +2738,9 @@
       "source_file": "step_plans.md",
       "source_location": "L295",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_phase_0_planning_architecture_lock",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_phase_0_planning_architecture_lock"
     },
     {
       "relation": "contains",
@@ -2738,9 +2748,9 @@
       "source_file": "step_plans.md",
       "source_location": "L393",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core"
     },
     {
       "relation": "contains",
@@ -2748,9 +2758,9 @@
       "source_file": "step_plans.md",
       "source_location": "L527",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core"
     },
     {
       "relation": "contains",
@@ -2758,9 +2768,9 @@
       "source_file": "step_plans.md",
       "source_location": "L690",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_phase_3_resident_system_payments_food"
     },
     {
       "relation": "contains",
@@ -2768,9 +2778,9 @@
       "source_file": "step_plans.md",
       "source_location": "L903",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety"
     },
     {
       "relation": "contains",
@@ -2778,9 +2788,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1151",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish"
     },
     {
       "relation": "contains",
@@ -2788,9 +2798,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1396",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_6_suggested_5_week_calendar",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_6_suggested_5_week_calendar"
     },
     {
       "relation": "contains",
@@ -2798,9 +2808,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1410",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_7_module_dependency_map",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_7_module_dependency_map"
     },
     {
       "relation": "contains",
@@ -2808,9 +2818,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1439",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_8_core_mongodb_collections",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_8_core_mongodb_collections"
     },
     {
       "relation": "contains",
@@ -2818,9 +2828,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1490",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_9_critical_data_privacy_rules",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_9_critical_data_privacy_rules"
     },
     {
       "relation": "contains",
@@ -2828,9 +2838,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1506",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_10_definition_of_done_for_any_module",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_10_definition_of_done_for_any_module"
     },
     {
       "relation": "contains",
@@ -2838,9 +2848,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1526",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_11_first_production_pilot_scope",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_11_first_production_pilot_scope"
     },
     {
       "relation": "contains",
@@ -2848,9 +2858,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1562",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_12_development_rules_for_the_team",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_12_development_rules_for_the_team"
     },
     {
       "relation": "contains",
@@ -2858,9 +2868,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1632",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_13_handover_checklist",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_13_handover_checklist"
     },
     {
       "relation": "contains",
@@ -2868,9 +2878,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1650",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "step_plans_md",
-      "target": "hostel_management_software_step_plans_14_final_recommendation",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_14_final_recommendation"
     },
     {
       "relation": "contains",
@@ -2878,9 +2888,9 @@
       "source_file": "step_plans.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan",
-      "target": "hostel_management_software_step_plans_1_final_technical_direction",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_final_technical_direction"
     },
     {
       "relation": "contains",
@@ -2888,9 +2898,9 @@
       "source_file": "step_plans.md",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan",
-      "target": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project"
     },
     {
       "relation": "contains",
@@ -2898,9 +2908,9 @@
       "source_file": "step_plans.md",
       "source_location": "L263",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan",
-      "target": "hostel_management_software_step_plans_3_team_work_lanes",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_team_work_lanes"
     },
     {
       "relation": "contains",
@@ -2908,9 +2918,9 @@
       "source_file": "step_plans.md",
       "source_location": "L280",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan",
-      "target": "hostel_management_software_step_plans_4_phase_overview",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_phase_overview"
     },
     {
       "relation": "contains",
@@ -2918,9 +2928,9 @@
       "source_file": "step_plans.md",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_final_technical_direction",
-      "target": "hostel_management_software_step_plans_1_1_recommended_project_structure",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_1_recommended_project_structure"
     },
     {
       "relation": "contains",
@@ -2928,9 +2938,9 @@
       "source_file": "step_plans.md",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_recommended_project_structure",
-      "target": "hostel_management_software_step_plans_codeblock_1",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_1"
     },
     {
       "relation": "contains",
@@ -2938,9 +2948,9 @@
       "source_file": "step_plans.md",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_recommended_project_structure",
-      "target": "hostel_management_software_step_plans_codeblock_2",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_2"
     },
     {
       "relation": "contains",
@@ -2948,9 +2958,9 @@
       "source_file": "step_plans.md",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_1_api_pattern",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_1_api_pattern"
     },
     {
       "relation": "contains",
@@ -2958,9 +2968,9 @@
       "source_file": "step_plans.md",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_2_multi_tenant_rule",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_2_multi_tenant_rule"
     },
     {
       "relation": "contains",
@@ -2968,9 +2978,9 @@
       "source_file": "step_plans.md",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_3_role_based_access_control",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_3_role_based_access_control"
     },
     {
       "relation": "contains",
@@ -2978,9 +2988,9 @@
       "source_file": "step_plans.md",
       "source_location": "L182",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_4_authentication_direction",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_4_authentication_direction"
     },
     {
       "relation": "contains",
@@ -2988,9 +2998,9 @@
       "source_file": "step_plans.md",
       "source_location": "L197",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_5_file_upload_rule",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_5_file_upload_rule"
     },
     {
       "relation": "contains",
@@ -2998,9 +3008,9 @@
       "source_file": "step_plans.md",
       "source_location": "L223",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_6_api_response_standard",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_6_api_response_standard"
     },
     {
       "relation": "contains",
@@ -3008,9 +3018,9 @@
       "source_file": "step_plans.md",
       "source_location": "L247",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_backend_best_practices_for_this_project",
-      "target": "hostel_management_software_step_plans_2_7_audit_log_rule",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_7_audit_log_rule"
     },
     {
       "relation": "contains",
@@ -3018,9 +3028,9 @@
       "source_file": "step_plans.md",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_1_api_pattern",
-      "target": "hostel_management_software_step_plans_codeblock_3",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_3"
     },
     {
       "relation": "contains",
@@ -3028,9 +3038,9 @@
       "source_file": "step_plans.md",
       "source_location": "L118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_1_api_pattern",
-      "target": "hostel_management_software_step_plans_codeblock_4",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_4"
     },
     {
       "relation": "contains",
@@ -3038,9 +3048,9 @@
       "source_file": "step_plans.md",
       "source_location": "L124",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_1_api_pattern",
-      "target": "hostel_management_software_step_plans_codeblock_5",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_5"
     },
     {
       "relation": "contains",
@@ -3048,9 +3058,9 @@
       "source_file": "step_plans.md",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_2_multi_tenant_rule",
-      "target": "hostel_management_software_step_plans_codeblock_6",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_6"
     },
     {
       "relation": "contains",
@@ -3058,9 +3068,9 @@
       "source_file": "step_plans.md",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_3_role_based_access_control",
-      "target": "hostel_management_software_step_plans_codeblock_7",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_7"
     },
     {
       "relation": "contains",
@@ -3068,9 +3078,9 @@
       "source_file": "step_plans.md",
       "source_location": "L174",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_3_role_based_access_control",
-      "target": "hostel_management_software_step_plans_codeblock_8",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_8"
     },
     {
       "relation": "contains",
@@ -3078,9 +3088,9 @@
       "source_file": "step_plans.md",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_5_file_upload_rule",
-      "target": "hostel_management_software_step_plans_codeblock_9",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_9"
     },
     {
       "relation": "contains",
@@ -3088,9 +3098,9 @@
       "source_file": "step_plans.md",
       "source_location": "L229",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_6_api_response_standard",
-      "target": "hostel_management_software_step_plans_codeblock_10",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_10"
     },
     {
       "relation": "contains",
@@ -3098,9 +3108,9 @@
       "source_file": "step_plans.md",
       "source_location": "L239",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_6_api_response_standard",
-      "target": "hostel_management_software_step_plans_codeblock_11",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_11"
     },
     {
       "relation": "contains",
@@ -3108,9 +3118,9 @@
       "source_file": "step_plans.md",
       "source_location": "L300",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_0_planning_architecture_lock",
-      "target": "hostel_management_software_step_plans_0_1_outputs",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_0_1_outputs"
     },
     {
       "relation": "contains",
@@ -3118,9 +3128,9 @@
       "source_file": "step_plans.md",
       "source_location": "L312",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_0_planning_architecture_lock",
-      "target": "hostel_management_software_step_plans_0_2_required_decisions",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_0_2_required_decisions"
     },
     {
       "relation": "contains",
@@ -3128,9 +3138,9 @@
       "source_file": "step_plans.md",
       "source_location": "L326",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_0_planning_architecture_lock",
-      "target": "hostel_management_software_step_plans_0_3_ui_sitemap",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_0_3_ui_sitemap"
     },
     {
       "relation": "contains",
@@ -3138,9 +3148,9 @@
       "source_file": "step_plans.md",
       "source_location": "L384",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_0_planning_architecture_lock",
-      "target": "hostel_management_software_step_plans_0_4_phase_0_done_means",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_0_4_phase_0_done_means"
     },
     {
       "relation": "contains",
@@ -3148,9 +3158,9 @@
       "source_file": "step_plans.md",
       "source_location": "L328",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_0_3_ui_sitemap",
-      "target": "hostel_management_software_step_plans_codeblock_12",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_12"
     },
     {
       "relation": "contains",
@@ -3158,9 +3168,9 @@
       "source_file": "step_plans.md",
       "source_location": "L398",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
-      "target": "hostel_management_software_step_plans_1_1_backend_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_1_backend_tasks"
     },
     {
       "relation": "contains",
@@ -3168,9 +3178,9 @@
       "source_file": "step_plans.md",
       "source_location": "L469",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
-      "target": "hostel_management_software_step_plans_1_2_web_frontend_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_2_web_frontend_tasks"
     },
     {
       "relation": "contains",
@@ -3178,9 +3188,9 @@
       "source_file": "step_plans.md",
       "source_location": "L492",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
-      "target": "hostel_management_software_step_plans_1_3_mobile_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_3_mobile_tasks"
     },
     {
       "relation": "contains",
@@ -3188,9 +3198,9 @@
       "source_file": "step_plans.md",
       "source_location": "L504",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
-      "target": "hostel_management_software_step_plans_1_4_qa_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_4_qa_tasks"
     },
     {
       "relation": "contains",
@@ -3198,9 +3208,9 @@
       "source_file": "step_plans.md",
       "source_location": "L516",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
-      "target": "hostel_management_software_step_plans_1_5_phase_1_done_means",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_1_5_phase_1_done_means"
     },
     {
       "relation": "contains",
@@ -3208,9 +3218,9 @@
       "source_file": "step_plans.md",
       "source_location": "L400",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_backend_tasks",
-      "target": "hostel_management_software_step_plans_project_setup",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_project_setup"
     },
     {
       "relation": "contains",
@@ -3218,9 +3228,9 @@
       "source_file": "step_plans.md",
       "source_location": "L412",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_backend_tasks",
-      "target": "hostel_management_software_step_plans_auth_module",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_auth_module"
     },
     {
       "relation": "contains",
@@ -3228,9 +3238,9 @@
       "source_file": "step_plans.md",
       "source_location": "L433",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_backend_tasks",
-      "target": "hostel_management_software_step_plans_role_permission_module",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_role_permission_module"
     },
     {
       "relation": "contains",
@@ -3238,9 +3248,9 @@
       "source_file": "step_plans.md",
       "source_location": "L446",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_backend_tasks",
-      "target": "hostel_management_software_step_plans_core_models",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_core_models"
     },
     {
       "relation": "contains",
@@ -3248,9 +3258,9 @@
       "source_file": "step_plans.md",
       "source_location": "L460",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_1_backend_tasks",
-      "target": "hostel_management_software_step_plans_platform_owner_base",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_platform_owner_base"
     },
     {
       "relation": "contains",
@@ -3258,9 +3268,9 @@
       "source_file": "step_plans.md",
       "source_location": "L426",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_auth_module",
-      "target": "hostel_management_software_step_plans_codeblock_13",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_13"
     },
     {
       "relation": "contains",
@@ -3268,9 +3278,9 @@
       "source_file": "step_plans.md",
       "source_location": "L450",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_core_models",
-      "target": "hostel_management_software_step_plans_codeblock_14",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_14"
     },
     {
       "relation": "contains",
@@ -3278,9 +3288,9 @@
       "source_file": "step_plans.md",
       "source_location": "L482",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_1_2_web_frontend_tasks",
-      "target": "hostel_management_software_step_plans_codeblock_15",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_15"
     },
     {
       "relation": "contains",
@@ -3288,9 +3298,9 @@
       "source_file": "step_plans.md",
       "source_location": "L532",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_1_platform_owner_hostel_approval",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_1_platform_owner_hostel_approval"
     },
     {
       "relation": "contains",
@@ -3298,9 +3308,9 @@
       "source_file": "step_plans.md",
       "source_location": "L564",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_2_public_hostel_listing",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_2_public_hostel_listing"
     },
     {
       "relation": "contains",
@@ -3308,9 +3318,9 @@
       "source_file": "step_plans.md",
       "source_location": "L585",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_3_inquiry_flow",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_3_inquiry_flow"
     },
     {
       "relation": "contains",
@@ -3318,9 +3328,9 @@
       "source_file": "step_plans.md",
       "source_location": "L610",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_4_hostel_profile_management",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_4_hostel_profile_management"
     },
     {
       "relation": "contains",
@@ -3328,9 +3338,9 @@
       "source_file": "step_plans.md",
       "source_location": "L634",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_5_room_bed_management",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_5_room_bed_management"
     },
     {
       "relation": "contains",
@@ -3338,9 +3348,9 @@
       "source_file": "step_plans.md",
       "source_location": "L668",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_6_qa_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_6_qa_tasks"
     },
     {
       "relation": "contains",
@@ -3348,9 +3358,9 @@
       "source_file": "step_plans.md",
       "source_location": "L679",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
-      "target": "hostel_management_software_step_plans_2_7_phase_2_done_means",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_2_7_phase_2_done_means"
     },
     {
       "relation": "contains",
@@ -3358,9 +3368,9 @@
       "source_file": "step_plans.md",
       "source_location": "L545",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_1_platform_owner_hostel_approval",
-      "target": "hostel_management_software_step_plans_codeblock_16",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_16"
     },
     {
       "relation": "contains",
@@ -3368,9 +3378,9 @@
       "source_file": "step_plans.md",
       "source_location": "L554",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_1_platform_owner_hostel_approval",
-      "target": "hostel_management_software_step_plans_codeblock_17",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_17"
     },
     {
       "relation": "contains",
@@ -3378,9 +3388,9 @@
       "source_file": "step_plans.md",
       "source_location": "L580",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_2_public_hostel_listing",
-      "target": "hostel_management_software_step_plans_codeblock_18",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_18"
     },
     {
       "relation": "contains",
@@ -3388,9 +3398,9 @@
       "source_file": "step_plans.md",
       "source_location": "L596",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_3_inquiry_flow",
-      "target": "hostel_management_software_step_plans_codeblock_19",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_19"
     },
     {
       "relation": "contains",
@@ -3398,9 +3408,9 @@
       "source_file": "step_plans.md",
       "source_location": "L603",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_3_inquiry_flow",
-      "target": "hostel_management_software_step_plans_codeblock_20",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_20"
     },
     {
       "relation": "contains",
@@ -3408,9 +3418,9 @@
       "source_file": "step_plans.md",
       "source_location": "L627",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_4_hostel_profile_management",
-      "target": "hostel_management_software_step_plans_codeblock_21",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_21"
     },
     {
       "relation": "contains",
@@ -3418,9 +3428,9 @@
       "source_file": "step_plans.md",
       "source_location": "L649",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_5_room_bed_management",
-      "target": "hostel_management_software_step_plans_codeblock_22",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_22"
     },
     {
       "relation": "contains",
@@ -3428,9 +3438,9 @@
       "source_file": "step_plans.md",
       "source_location": "L657",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_2_5_room_bed_management",
-      "target": "hostel_management_software_step_plans_codeblock_23",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_23"
     },
     {
       "relation": "contains",
@@ -3438,9 +3448,9 @@
       "source_file": "step_plans.md",
       "source_location": "L695",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_1_resident_registration",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_1_resident_registration"
     },
     {
       "relation": "contains",
@@ -3448,9 +3458,9 @@
       "source_file": "step_plans.md",
       "source_location": "L729",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_2_qr_activation",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_2_qr_activation"
     },
     {
       "relation": "contains",
@@ -3458,9 +3468,9 @@
       "source_file": "step_plans.md",
       "source_location": "L753",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_3_resident_dashboard",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_3_resident_dashboard"
     },
     {
       "relation": "contains",
@@ -3468,9 +3478,9 @@
       "source_file": "step_plans.md",
       "source_location": "L773",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_4_payment_records",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_4_payment_records"
     },
     {
       "relation": "contains",
@@ -3478,9 +3488,9 @@
       "source_file": "step_plans.md",
       "source_location": "L811",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_5_food_transparency",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_5_food_transparency"
     },
     {
       "relation": "contains",
@@ -3488,9 +3498,9 @@
       "source_file": "step_plans.md",
       "source_location": "L841",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_6_notice_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_6_notice_system"
     },
     {
       "relation": "contains",
@@ -3498,9 +3508,9 @@
       "source_file": "step_plans.md",
       "source_location": "L867",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_7_mobile_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_7_mobile_tasks"
     },
     {
       "relation": "contains",
@@ -3508,9 +3518,9 @@
       "source_file": "step_plans.md",
       "source_location": "L879",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_8_qa_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_8_qa_tasks"
     },
     {
       "relation": "contains",
@@ -3518,9 +3528,9 @@
       "source_file": "step_plans.md",
       "source_location": "L891",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
-      "target": "hostel_management_software_step_plans_3_9_phase_3_done_means",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_3_9_phase_3_done_means"
     },
     {
       "relation": "contains",
@@ -3528,9 +3538,9 @@
       "source_file": "step_plans.md",
       "source_location": "L712",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_1_resident_registration",
-      "target": "hostel_management_software_step_plans_codeblock_24",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_24"
     },
     {
       "relation": "contains",
@@ -3538,9 +3548,9 @@
       "source_file": "step_plans.md",
       "source_location": "L721",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_1_resident_registration",
-      "target": "hostel_management_software_step_plans_codeblock_25",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_25"
     },
     {
       "relation": "contains",
@@ -3548,9 +3558,9 @@
       "source_file": "step_plans.md",
       "source_location": "L741",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_2_qr_activation",
-      "target": "hostel_management_software_step_plans_codeblock_26",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_26"
     },
     {
       "relation": "contains",
@@ -3558,9 +3568,9 @@
       "source_file": "step_plans.md",
       "source_location": "L747",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_2_qr_activation",
-      "target": "hostel_management_software_step_plans_codeblock_27",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_27"
     },
     {
       "relation": "contains",
@@ -3568,9 +3578,9 @@
       "source_file": "step_plans.md",
       "source_location": "L768",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_3_resident_dashboard",
-      "target": "hostel_management_software_step_plans_codeblock_28",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_28"
     },
     {
       "relation": "contains",
@@ -3578,9 +3588,9 @@
       "source_file": "step_plans.md",
       "source_location": "L791",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_4_payment_records",
-      "target": "hostel_management_software_step_plans_codeblock_29",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_29"
     },
     {
       "relation": "contains",
@@ -3588,9 +3598,9 @@
       "source_file": "step_plans.md",
       "source_location": "L800",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_4_payment_records",
-      "target": "hostel_management_software_step_plans_codeblock_30",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_30"
     },
     {
       "relation": "contains",
@@ -3598,9 +3608,9 @@
       "source_file": "step_plans.md",
       "source_location": "L824",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_5_food_transparency",
-      "target": "hostel_management_software_step_plans_codeblock_31",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_31"
     },
     {
       "relation": "contains",
@@ -3608,9 +3618,9 @@
       "source_file": "step_plans.md",
       "source_location": "L832",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_5_food_transparency",
-      "target": "hostel_management_software_step_plans_codeblock_32",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_32"
     },
     {
       "relation": "contains",
@@ -3618,9 +3628,9 @@
       "source_file": "step_plans.md",
       "source_location": "L853",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_6_notice_system",
-      "target": "hostel_management_software_step_plans_codeblock_33",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_33"
     },
     {
       "relation": "contains",
@@ -3628,9 +3638,9 @@
       "source_file": "step_plans.md",
       "source_location": "L860",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_3_6_notice_system",
-      "target": "hostel_management_software_step_plans_codeblock_34",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_34"
     },
     {
       "relation": "contains",
@@ -3638,9 +3648,9 @@
       "source_file": "step_plans.md",
       "source_location": "L908",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_1_complaint_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_1_complaint_system"
     },
     {
       "relation": "contains",
@@ -3648,9 +3658,9 @@
       "source_file": "step_plans.md",
       "source_location": "L940",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_2_night_safety_status",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_2_night_safety_status"
     },
     {
       "relation": "contains",
@@ -3658,9 +3668,9 @@
       "source_file": "step_plans.md",
       "source_location": "L980",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_3_sos_emergency",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_3_sos_emergency"
     },
     {
       "relation": "contains",
@@ -3668,9 +3678,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1008",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_4_guardian_dashboard",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_4_guardian_dashboard"
     },
     {
       "relation": "contains",
@@ -3678,9 +3688,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1040",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_5_move_in_move_out_checklist",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_5_move_in_move_out_checklist"
     },
     {
       "relation": "contains",
@@ -3688,9 +3698,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1075",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_6_ratings_and_reviews",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_6_ratings_and_reviews"
     },
     {
       "relation": "contains",
@@ -3698,9 +3708,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_7_notifications_foundation",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_7_notifications_foundation"
     },
     {
       "relation": "contains",
@@ -3708,9 +3718,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_8_qa_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_8_qa_tasks"
     },
     {
       "relation": "contains",
@@ -3718,9 +3728,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1139",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
-      "target": "hostel_management_software_step_plans_4_9_phase_4_done_means",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_4_9_phase_4_done_means"
     },
     {
       "relation": "contains",
@@ -3728,9 +3738,9 @@
       "source_file": "step_plans.md",
       "source_location": "L923",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_1_complaint_system",
-      "target": "hostel_management_software_step_plans_codeblock_35",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_35"
     },
     {
       "relation": "contains",
@@ -3738,9 +3748,9 @@
       "source_file": "step_plans.md",
       "source_location": "L931",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_1_complaint_system",
-      "target": "hostel_management_software_step_plans_codeblock_36",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_36"
     },
     {
       "relation": "contains",
@@ -3748,9 +3758,9 @@
       "source_file": "step_plans.md",
       "source_location": "L946",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_2_night_safety_status",
-      "target": "hostel_management_software_step_plans_codeblock_37",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_37"
     },
     {
       "relation": "contains",
@@ -3758,9 +3768,9 @@
       "source_file": "step_plans.md",
       "source_location": "L965",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_2_night_safety_status",
-      "target": "hostel_management_software_step_plans_codeblock_38",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_38"
     },
     {
       "relation": "contains",
@@ -3768,9 +3778,9 @@
       "source_file": "step_plans.md",
       "source_location": "L973",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_2_night_safety_status",
-      "target": "hostel_management_software_step_plans_codeblock_39",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_39"
     },
     {
       "relation": "contains",
@@ -3778,9 +3788,9 @@
       "source_file": "step_plans.md",
       "source_location": "L993",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_3_sos_emergency",
-      "target": "hostel_management_software_step_plans_codeblock_40",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_40"
     },
     {
       "relation": "contains",
@@ -3788,9 +3798,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1001",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_3_sos_emergency",
-      "target": "hostel_management_software_step_plans_codeblock_41",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_41"
     },
     {
       "relation": "contains",
@@ -3798,9 +3808,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1023",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_4_guardian_dashboard",
-      "target": "hostel_management_software_step_plans_codeblock_42",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_42"
     },
     {
       "relation": "contains",
@@ -3808,9 +3818,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1030",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_4_guardian_dashboard",
-      "target": "hostel_management_software_step_plans_codeblock_43",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_43"
     },
     {
       "relation": "contains",
@@ -3818,9 +3828,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1058",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_5_move_in_move_out_checklist",
-      "target": "hostel_management_software_step_plans_codeblock_44",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_44"
     },
     {
       "relation": "contains",
@@ -3828,9 +3838,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1068",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_5_move_in_move_out_checklist",
-      "target": "hostel_management_software_step_plans_codeblock_45",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_45"
     },
     {
       "relation": "contains",
@@ -3838,9 +3848,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1087",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_6_ratings_and_reviews",
-      "target": "hostel_management_software_step_plans_codeblock_46",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_46"
     },
     {
       "relation": "contains",
@@ -3848,9 +3858,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1094",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_6_ratings_and_reviews",
-      "target": "hostel_management_software_step_plans_codeblock_47",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_47"
     },
     {
       "relation": "contains",
@@ -3858,9 +3868,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_7_notifications_foundation",
-      "target": "hostel_management_software_step_plans_codeblock_48",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_48"
     },
     {
       "relation": "contains",
@@ -3868,9 +3878,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1121",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_4_7_notifications_foundation",
-      "target": "hostel_management_software_step_plans_codeblock_49",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_49"
     },
     {
       "relation": "contains",
@@ -3878,9 +3888,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_1_service_provider_registration",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_1_service_provider_registration"
     },
     {
       "relation": "contains",
@@ -3888,9 +3898,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_2_hostel_maintenance_module",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_2_hostel_maintenance_module"
     },
     {
       "relation": "contains",
@@ -3898,9 +3908,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1245",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_3_hostel_comparison",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_3_hostel_comparison"
     },
     {
       "relation": "contains",
@@ -3908,9 +3918,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1264",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_4_referral_system",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_4_referral_system"
     },
     {
       "relation": "contains",
@@ -3918,9 +3928,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1291",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_5_duplicate_ghost_listing_detection",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_5_duplicate_ghost_listing_detection"
     },
     {
       "relation": "contains",
@@ -3928,9 +3938,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1318",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_6_reports",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_6_reports"
     },
     {
       "relation": "contains",
@@ -3938,9 +3948,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1353",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_7_production_hardening",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_7_production_hardening"
     },
     {
       "relation": "contains",
@@ -3948,9 +3958,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1374",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_8_qa_tasks",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_8_qa_tasks"
     },
     {
       "relation": "contains",
@@ -3958,9 +3968,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1386",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
-      "target": "hostel_management_software_step_plans_5_9_phase_5_done_means",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_5_9_phase_5_done_means"
     },
     {
       "relation": "contains",
@@ -3968,9 +3978,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_1_service_provider_registration",
-      "target": "hostel_management_software_step_plans_codeblock_50",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_50"
     },
     {
       "relation": "contains",
@@ -3978,9 +3988,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1194",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_1_service_provider_registration",
-      "target": "hostel_management_software_step_plans_codeblock_51",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_51"
     },
     {
       "relation": "contains",
@@ -3988,9 +3998,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1218",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_2_hostel_maintenance_module",
-      "target": "hostel_management_software_step_plans_codeblock_52",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_52"
     },
     {
       "relation": "contains",
@@ -3998,9 +4008,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1228",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_2_hostel_maintenance_module",
-      "target": "hostel_management_software_step_plans_codeblock_53",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_53"
     },
     {
       "relation": "contains",
@@ -4008,9 +4018,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_2_hostel_maintenance_module",
-      "target": "hostel_management_software_step_plans_codeblock_54",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_54"
     },
     {
       "relation": "contains",
@@ -4018,9 +4028,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_3_hostel_comparison",
-      "target": "hostel_management_software_step_plans_codeblock_55",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_55"
     },
     {
       "relation": "contains",
@@ -4028,9 +4038,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1276",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_4_referral_system",
-      "target": "hostel_management_software_step_plans_codeblock_56",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_56"
     },
     {
       "relation": "contains",
@@ -4038,9 +4048,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1284",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_4_referral_system",
-      "target": "hostel_management_software_step_plans_codeblock_57",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_57"
     },
     {
       "relation": "contains",
@@ -4048,9 +4058,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1305",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_5_duplicate_ghost_listing_detection",
-      "target": "hostel_management_software_step_plans_codeblock_58",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_58"
     },
     {
       "relation": "contains",
@@ -4058,9 +4068,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1312",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_5_duplicate_ghost_listing_detection",
-      "target": "hostel_management_software_step_plans_codeblock_59",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_59"
     },
     {
       "relation": "contains",
@@ -4068,9 +4078,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1345",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_5_6_reports",
-      "target": "hostel_management_software_step_plans_codeblock_60",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_60"
     },
     {
       "relation": "contains",
@@ -4078,9 +4088,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1414",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_7_module_dependency_map",
-      "target": "hostel_management_software_step_plans_codeblock_61",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_61"
     },
     {
       "relation": "contains",
@@ -4088,9 +4098,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1443",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_8_core_mongodb_collections",
-      "target": "hostel_management_software_step_plans_codeblock_62",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_62"
     },
     {
       "relation": "contains",
@@ -4098,9 +4108,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1564",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_development_rules_for_the_team",
-      "target": "hostel_management_software_step_plans_12_1_do_not_break_api_contracts",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_12_1_do_not_break_api_contracts"
     },
     {
       "relation": "contains",
@@ -4108,9 +4118,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1575",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_development_rules_for_the_team",
-      "target": "hostel_management_software_step_plans_12_2_every_collection_must_have_indexes",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_12_2_every_collection_must_have_indexes"
     },
     {
       "relation": "contains",
@@ -4118,9 +4128,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1588",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_development_rules_for_the_team",
-      "target": "hostel_management_software_step_plans_12_3_use_soft_delete_for_important_records",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_12_3_use_soft_delete_for_important_records"
     },
     {
       "relation": "contains",
@@ -4128,9 +4138,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1607",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_development_rules_for_the_team",
-      "target": "hostel_management_software_step_plans_12_4_keep_public_data_separate_from_private_data",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_12_4_keep_public_data_separate_from_private_data"
     },
     {
       "relation": "contains",
@@ -4138,9 +4148,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1618",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_development_rules_for_the_team",
-      "target": "hostel_management_software_step_plans_12_5_build_for_nepal_reality",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_12_5_build_for_nepal_reality"
     },
     {
       "relation": "contains",
@@ -4148,9 +4158,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1570",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_1_do_not_break_api_contracts",
-      "target": "hostel_management_software_step_plans_codeblock_63",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_63"
     },
     {
       "relation": "contains",
@@ -4158,9 +4168,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1579",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_2_every_collection_must_have_indexes",
-      "target": "hostel_management_software_step_plans_codeblock_64",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_64"
     },
     {
       "relation": "contains",
@@ -4168,9 +4178,9 @@
       "source_file": "step_plans.md",
       "source_location": "L1601",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_12_3_use_soft_delete_for_important_records",
-      "target": "hostel_management_software_step_plans_codeblock_65",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_65"
     },
     {
       "relation": "contains",
@@ -4178,11 +4188,11 @@
       "source_file": "step_plans.md",
       "source_location": "L1658",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hostel_management_software_step_plans_14_final_recommendation",
-      "target": "hostel_management_software_step_plans_codeblock_66",
-      "confidence_score": 1.0
+      "target": "hostel_management_software_step_plans_codeblock_66"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "90f16473aa52f9faee67db99b5ce5e37cbe1ab45"
+  "built_at_commit": "87a78df5b7b5e9d4a5e9182f53dc13b9ffda1715"
 }
