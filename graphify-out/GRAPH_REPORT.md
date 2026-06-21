@@ -1,17 +1,17 @@
 # Graph Report - hostel-management-software  (2026-06-21)
 
 ## Corpus Check
-- 6 files · ~9,036 words
+- 7 files · ~9,189 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 223 nodes · 218 edges · 17 communities (15 shown, 2 thin omitted)
+- 225 nodes · 219 edges · 18 communities (16 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d10bab40`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Built from commit: `normalized-for-git`
+- Commit-specific freshness metadata is normalized for stable Git diffs.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
@@ -31,7 +31,7 @@
 - [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 15|Community 15]]
-- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Multi-Hostel SaaS Platform - Final Source of Truth` - 25 edges
@@ -48,7 +48,7 @@
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (17 total, 2 thin omitted)
+## Communities (18 total, 2 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -119,11 +119,11 @@ Nodes (4): graphify - READ THIS FIRST, Keeping the graph fresh, What you MUST do
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Phase 4 — Daily Operations + Trust + Safety` connect `Community 1` to `Community 5`?**
-  _High betweenness centrality (0.131) - this node is a cross-community bridge._
+  _High betweenness centrality (0.128) - this node is a cross-community bridge._
 - **Why does `Multi-Hostel SaaS Platform — Phase-Wise Development Plan` connect `Community 11` to `Community 5`, `Community 6`?**
-  _High betweenness centrality (0.121) - this node is a cross-community bridge._
+  _High betweenness centrality (0.119) - this node is a cross-community bridge._
 - **Why does `Phase 3 — Resident System + Payments + Food` connect `Community 2` to `Community 5`?**
-  _High betweenness centrality (0.111) - this node is a cross-community bridge._
+  _High betweenness centrality (0.109) - this node is a cross-community bridge._
 - **What connects `What you MUST do at the start of every session`, `What you MUST NOT do`, `Keeping the graph fresh` to the rest of the system?**
   _155 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

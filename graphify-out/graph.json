@@ -4,6 +4,24 @@
   "graph": {},
   "nodes": [
     {
+      "label": "normalize-graphify-context.py",
+      "file_type": "code",
+      "source_file": "scripts/normalize-graphify-context.py",
+      "source_location": "L1",
+      "id": "scripts_normalize_graphify_context_py",
+      "community": 16,
+      "norm_label": "normalize-graphify-context.py"
+    },
+    {
+      "label": "normalize()",
+      "file_type": "code",
+      "source_file": "scripts/normalize-graphify-context.py",
+      "source_location": "L15",
+      "id": "scripts_normalize_graphify_context_normalize",
+      "community": 16,
+      "norm_label": "normalize()"
+    },
+    {
       "label": "AGENTS.md",
       "file_type": "document",
       "source_file": "AGENTS.md",
@@ -639,7 +657,7 @@
       "source_file": "CODEX.md",
       "source_location": "L1",
       "id": "codex_md",
-      "community": 16,
+      "community": 17,
       "norm_label": "codex.md"
     },
     {
@@ -648,7 +666,7 @@
       "source_file": "CODEX.md",
       "source_location": "L1",
       "id": "hostel_management_software_codex_codex_context",
-      "community": 16,
+      "community": 17,
       "norm_label": "codex context"
     },
     {
@@ -688,13 +706,13 @@
       "norm_label": "step_plans.md"
     },
     {
-      "label": "Multi-Hostel SaaS Platform \u2014 Phase-Wise Development Plan",
+      "label": "Multi-Hostel SaaS Platform — Phase-Wise Development Plan",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L1",
       "id": "hostel_management_software_step_plans_multi_hostel_saas_platform_phase_wise_development_plan",
       "community": 11,
-      "norm_label": "multi-hostel saas platform \u2014 phase-wise development plan"
+      "norm_label": "multi-hostel saas platform — phase-wise development plan"
     },
     {
       "label": "1. Final Technical Direction",
@@ -904,13 +922,13 @@
       "norm_label": "4. phase overview"
     },
     {
-      "label": "Phase 0 \u2014 Planning + Architecture Lock",
+      "label": "Phase 0 — Planning + Architecture Lock",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L295",
       "id": "hostel_management_software_step_plans_phase_0_planning_architecture_lock",
       "community": 5,
-      "norm_label": "phase 0 \u2014 planning + architecture lock"
+      "norm_label": "phase 0 — planning + architecture lock"
     },
     {
       "label": "0.1 Outputs",
@@ -958,13 +976,13 @@
       "norm_label": "0.4 phase 0 done means"
     },
     {
-      "label": "Phase 1 \u2014 Foundation + Auth + Tenant Core",
+      "label": "Phase 1 — Foundation + Auth + Tenant Core",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L393",
       "id": "hostel_management_software_step_plans_phase_1_foundation_auth_tenant_core",
       "community": 8,
-      "norm_label": "phase 1 \u2014 foundation + auth + tenant core"
+      "norm_label": "phase 1 — foundation + auth + tenant core"
     },
     {
       "label": "1.1 Backend Tasks",
@@ -1084,13 +1102,13 @@
       "norm_label": "1.5 phase 1 done means"
     },
     {
-      "label": "Phase 2 \u2014 Public Portal + Hostel Core",
+      "label": "Phase 2 — Public Portal + Hostel Core",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L527",
       "id": "hostel_management_software_step_plans_phase_2_public_portal_hostel_core",
       "community": 7,
-      "norm_label": "phase 2 \u2014 public portal + hostel core"
+      "norm_label": "phase 2 — public portal + hostel core"
     },
     {
       "label": "2.1 Platform Owner Hostel Approval",
@@ -1228,13 +1246,13 @@
       "norm_label": "2.7 phase 2 done means"
     },
     {
-      "label": "Phase 3 \u2014 Resident System + Payments + Food",
+      "label": "Phase 3 — Resident System + Payments + Food",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L690",
       "id": "hostel_management_software_step_plans_phase_3_resident_system_payments_food",
       "community": 2,
-      "norm_label": "phase 3 \u2014 resident system + payments + food"
+      "norm_label": "phase 3 — resident system + payments + food"
     },
     {
       "label": "3.1 Resident Registration",
@@ -1417,13 +1435,13 @@
       "norm_label": "3.9 phase 3 done means"
     },
     {
-      "label": "Phase 4 \u2014 Daily Operations + Trust + Safety",
+      "label": "Phase 4 — Daily Operations + Trust + Safety",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L903",
       "id": "hostel_management_software_step_plans_phase_4_daily_operations_trust_safety",
       "community": 1,
-      "norm_label": "phase 4 \u2014 daily operations + trust + safety"
+      "norm_label": "phase 4 — daily operations + trust + safety"
     },
     {
       "label": "4.1 Complaint System",
@@ -1642,13 +1660,13 @@
       "norm_label": "4.9 phase 4 done means"
     },
     {
-      "label": "Phase 5 \u2014 Maintenance Network + Growth + Reports + Production Polish",
+      "label": "Phase 5 — Maintenance Network + Growth + Reports + Production Polish",
       "file_type": "document",
       "source_file": "step_plans.md",
       "source_location": "L1151",
       "id": "hostel_management_software_step_plans_phase_5_maintenance_network_growth_reports_production_polish",
       "community": 3,
-      "norm_label": "phase 5 \u2014 maintenance network + growth + reports + production polish"
+      "norm_label": "phase 5 — maintenance network + growth + reports + production polish"
     },
     {
       "label": "5.1 Service Provider Registration",
@@ -2012,6 +2030,16 @@
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/normalize-graphify-context.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "scripts_normalize_graphify_context_py",
+      "target": "scripts_normalize_graphify_context_normalize",
+      "confidence_score": 1.0
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -4194,5 +4222,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d10bab40f6460dd7b982cbff17e1b2b1d1e8cfe6"
+  "built_at_commit": "normalized-for-git"
 }
