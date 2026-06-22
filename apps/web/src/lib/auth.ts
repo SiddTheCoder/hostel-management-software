@@ -1,0 +1,135 @@
+import { createHash } from "node:crypto";
+import { jwtVerify, SignJWT, type JWTPayload } from "jose";
+
+export { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/lib/auth-cookies";
+import { Role } from "@/lib/roles";
+
+type TokenType = "access" | "refresh";
+
+export type AuthTokenPayload = JWTPayload & {
+  role: Role;
+  hostelIds?: string[];
+  sessionId?: string;
+  tokenType: TokenType;
+};
+
+type TokenInput = {
+  hostelIds?: string[];
+  role: Role;
+  sessionId?: string;
+  userId: string;
+};
+
+const timeUnitSeconds: Record<string, number> = {
+  s: 1,
+  m: 60,
+  h: 60 * 60,
+  d: 24 * 60 * 60,
+};
+
+function parseDurationSeconds(value: string | undefined, fallbackSeconds: number) {
+  if (!value) {
+    return fallbackSeconds;
+  }
+
+  const numeric = Number(value);
+
+  if (Number.isFinite(numeric)) {
+    return numeric;
+  }
+
+  const match = value.match(/^(\d+)([smhd])$/);
+
+  if (!match) {
+    return fallbackSeconds;
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2];
+
+  return amount * timeUnitSeconds[unit];
+}
+
+function jwtSecret(name: "JWT_ACCESS_SECRET" | "JWT_REFRESH_SECRET") {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`${name} is required for authentication.`);
+  }
+
+  return new TextEncoder().encode(value);
+}
+
+export function accessTokenTtlSeconds() {
+  return parseDurationSeconds(process.env.ACCESS_TOKEN_TTL, 15 * 60);
+}
+
+export function refreshTokenTtlSeconds() {
+  return parseDurationSeconds(process.env.REFRESH_TOKEN_TTL, 30 * 24 * 60 * 60);
+}
+
+export function refreshTokenExpiresAt() {
+  return new Date(Date.now() + refreshTokenTtlSeconds() * 1000);
+}
+
+export function hashToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+export async function signAccessToken(input: TokenInput) {
+  return new SignJWT({
+    role: input.role,
+    hostelIds: input.hostelIds ?? [],
+    sessionId: input.sessionId,
+    tokenType: "access",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(input.userId)
+    .setIssuedAt()
+    .setExpirationTime(`${accessTokenTtlSeconds()}s`)
+    .sign(jwtSecret("JWT_ACCESS_SECRET"));
+}
+
+export async function signRefreshToken(input: TokenInput) {
+  return new SignJWT({
+    role: input.role,
+    hostelIds: input.hostelIds ?? [],
+    sessionId: input.sessionId,
+    tokenType: "refresh",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(input.userId)
+    .setIssuedAt()
+    .setExpirationTime(`${refreshTokenTtlSeconds()}s`)
+    .sign(jwtSecret("JWT_REFRESH_SECRET"));
+}
+
+async function verifyToken(
+  token: string,
+  expectedType: TokenType,
+  secretName: "JWT_ACCESS_SECRET" | "JWT_REFRESH_SECRET",
+) {
+  const { payload } = await jwtVerify(token, jwtSecret(secretName));
+
+  if (payload.tokenType !== expectedType || !payload.sub || !payload.role) {
+    throw new Error("Invalid authentication token.");
+  }
+
+  return payload as AuthTokenPayload;
+}
+
+export function getBearerToken(authorizationHeader: string | null) {
+  if (!authorizationHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+
+  return authorizationHeader.slice("Bearer ".length).trim();
+}
+
+export function verifyAccessToken(token: string) {
+  return verifyToken(token, "access", "JWT_ACCESS_SECRET");
+}
+
+export function verifyRefreshToken(token: string) {
+  return verifyToken(token, "refresh", "JWT_REFRESH_SECRET");
+}

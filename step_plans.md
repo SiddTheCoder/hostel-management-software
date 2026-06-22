@@ -185,14 +185,25 @@ Use custom auth because web and mobile both need clean support.
 
 Recommended:
 
-- Phone/email + password for admins.
-- Phone OTP can be added later.
+- Everyone can create a normal app account.
+- Signup methods:
+  - Phone number + OTP verification + password.
+  - Email + email OTP verification + password.
+  - Google sign-in/signup.
+- Login methods:
+  - Phone number + password.
+  - Email + password.
+  - Google sign-in.
+- A newly registered public account starts as `PUBLIC_USER` unless an admin has assigned another role or the account activates a resident profile.
+- Resident private portal access is not granted by normal signup alone. The resident must first log in with a normal account, then scan or enter the admin-issued resident activation QR/code.
 - JWT access token.
 - Refresh token.
 - Web stores refresh token in secure HTTP-only cookie.
 - Mobile stores refresh token in secure storage.
 - Passwords hashed using bcrypt or Argon2.
 - Device/session table for logout and token rotation.
+- OTP challenges must be short-lived, single-purpose, rate-limited, and stored hashed.
+- Google accounts should be linked by provider ID and verified email, not by trusting client-provided profile data alone.
 
 ### 2.5 File Upload Rule
 
@@ -414,21 +425,47 @@ Guardian Portal
 Build:
 
 - Register platform owner seed account.
-- Login.
+- Public account registration with phone OTP + password.
+- Public account registration with email OTP + password.
+- Google sign-in/signup.
+- Login by phone + password.
+- Login by email + password.
 - Refresh token.
 - Logout.
+- OTP request, verification, expiry, resend, and rate-limit rules.
 - Password hashing.
 - Current user endpoint.
 - Session/device storage.
+- Provider account linking for Google.
 
 APIs:
 
 ```txt
+POST /api/v1/auth/otp/request
+POST /api/v1/auth/otp/verify
+POST /api/v1/auth/register
 POST /api/v1/auth/login
+POST /api/v1/auth/google
 POST /api/v1/auth/refresh
 POST /api/v1/auth/logout
 GET  /api/v1/auth/me
 ```
+
+Auth model additions:
+
+```txt
+User
+Session
+OtpChallenge
+OAuthAccount
+```
+
+Rules:
+
+- Registration does not automatically create a resident profile.
+- Unlinked public users can browse, inquire, compare hostels, and register as service providers.
+- Admin, warden, guardian, and service-provider roles still require admin/platform approval or controlled linking.
+- Resident dashboard access requires a successful QR/code activation against an admin-created resident record.
 
 ### Role + Permission Module
 
@@ -496,6 +533,8 @@ Build:
 - Expo app setup.
 - Navigation structure.
 - Login screen.
+- Signup screen with phone OTP, email OTP, password, and Google options.
+- OTP verification screen.
 - Token storage.
 - API client.
 - Public mode shell.
@@ -506,7 +545,11 @@ Build:
 Test:
 
 - Login works.
+- Phone OTP registration works.
+- Email OTP registration works.
+- Google sign-in/signup works.
 - Wrong password rejected.
+- Unverified phone/email cannot complete account registration.
 - Unauthorized user blocked.
 - Platform route blocks hostel admin.
 - Hostel route blocks resident.
@@ -696,6 +739,8 @@ Test:
 
 Important rule: resident registration is admin-controlled.
 
+This means public users can create normal app accounts, but they cannot create their own resident record or enter a private resident portal by signup alone.
+
 Build:
 
 - Add resident manually.
@@ -728,18 +773,27 @@ PATCH /api/v1/hostel-admin/residents/:id/status
 
 ## 3.2 QR Activation
 
+Private resident portal access happens through activation, not through normal login alone.
+
 Build:
 
 - Generate one-time QR/code after resident registration.
-- Resident scans QR or enters code.
-- Account gets linked to hostel and resident profile.
+- Resident first logs in with any normal account created by phone OTP, email OTP, password, or Google.
+- Logged-in resident scans QR or enters code from the admin.
+- Current user account gets linked to the hostel and resident profile.
+- Linked account receives resident access for that hostel.
 - QR expires after use or timeout.
 - Admin can regenerate activation code.
+- Used QR stores `usedBy`, `usedAt`, device/session context, and audit metadata.
+- Prevent one active resident profile from being claimed by multiple accounts unless admin explicitly resets activation.
+- Prevent one account from claiming multiple active resident profiles unless a future multi-resident-account rule is deliberately added.
 
 Models:
 
 ```txt
 QRActivation
+Resident
+User
 ```
 
 APIs:
@@ -747,6 +801,7 @@ APIs:
 ```txt
 POST /api/v1/hostel-admin/residents/:id/activation-code
 POST /api/v1/resident/activate
+GET  /api/v1/resident/activation-status
 GET  /api/v1/resident/me
 ```
 
@@ -869,7 +924,8 @@ PATCH /api/v1/resident/notices/:id/read
 Build:
 
 - QR scan screen.
-- Resident activation flow.
+- Resident activation flow after normal account login.
+- Activation status / already linked state.
 - Resident dashboard.
 - Food view.
 - Payment view.
@@ -881,7 +937,10 @@ Build:
 Test:
 
 - Resident cannot self-register directly.
+- Public account signup does not create resident access.
+- QR activation requires a logged-in account.
 - Activation code works once only.
+- Used/expired activation code is rejected.
 - Resident sees only own profile.
 - Resident cannot see another resident payment.
 - Payment proof goes to correct hostel.
