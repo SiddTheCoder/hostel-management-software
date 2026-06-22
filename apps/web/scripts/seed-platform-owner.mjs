@@ -1,8 +1,14 @@
-import { loadEnvConfig } from "@next/env";
+import nextEnv from "@next/env";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-loadEnvConfig(process.cwd());
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(dirname, "../../..");
+const { loadEnvConfig } = nextEnv;
+
+loadEnvConfig(repoRoot);
 
 const DEFAULT_DEV_PASSWORD = "ChangeMe123!";
 const isProduction = process.env.NODE_ENV === "production";
@@ -34,13 +40,13 @@ const userSchema = new mongoose.Schema(
     createdBy: { ref: "User", type: mongoose.Schema.Types.ObjectId },
     deletedAt: Date,
     deletedBy: { ref: "User", type: mongoose.Schema.Types.ObjectId },
-    email: { lowercase: true, sparse: true, trim: true, type: String },
+    email: { lowercase: true, trim: true, type: String },
     hostelIds: [{ ref: "Hostel", type: mongoose.Schema.Types.ObjectId }],
     isDeleted: { default: false, type: Boolean },
     lastLoginAt: Date,
     name: { required: true, trim: true, type: String },
     passwordHash: { required: true, select: false, type: String },
-    phone: { sparse: true, trim: true, type: String },
+    phone: { trim: true, type: String },
     role: { required: true, type: String },
     status: {
       default: "ACTIVE",
@@ -84,7 +90,7 @@ await mongoose.connect(process.env.MONGODB_URI, {
 });
 
 const user = await User.findOneAndUpdate({ email }, update, {
-  new: true,
+  returnDocument: "after",
   setDefaultsOnInsert: true,
   upsert: true,
 });

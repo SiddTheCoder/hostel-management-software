@@ -7,6 +7,8 @@
     "web:lint": "npm --prefix apps/web run lint",
     "web:format": "npm --prefix apps/web run format",
     "web:test": "npm --prefix apps/web run test",
-    "web:seed:platform-owner": "npm --prefix apps/web run seed:platform-owner"
+    "web:seed:platform-owner": "npm --prefix apps/web run seed:platform-owner",
+    "mobile:start": "npm --prefix apps/mobile run start",
+    "mobile:typecheck": "npm --prefix apps/mobile run typecheck"
   }
 }

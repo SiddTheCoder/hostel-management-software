@@ -1,3 +1,5 @@
+import "@/lib/load-root-env";
+
 import { createHash } from "node:crypto";
 import { jwtVerify, SignJWT, type JWTPayload } from "jose";
 

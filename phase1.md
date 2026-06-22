@@ -1,7 +1,7 @@
 # Phase 1 - Foundation + Auth + Tenant Core
 
 **Phase in roadmap:** Phase 1
-**Status:** In progress
+**Status:** Web/backend Phase 1 complete; mobile deferred; external OTP delivery and final provider/browser QA pending
 **Started:** 2026-06-22
 **Source:** `step_plans.md` Phase 1
 **Rule:** Every work item below is a checkbox. Tick a task only after implementation and verification. If a task is partly started but not verified, keep it unchecked and add a note.
@@ -29,9 +29,11 @@ Build the system backbone:
 - [x] Initial auth login/refresh/logout/me endpoints exist.
 - [x] Portal route protection exists for platform, hostel admin/warden, resident, and guardian routes.
 - [x] Base MongoDB models exist.
-- [ ] Full Phase 1 auth is complete.
-- [ ] Mobile app shell is complete.
-- [ ] Phase 1 QA gate is complete.
+- [x] Full Phase 1 web/backend auth implementation is complete.
+- [ ] Mobile app shell is deferred for now by user direction.
+- [x] Phase 1 web automated QA gate is complete.
+- [x] DB-backed seed and live auth smoke tests pass against the configured MongoDB Atlas URI.
+- [ ] External OTP delivery is blank by current decision and pending the later Nepal-based email provider/SMS sender setup.
 
 ---
 
@@ -53,27 +55,27 @@ Build the system backbone:
 ### 3.2 Auth Module
 
 - [x] Register platform owner seed account script.
-- [ ] Public account registration with phone OTP plus password.
-- [ ] Public account registration with email OTP plus password.
-- [ ] Google sign-in/signup.
+- [x] Public account registration with phone OTP plus password.
+- [x] Public account registration with email OTP plus password.
+- [x] Google sign-in/signup.
 - [x] Login by phone plus password for existing users.
 - [x] Login by email plus password for existing users.
 - [x] Refresh token endpoint.
 - [x] Logout endpoint.
-- [ ] OTP request, verification, expiry, resend, and rate-limit rules.
+- [x] OTP request, verification, expiry, resend, and rate-limit rules.
 - [x] Password hashing.
 - [x] Current user endpoint.
 - [x] Session/device storage baseline.
-- [ ] Provider account linking for Google.
-- [ ] Production-grade refresh-token rotation.
+- [x] Provider account linking for Google.
+- [x] Production-grade refresh-token rotation.
 
 ### 3.3 Auth APIs
 
-- [ ] `POST /api/v1/auth/otp/request`
-- [ ] `POST /api/v1/auth/otp/verify`
-- [ ] `POST /api/v1/auth/register`
+- [x] `POST /api/v1/auth/otp/request`
+- [x] `POST /api/v1/auth/otp/verify`
+- [x] `POST /api/v1/auth/register`
 - [x] `POST /api/v1/auth/login`
-- [ ] `POST /api/v1/auth/google`
+- [x] `POST /api/v1/auth/google`
 - [x] `POST /api/v1/auth/refresh`
 - [x] `POST /api/v1/auth/logout`
 - [x] `GET /api/v1/auth/me`
@@ -82,16 +84,16 @@ Build the system backbone:
 
 - [x] `User`
 - [x] `Session`
-- [ ] `OtpChallenge`
-- [ ] `OAuthAccount`
+- [x] `OtpChallenge`
+- [x] `OAuthAccount`
 
 ### 3.5 Auth Rules
 
-- [ ] Registration does not automatically create a resident profile.
-- [ ] New public registration starts as `PUBLIC_USER`.
-- [ ] Unlinked public users can browse, inquire, compare hostels, and register as service providers.
-- [ ] Admin, warden, guardian, and service-provider roles require admin/platform approval or controlled linking.
-- [ ] Resident dashboard access requires successful QR/code activation against an admin-created resident record.
+- [x] Registration does not automatically create a resident profile.
+- [x] New public registration starts as `PUBLIC_USER`.
+- [x] Unlinked public users can browse, inquire, compare hostels, and register as service providers.
+- [x] Admin, warden, guardian, and service-provider roles require admin/platform approval or controlled linking.
+- [x] Resident dashboard access requires successful QR/code activation against an admin-created resident record.
 
 ### 3.6 Role + Permission Module
 
@@ -103,11 +105,11 @@ Build the system backbone:
 - [x] Hostel admin/warden web route guard.
 - [x] Resident-only web route guard.
 - [x] Guardian-only web route guard.
-- [ ] Reusable API principal loader for protected endpoints.
-- [ ] Platform-only API guard.
-- [ ] Hostel-scoped API guard.
-- [ ] Resident-only API guard.
-- [ ] Guardian-only API guard.
+- [x] Reusable API principal loader for protected endpoints.
+- [x] Platform-only API guard.
+- [x] Hostel-scoped API guard.
+- [x] Resident-only API guard.
+- [x] Guardian-only API guard.
 
 ### 3.7 Core Models
 
@@ -122,9 +124,9 @@ Build the system backbone:
 ### 3.8 Platform Owner Base
 
 - [x] Platform owner dashboard shell.
-- [ ] Hostel registration list placeholder page.
-- [ ] User management placeholder page.
-- [ ] Service provider placeholder page.
+- [x] Hostel registration list placeholder page.
+- [x] User management placeholder page.
+- [x] Service provider placeholder page.
 
 ---
 
@@ -154,13 +156,16 @@ Build the system backbone:
 - [x] Safe `next` redirect handling.
 - [x] HTTP-only cookie support for browser portal sessions.
 - [x] Bearer access token support for mobile/API clients.
-- [ ] Logout UI action in portal shell.
-- [ ] Current-user loading in portal shell.
-- [ ] Empty/loading/error states for auth screens.
+- [x] Logout UI action in portal shell.
+- [x] Current-user loading in portal shell.
+- [x] Empty/loading/error states for auth screens.
 
 ---
 
 ## 5. Mobile Tasks
+
+Deferred for now by user direction. Some scaffold files were started, but mobile is
+not part of the current completion gate.
 
 - [ ] Expo app setup.
 - [ ] Navigation structure.
@@ -182,46 +187,51 @@ Build the system backbone:
 
 - [x] Route access helper tests.
 - [x] Mobile auth contract tests.
-- [ ] Auth service login success test.
-- [ ] Auth service wrong-password rejection test.
-- [ ] Refresh token test.
-- [ ] Logout session revocation test.
-- [ ] API route integration tests for auth endpoints.
-- [ ] Tenant guard tests.
+- [x] Auth service login success test.
+- [x] Auth service wrong-password rejection test.
+- [x] Refresh token test.
+- [x] Logout session revocation test.
+- [x] API route integration tests for auth endpoints.
+- [x] Tenant guard tests.
 
 ### 6.2 Manual QA
 
-- [ ] Login works.
-- [ ] Phone OTP registration works.
-- [ ] Email OTP registration works.
-- [ ] Google sign-in/signup works.
-- [ ] Wrong password rejected.
-- [ ] Unverified phone/email cannot complete account registration.
-- [ ] Unauthorized user blocked.
+Live API smoke testing passed against MongoDB Atlas for login, refresh, logout,
+wrong-password rejection, unverified-registration rejection, unauthenticated route
+blocking, and development-mode email/phone OTP registration. External OTP
+delivery remains blank by design until provider setup is chosen.
+
+- [x] Login works.
+- [x] Phone OTP registration works in development delivery mode.
+- [x] Email OTP registration works in development delivery mode.
+- [ ] Google sign-in/signup browser flow needs a real Google account click test.
+- [x] Wrong password rejected.
+- [x] Unverified phone/email cannot complete account registration.
+- [x] Unauthorized user blocked.
 - [ ] Platform route blocks hostel admin.
 - [ ] Hostel route blocks resident.
-- [ ] Token refresh works.
-- [ ] Logout removes session.
+- [x] Token refresh works.
+- [x] Logout removes session.
 
 ### 6.3 Required Verification Commands
 
-- [ ] `npm --prefix apps/web run format:check`
-- [ ] `npm run web:test`
-- [ ] `npm run web:lint`
-- [ ] `npm run web:build`
-- [ ] `npm --prefix apps/web audit --audit-level=high`
+- [x] `npm --prefix apps/web run format:check`
+- [x] `npm run web:test`
+- [x] `npm run web:lint`
+- [x] `npm run web:build`
+- [x] `npm --prefix apps/web audit --audit-level=high`
 
 ---
 
 ## 7. Phase 1 Done Means
 
-- [ ] The app has real auth.
+- [x] The app has real auth.
 - [x] Role-based web route access works.
 - [x] MongoDB connection helper exists.
 - [x] Base layouts exist.
 - [x] API structure is clean.
 - [x] Future modules can plug into the same pattern.
-- [ ] Full Phase 1 QA checklist is passed.
+- [ ] Full Phase 1 manual QA checklist is pending real Google browser flow and cross-role portal account smoke tests.
 
 ---
 
@@ -230,3 +240,5 @@ Build the system backbone:
 | Date | Update |
 |---|---|
 | 2026-06-22 | Phase 1 tracker created from `step_plans.md`; completed baseline items marked from committed Phase 0 foundation. |
+| 2026-06-22 | Completed web/backend Phase 1 implementation: OTP registration, Google auth endpoint/linking, refresh-token rotation, API guards, platform placeholders, portal current-user/logout, and automated web QA. Manual DB/provider checks remain pending until MongoDB and phase 1 keys are available. |
+| 2026-06-22 | MongoDB Atlas seed and live auth smoke passed. Email OTP provider was intentionally blanked for later Nepal-based provider selection; OTP registration currently works in development delivery mode. |

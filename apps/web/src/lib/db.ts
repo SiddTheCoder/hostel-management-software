@@ -1,3 +1,5 @@
+import "@/lib/load-root-env";
+
 import mongoose from "mongoose";
 
 type CachedConnection = {

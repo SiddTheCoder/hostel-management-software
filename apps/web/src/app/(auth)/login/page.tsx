@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { LoginForm } from "./login-form";
 
@@ -20,7 +21,13 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <LoginForm />
+        <Suspense
+          fallback={
+            <p className="mt-8 text-sm text-muted-foreground">Loading login form...</p>
+          }
+        >
+          <LoginForm />
+        </Suspense>
       </section>
     </main>
   );

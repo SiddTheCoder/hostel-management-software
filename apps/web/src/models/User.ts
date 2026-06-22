@@ -5,9 +5,11 @@ import { ROLE_VALUES } from "@/lib/roles";
 const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: { type: String, lowercase: true, sparse: true, trim: true },
-    phone: { type: String, sparse: true, trim: true },
-    passwordHash: { type: String, required: true, select: false },
+    email: { type: String, lowercase: true, trim: true },
+    emailVerifiedAt: Date,
+    phone: { type: String, trim: true },
+    phoneVerifiedAt: Date,
+    passwordHash: { type: String, select: false },
     role: { type: String, enum: ROLE_VALUES, required: true },
     hostelIds: [{ ref: "Hostel", type: Schema.Types.ObjectId }],
     status: {

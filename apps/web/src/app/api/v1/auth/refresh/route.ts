@@ -5,8 +5,9 @@ import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
   accessTokenTtlSeconds,
+  refreshTokenTtlSeconds,
 } from "@/lib/auth";
-import { readBodyRefreshToken } from "@/lib/mobile-auth";
+import { readBodyRefreshToken, shouldExposeRefreshToken } from "@/lib/mobile-auth";
 import { AuthServiceError, refreshAccessToken } from "@/modules/auth/auth.service";
 
 export const runtime = "nodejs";
@@ -24,13 +25,30 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await refreshAccessToken(refreshToken);
-    const response = successResponse(result, "Token refreshed");
+    const response = successResponse(
+      {
+        accessToken: result.accessToken,
+        ...(shouldExposeRefreshToken(request.headers)
+          ? { refreshToken: result.refreshToken }
+          : {}),
+        user: result.user,
+      },
+      "Token refreshed",
+    );
 
     if (cookieRefreshToken) {
       response.cookies.set(ACCESS_TOKEN_COOKIE, result.accessToken, {
         httpOnly: true,
         maxAge: accessTokenTtlSeconds(),
         path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+
+      response.cookies.set(REFRESH_TOKEN_COOKIE, result.refreshToken, {
+        httpOnly: true,
+        maxAge: refreshTokenTtlSeconds(),
+        path: "/api/v1/auth",
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
       });

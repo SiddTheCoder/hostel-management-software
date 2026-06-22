@@ -4,6 +4,7 @@ const navItems = [
   { href: "/platform/dashboard", label: "Dashboard" },
   { href: "/platform/hostels", label: "Hostel approvals" },
   { href: "/platform/users", label: "Users" },
+  { href: "/platform/service-providers", label: "Service providers" },
   { href: "/platform/reports", label: "Reports" },
   { href: "/platform/reviews", label: "Review moderation" },
 ];

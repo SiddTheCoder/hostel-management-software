@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { PortalAccount } from "@/components/portal-account";
+
 type NavItem = {
   href: string;
   label: string;
@@ -57,12 +59,7 @@ export function PortalShell({
             <p className="text-sm font-semibold text-secondary">Dashboard</p>
             <h2 className="text-2xl font-bold text-primary">{portalName}</h2>
           </div>
-          <Link
-            href="/login"
-            className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-primary"
-          >
-            Account
-          </Link>
+          <PortalAccount />
         </header>
         <main className="px-6 py-8">{children}</main>
       </div>

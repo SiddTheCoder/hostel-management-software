@@ -51,6 +51,16 @@ export function handleRouteError(error: unknown) {
     return errorResponse("Validation failed", "VALIDATION_ERROR", 422, error.flatten());
   }
 
+  if (
+    error instanceof Error &&
+    "status" in error &&
+    typeof error.status === "number" &&
+    "errorCode" in error &&
+    typeof error.errorCode === "string"
+  ) {
+    return errorResponse(error.message, error.errorCode, error.status);
+  }
+
   console.error(error);
   return errorResponse("Internal server error", "INTERNAL_SERVER_ERROR", 500);
 }
