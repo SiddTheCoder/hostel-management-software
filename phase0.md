@@ -1,4 +1,4 @@
-# Step 1 - Planning + Architecture Lock
+# Phase 0 - Planning + Architecture Lock
 
 **Phase in roadmap:** Phase 0
 **Status:** Completed for documentation lock and hardened local foundation baseline; full Phase 1 auth expansion continues in the next implementation phase
@@ -35,7 +35,7 @@
 - [x] Privacy and tenant-isolation rules are written down.
 - [x] No disconnected modules should be started.
 
-### 1.3 Step 1 Completion Boundary
+### 1.3 Phase 0 Completion Boundary
 
 - [x] Local architecture lock is complete.
 - [x] Local foundation baseline is implemented, tested, and verified.
@@ -794,7 +794,7 @@ Phase 1 can start when the team accepts this lock and begins foundation work:
 
 ## 19. User Action Needed Later
 
-These do not block Step 1 or local development. User will provide these when the matching feature/integration is being implemented:
+These do not block Phase 0 or local development. User will provide these when the matching feature/integration is being implemented:
 
 | User Action | Needed For |
 |---|---|
@@ -812,7 +812,7 @@ These do not block Step 1 or local development. User will provide these when the
 
 ## 20. Current Phase 0 Result
 
-Planning and architecture are locked. There are no remaining Codex-side Step 1 blockers. Provider credentials, API keys, deployment host, and production domain are user-supplied setup items for later implementation/deployment work.
+Planning and architecture are locked. There are no remaining Codex-side Phase 0 blockers. Provider credentials, API keys, deployment host, and production domain are user-supplied setup items for later implementation/deployment work.
 
 ---
 
@@ -846,13 +846,13 @@ Verification passed on 2026-06-22 from the repository root:
 - `npm run web:lint`
 - `npm run web:build`
 
-Step 1 is complete for local development and ready to serve as the next-phase baseline. When a later feature needs credentials, API keys, QR payment assets, deployment, or domain setup, Codex will ask the user for the exact value/action at that time.
+Phase 0 is complete for local development and ready to serve as the next-phase baseline. When a later feature needs credentials, API keys, QR payment assets, deployment, or domain setup, Codex will ask the user for the exact value/action at that time.
 
 ---
 
 ## 22. Deferred Phase 1 Expansion Items
 
-These are still required for full Phase 1 completion from `step_plans.md`, but they are no longer Step 1 blockers:
+These are still required for full Phase 1 completion from `step_plans.md`, but they are no longer Phase 0 blockers:
 
 - OTP request, verification, expiry, resend, and rate-limit APIs.
 - Public registration by phone/email plus password.
@@ -864,10 +864,10 @@ These are still required for full Phase 1 completion from `step_plans.md`, but t
 
 ---
 
-## 23. Next Phase Tracker
+## 23. Phase 1 Tracker
 
 Active tracker for the next phase:
 
-- `step_2.md` - Phase 1 Foundation + Auth + Tenant Core todo list.
+- `phase1.md` - Phase 1 Foundation + Auth + Tenant Core todo list.
 
-Use `step_2.md` as the working checklist. As each Phase 1 item is implemented and verified, tick the matching checkbox there before moving on.
+Use `phase1.md` as the working checklist. As each Phase 1 item is implemented and verified, tick the matching checkbox there before moving on.

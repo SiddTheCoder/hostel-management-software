@@ -1,10 +1,10 @@
-# Step 2 - Phase 1 Foundation + Auth + Tenant Core
+# Phase 1 - Foundation + Auth + Tenant Core
 
 **Phase in roadmap:** Phase 1
 **Status:** In progress
 **Started:** 2026-06-22
 **Source:** `step_plans.md` Phase 1
-**Rule:** Tick a task only after implementation and verification. If a task is partly started but not verified, keep it unchecked and add a note.
+**Rule:** Every work item below is a checkbox. Tick a task only after implementation and verification. If a task is partly started but not verified, keep it unchecked and add a note.
 
 ---
 
@@ -229,4 +229,4 @@ Build the system backbone:
 
 | Date | Update |
 |---|---|
-| 2026-06-22 | Phase 1 tracker created from `step_plans.md`; completed baseline items marked from committed Step 1 foundation. |
+| 2026-06-22 | Phase 1 tracker created from `step_plans.md`; completed baseline items marked from committed Phase 0 foundation. |
