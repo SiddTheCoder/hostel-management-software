@@ -861,3 +861,13 @@ These are still required for full Phase 1 completion from `step_plans.md`, but t
 - Production refresh-token rotation and multi-device session hardening.
 - Expo mobile app shell and secure-storage implementation.
 - Broader role/tenant integration tests against real API endpoints.
+
+---
+
+## 23. Next Phase Tracker
+
+Active tracker for the next phase:
+
+- `step_2.md` - Phase 1 Foundation + Auth + Tenant Core todo list.
+
+Use `step_2.md` as the working checklist. As each Phase 1 item is implemented and verified, tick the matching checkbox there before moving on.
