@@ -31,6 +31,13 @@ function redirectToLogin(request: NextRequest, error?: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  if (
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_UI_PREVIEW === "true"
+  ) {
+    return NextResponse.next();
+  }
+
   const rule = protectedRouteRuleForPath(request.nextUrl.pathname);
 
   if (!rule) {

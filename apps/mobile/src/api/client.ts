@@ -12,6 +12,43 @@ export type AuthSession = {
   user: AuthUser;
 };
 
+export type PublicHostel = {
+  capacitySummary?: {
+    totalBeds?: number;
+    totalRooms?: number;
+    vacantBeds?: number;
+  };
+  description?: string;
+  facilities: string[];
+  food?: {
+    hasNonVeg?: boolean;
+    hasVeg?: boolean;
+    mealsPerDay?: number;
+    notes?: string;
+  };
+  hostelType: "BOYS" | "GIRLS" | "CO_LIVING";
+  id: string;
+  location: {
+    address?: string;
+    area: string;
+    city?: string;
+  };
+  name: string;
+  photos: Array<{
+    alt?: string;
+    url?: string;
+  }>;
+  pricing?: {
+    currency?: string;
+    monthlyRentMax?: number;
+    monthlyRentMin?: number;
+  };
+  roomTypes: string[];
+  rules?: string[];
+  slug: string;
+  verificationStatus: "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED";
+};
+
 type ApiSuccess<T> = {
   data: T;
   message: string;
@@ -117,6 +154,53 @@ export function refreshSession(refreshToken: string) {
 export function logout(refreshToken: string) {
   return apiRequest<null>("/api/v1/auth/logout", {
     body: { refreshToken },
+    method: "POST",
+  });
+}
+
+export function listPublicHostels(query: {
+  area?: string;
+  facility?: string;
+  food?: "veg" | "non-veg";
+  maxPrice?: string;
+  minPrice?: string;
+  q?: string;
+  roomType?: string;
+  type?: "BOYS" | "GIRLS" | "CO_LIVING";
+} = {}) {
+  const params = new URLSearchParams();
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) {
+      params.set(key, value);
+    }
+  });
+
+  return apiRequest<{ hostels: PublicHostel[] }>(
+    `/api/v1/public/hostels${params.size ? `?${params.toString()}` : ""}`,
+  );
+}
+
+export function getPublicHostel(slug: string) {
+  return apiRequest<{ hostel: PublicHostel }>(`/api/v1/public/hostels/${slug}`);
+}
+
+export function createPublicInquiry(
+  hostelId: string,
+  input: {
+    message?: string;
+    name: string;
+    phone: string;
+    preferredVisitDate?: string;
+  },
+) {
+  return apiRequest<{
+    inquiry: {
+      id: string;
+      status: string;
+    };
+  }>(`/api/v1/public/hostels/${hostelId}/inquiries`, {
+    body: input,
     method: "POST",
   });
 }

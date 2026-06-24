@@ -1,0 +1,325 @@
+"use client";
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import {
+  AlertCircle,
+  AlertCircle as AlertIcon,
+  ArrowRight,
+  BadgeCheck,
+  BedDouble,
+  Bell,
+  Building2,
+  Calendar,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Download,
+  Eye,
+  FileCheck2,
+  FileText,
+  Filter,
+  Grid2X2,
+  Heart,
+  HelpCircle,
+  Home,
+  KeyRound,
+  List,
+  LockKeyhole,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Moon,
+  MoreVertical,
+  Phone,
+  PhoneCall,
+  Plus,
+  QrCode,
+  Search,
+  Send,
+  ShieldCheck,
+  SlidersHorizontal,
+  Star,
+  Trash2,
+  Upload,
+  User,
+  UserRound,
+  Users,
+  Utensils,
+  Wifi,
+  WalletCards,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+import {
+  adminMetrics,
+  auditActivity,
+  complaints,
+  imageSet,
+  notices,
+  payments,
+  platformMetrics,
+  providers,
+  hostelListings,
+  residents,
+  weeklyMenu,
+  type HostelSummary,
+  type Tone,
+} from "@/lib/hostelhub-data";
+import {
+  AnimatedPage,
+  Breadcrumbs,
+  FormField,
+  HostelCard,
+  HostelListCard,
+  MetricCard,
+  NepalBannerGraphic,
+  PublicShell,
+  SectionCard,
+  StatusPill,
+  TableView,
+  formatMoney,
+  humanize,
+  metricIcons,
+  type AuthMode,
+  type PortalKind,
+} from "./shared";
+
+export function PublicComparePage() {
+  const [comparedHostels, setComparedHostels] = useState<HostelSummary[]>(
+    hostelListings.slice(0, 3),
+  );
+
+  const rows = [
+    ["Hostel", "name"],
+    ["Monthly Rent", "price"],
+    ["Location", "area"],
+    ["Room Types", "roomTypes"],
+    ["Vacancy", "vacancy"],
+    ["Food Score", "foodScore"],
+    ["Facilities", "facilities"],
+    ["Verification", "verified"],
+    ["Rating & Reviews", "rating"],
+  ] as const;
+
+  const removeHostel = (id: string) => {
+    setComparedHostels(comparedHostels.filter((h) => h.id !== id));
+  };
+
+  const addHostel = () => {
+    const remaining = hostelListings.filter(
+      (h) => !comparedHostels.find((ch) => ch.id === h.id),
+    );
+    if (remaining.length > 0 && comparedHostels.length < 3) {
+      setComparedHostels([...comparedHostels, remaining[0]]);
+    } else {
+      alert("You can compare up to 3 hostels side-by-side.");
+    }
+  };
+
+  return (
+    <PublicShell active="compare">
+      <section className="mx-auto max-w-[1360px] px-6 py-8">
+        <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Compare Hostels</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Compare verified hostels side by side and choose the best place that fits
+              your needs.
+            </p>
+          </div>
+          {comparedHostels.length < 3 && (
+            <button
+              onClick={addHostel}
+              className="rounded-lg bg-brand-teal px-5 py-2.5 text-sm font-semibold text-white shadow hover:brightness-105 transition flex items-center gap-1.5"
+            >
+              <Plus className="size-4" /> Add Another Hostel
+            </button>
+          )}
+        </div>
+
+        <div className="flex gap-4 mb-4">
+          <Link
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition"
+            href="/hostels"
+          >
+            &larr; Back to Hostels
+          </Link>
+        </div>
+
+        <SectionCard className="overflow-x-auto">
+          <div
+            className="min-w-[800px] grid"
+            style={{
+              gridTemplateColumns: `220px repeat(${comparedHostels.length}, 1fr)`,
+            }}
+          >
+            {/* Left Criteria column */}
+            <div className="border-r border-border bg-slate-50/50">
+              <div className="h-44 flex items-center px-5 border-b border-border bg-slate-50">
+                <span className="font-bold text-sm text-primary uppercase tracking-wider">
+                  Comparison Criteria
+                </span>
+              </div>
+              <div className="divide-y divide-border/60 text-xs font-semibold text-muted-foreground">
+                {rows.map(([label]) => (
+                  <div key={label} className="h-14 flex items-center px-5">
+                    {label}
+                  </div>
+                ))}
+                <div className="h-20 flex items-center px-5">Actions</div>
+              </div>
+            </div>
+
+            {/* Hostel columns */}
+            {comparedHostels.map((hostel) => (
+              <div
+                className="border-r border-border last:border-r-0 relative"
+                key={hostel.id}
+              >
+                {/* Delete header button */}
+                <button
+                  onClick={() => removeHostel(hostel.id)}
+                  className="absolute right-3 top-3 z-20 size-7 bg-white/90 hover:bg-red-50 hover:text-danger rounded-full border border-border flex items-center justify-center text-muted-foreground transition shadow-sm"
+                  title="Remove from comparison"
+                >
+                  <X className="size-3.5" />
+                </button>
+
+                {/* Card header */}
+                <div className="h-44 border-b border-border bg-surface p-4 flex flex-col justify-end">
+                  <div
+                    className="absolute inset-0 h-32 bg-cover bg-center opacity-90"
+                    style={{ backgroundImage: `url("${hostel.image}")` }}
+                  />
+                  <div className="absolute inset-0 h-32 bg-gradient-to-t from-white via-white/50 to-transparent" />
+                  <div className="relative z-10 pt-24">
+                    <StatusPill
+                      tone="success"
+                      className="text-[9px] py-0 px-1 rounded-sm w-fit mb-1"
+                    >
+                      Verified
+                    </StatusPill>
+                    <h2
+                      className="font-bold text-sm text-primary truncate"
+                      title={hostel.name}
+                    >
+                      {hostel.name}
+                    </h2>
+                  </div>
+                </div>
+
+                {/* Criteria Values rows */}
+                <div className="divide-y divide-border/60 text-xs text-primary">
+                  {/* Name */}
+                  <div className="h-14 flex items-center px-5 font-semibold truncate bg-surface">
+                    {hostel.name}
+                  </div>
+                  {/* Rent */}
+                  <div className="h-14 flex items-center px-5 font-extrabold text-brand-teal bg-surface">
+                    {formatMoney(hostel.price)}{" "}
+                    <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                      / month
+                    </span>
+                  </div>
+                  {/* Location */}
+                  <div className="h-14 flex items-center px-5 bg-surface truncate">
+                    {hostel.address}
+                  </div>
+                  {/* Room Types */}
+                  <div className="h-14 flex items-center px-5 bg-surface truncate">
+                    {hostel.roomTypes.join(", ")}
+                  </div>
+                  {/* Vacancy */}
+                  <div className="h-14 flex items-center px-5 font-bold text-success bg-surface">
+                    {hostel.vacancy} Rooms Available
+                  </div>
+                  {/* Food Score */}
+                  <div className="h-14 flex items-center px-5 bg-surface">
+                    3 Times (Veg & Non-Veg included)
+                  </div>
+                  {/* Facilities */}
+                  <div className="h-14 flex items-center gap-1 px-5 bg-surface overflow-hidden">
+                    {hostel.facilities.slice(0, 3).map((f) => (
+                      <span
+                        key={f}
+                        className="rounded bg-muted px-1.5 py-0.5 text-[9px] text-muted-foreground"
+                        title={f}
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                  {/* Verification */}
+                  <div className="h-14 flex items-center px-5 bg-surface">
+                    <StatusPill tone="success" className="text-[10px]">
+                      Verified Profile
+                    </StatusPill>
+                  </div>
+                  {/* Rating */}
+                  <div className="h-14 flex items-center gap-1 px-5 bg-surface font-semibold">
+                    <Star className="size-3.5 fill-warning text-warning" />
+                    <span>{hostel.rating}</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">
+                      ({hostel.reviews} reviews)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="h-20 flex flex-col justify-center px-4 bg-slate-50 gap-1.5 border-t border-border">
+                  <Link
+                    className="w-full text-center py-2 rounded-md bg-brand-teal text-white text-[11px] font-bold shadow hover:brightness-105 transition flex items-center justify-center gap-1"
+                    href={`/inquiry?hostel=${hostel.slug}`}
+                  >
+                    <Send className="size-3" /> Send Inquiry
+                  </Link>
+                  <Link
+                    className="w-full text-center text-[10px] font-semibold text-brand-teal hover:underline"
+                    href={`/hostels/${hostel.slug}`}
+                  >
+                    View Details &rarr;
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* Support helper */}
+        <div className="mt-8 p-5 rounded-xl border border-border bg-surface flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4 text-left">
+            <div className="size-12 rounded-full bg-brand-teal-soft flex items-center justify-center text-brand-teal shrink-0">
+              <PhoneCall className="size-6" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-primary">
+                Need help choosing the right hostel?
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Our discovery experts will guide you to find the ideal accommodation based
+                on your college or workplace location.
+              </p>
+            </div>
+          </div>
+          <a
+            href="tel:015971234"
+            className="rounded-lg border border-slate-900 bg-slate-900 text-white font-semibold text-xs px-5 py-2.5 hover:bg-slate-800 transition whitespace-nowrap shrink-0"
+          >
+            Talk to an Expert
+          </a>
+        </div>
+      </section>
+    </PublicShell>
+  );
+}

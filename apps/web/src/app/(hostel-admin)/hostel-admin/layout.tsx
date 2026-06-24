@@ -1,12 +1,32 @@
 import { PortalShell } from "@/components/portal-shell";
 
 const navItems = [
-  { href: "/hostel-admin/dashboard", label: "Dashboard" },
-  { href: "/hostel-admin/rooms", label: "Rooms and beds" },
-  { href: "/hostel-admin/residents", label: "Residents" },
-  { href: "/hostel-admin/payments", label: "Fees and payments" },
-  { href: "/hostel-admin/complaints", label: "Complaints" },
-  { href: "/hostel-admin/maintenance", label: "Maintenance" },
+  {
+    href: "/hostel-admin/dashboard",
+    icon: "dashboard" as const,
+    label: "Dashboard",
+  },
+  { href: "/hostel-admin/profile", icon: "building" as const, label: "Hostel Profile" },
+  { href: "/hostel-admin/rooms", icon: "bed" as const, label: "Rooms & Beds" },
+  { href: "/hostel-admin/residents", icon: "users" as const, label: "Residents" },
+  { href: "/hostel-admin/inquiries", icon: "clipboard" as const, label: "Inquiries" },
+  { href: "/hostel-admin/payments", icon: "card" as const, label: "Payments" },
+  { href: "/hostel-admin/food", icon: "food" as const, label: "Food" },
+  { href: "/hostel-admin/notices", icon: "bell" as const, label: "Notices" },
+  {
+    href: "/hostel-admin/complaints",
+    icon: "clipboard" as const,
+    label: "Complaints",
+  },
+  { href: "/hostel-admin/night-status", icon: "moon" as const, label: "Night Status" },
+  {
+    href: "/hostel-admin/move-in-out",
+    icon: "receipt" as const,
+    label: "Move-In/Move-Out",
+  },
+  { href: "/hostel-admin/maintenance", icon: "wrench" as const, label: "Maintenance" },
+  { href: "/hostel-admin/reports", icon: "file" as const, label: "Reports" },
+  { href: "/hostel-admin/settings", icon: "settings" as const, label: "Settings" },
 ];
 
 export default function HostelAdminLayout({
@@ -17,8 +37,11 @@ export default function HostelAdminLayout({
   return (
     <PortalShell
       navItems={navItems}
-      portalName="Hostel Admin"
-      subtitle="Hostel operations"
+      portalName="HostelHub"
+      searchPlaceholder="Search residents, rooms..."
+      subtitle="Hostel Admin Portal"
+      tone="admin"
+      workspaceName="Himalayan Scholars Hostel"
     >
       {children}
     </PortalShell>

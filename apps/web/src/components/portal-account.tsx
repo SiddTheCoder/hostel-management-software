@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LogOut } from "lucide-react";
 
 type CurrentUser = {
   email: string | null;
@@ -87,8 +88,15 @@ export function PortalAccount() {
     }
   }
 
+  const initials = user?.name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <div className="hidden text-right sm:block">
         {isLoading ? (
           <>
@@ -112,13 +120,17 @@ export function PortalAccount() {
           </>
         )}
       </div>
+      <div className="flex size-9 items-center justify-center rounded-full border border-border bg-muted text-xs font-bold text-primary shadow-sm">
+        {initials || "HH"}
+      </div>
       <button
-        className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-primary transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label="Logout"
+        className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground shadow-sm transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60 dark:bg-card"
         disabled={isLoggingOut}
         onClick={handleLogout}
         type="button"
       >
-        {isLoggingOut ? "Logging out..." : "Logout"}
+        <LogOut className="size-4" />
       </button>
     </div>
   );

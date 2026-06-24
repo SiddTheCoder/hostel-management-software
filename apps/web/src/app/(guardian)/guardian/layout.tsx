@@ -1,11 +1,17 @@
 import { PortalShell } from "@/components/portal-shell";
 
 const navItems = [
-  { href: "/guardian/dashboard", label: "Dashboard" },
-  { href: "/guardian/payments", label: "Payments" },
-  { href: "/guardian/notices", label: "Notices" },
-  { href: "/guardian/food", label: "Food" },
-  { href: "/guardian/safety-summary", label: "Safety summary" },
+  { href: "/guardian/dashboard", icon: "receipt" as const, label: "Fee Summary" },
+  { href: "/guardian/notices", icon: "bell" as const, label: "Notices" },
+  { href: "/guardian/food", icon: "food" as const, label: "Food View" },
+  { href: "/guardian/safety", icon: "shield" as const, label: "Safety Summary" },
+  {
+    href: "/guardian/emergency-contact",
+    icon: "siren" as const,
+    label: "Emergency Contact",
+  },
+  { href: "/guardian/messages", icon: "message" as const, label: "Messages" },
+  { href: "/guardian/help", icon: "help" as const, label: "Help & Support" },
 ];
 
 export default function GuardianLayout({
@@ -14,7 +20,14 @@ export default function GuardianLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <PortalShell navItems={navItems} portalName="Guardian" subtitle="Trust summary">
+    <PortalShell
+      navItems={navItems}
+      portalName="HostelHub"
+      searchPlaceholder="Search guardian notices..."
+      subtitle="Guardian Portal"
+      tone="guardian"
+      workspaceName="Aarav Shrestha"
+    >
       {children}
     </PortalShell>
   );

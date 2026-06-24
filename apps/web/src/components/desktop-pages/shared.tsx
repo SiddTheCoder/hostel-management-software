@@ -1,0 +1,695 @@
+"use client";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import {
+  AlertCircle,
+  ArrowRight,
+  BadgeCheck,
+  BedDouble,
+  Bell,
+  Building2,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  Download,
+  FileCheck2,
+  Filter,
+  Grid2X2,
+  Heart,
+  Home,
+  KeyRound,
+  LockKeyhole,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Moon,
+  MoreVertical,
+  Phone,
+  Plus,
+  QrCode,
+  Search,
+  Send,
+  ShieldCheck,
+  SlidersHorizontal,
+  Star,
+  Upload,
+  User,
+  UserRound,
+  Users,
+  Utensils,
+  Wifi,
+  WalletCards,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
+
+import { PublicHeader } from "@/components/public-header";
+import { cn } from "@/lib/utils";
+import {
+  adminMetrics,
+  auditActivity,
+  complaints,
+  imageSet,
+  notices,
+  payments,
+  platformMetrics,
+  providers,
+  hostelListings,
+  residents,
+  weeklyMenu,
+  type HostelSummary,
+  type Tone,
+} from "@/lib/hostelhub-data";
+
+export type PortalKind = "admin" | "guardian" | "platform" | "resident";
+export type AuthMode = "activation" | "login" | "otp" | "reset" | "signup";
+
+export const toneStyles: Record<
+  Tone,
+  {
+    bg: string;
+    border: string;
+    button: string;
+    icon: string;
+    pill: string;
+    soft: string;
+    text: string;
+  }
+> = {
+  admin: {
+    bg: "bg-role-admin",
+    border: "border-role-admin/25",
+    button: "bg-role-admin text-white hover:brightness-105",
+    icon: "bg-role-admin-soft text-role-admin",
+    pill: "bg-role-admin-soft text-role-admin",
+    soft: "bg-role-admin-soft/70",
+    text: "text-role-admin",
+  },
+  danger: {
+    bg: "bg-danger",
+    border: "border-danger/25",
+    button: "bg-danger text-white hover:brightness-105",
+    icon: "bg-red-50 text-danger",
+    pill: "bg-red-50 text-danger",
+    soft: "bg-red-50",
+    text: "text-danger",
+  },
+  guardian: {
+    bg: "bg-role-guardian",
+    border: "border-role-guardian/25",
+    button: "bg-role-guardian text-white hover:brightness-105",
+    icon: "bg-role-guardian-soft text-role-guardian",
+    pill: "bg-role-guardian-soft text-role-guardian",
+    soft: "bg-role-guardian-soft/80",
+    text: "text-role-guardian",
+  },
+  platform: {
+    bg: "bg-role-platform",
+    border: "border-role-platform/25",
+    button: "bg-role-platform text-white hover:brightness-105",
+    icon: "bg-role-platform-soft text-role-platform",
+    pill: "bg-role-platform-soft text-role-platform",
+    soft: "bg-role-platform-soft/70",
+    text: "text-role-platform",
+  },
+  resident: {
+    bg: "bg-role-resident",
+    border: "border-role-resident/25",
+    button: "bg-role-resident text-white hover:brightness-105",
+    icon: "bg-role-resident-soft text-role-resident",
+    pill: "bg-role-resident-soft text-role-resident",
+    soft: "bg-role-resident-soft/75",
+    text: "text-role-resident",
+  },
+  slate: {
+    bg: "bg-slate-700",
+    border: "border-border",
+    button: "bg-slate-800 text-white hover:bg-slate-700",
+    icon: "bg-muted text-muted-foreground",
+    pill: "bg-muted text-muted-foreground",
+    soft: "bg-muted/50",
+    text: "text-muted-foreground",
+  },
+  success: {
+    bg: "bg-success",
+    border: "border-success/25",
+    button: "bg-success text-white hover:brightness-105",
+    icon: "bg-emerald-50 text-success",
+    pill: "bg-emerald-50 text-success",
+    soft: "bg-emerald-50",
+    text: "text-success",
+  },
+  teal: {
+    bg: "bg-brand-teal",
+    border: "border-brand-teal/25",
+    button: "bg-brand-teal text-white hover:brightness-105",
+    icon: "bg-brand-teal-soft text-brand-teal",
+    pill: "bg-brand-teal-soft text-brand-teal",
+    soft: "bg-brand-teal-soft/70",
+    text: "text-brand-teal",
+  },
+  warning: {
+    bg: "bg-warning",
+    border: "border-warning/25",
+    button: "bg-warning text-white hover:brightness-105",
+    icon: "bg-amber-50 text-warning",
+    pill: "bg-amber-50 text-warning",
+    soft: "bg-amber-50",
+    text: "text-warning",
+  },
+};
+
+export const metricIcons: LucideIcon[] = [
+  Building2,
+  CalendarDays,
+  Users,
+  MessageSquare,
+  Wrench,
+  AlertCircle,
+  WalletCards,
+  BedDouble,
+];
+
+export function formatMoney(value: number) {
+  return `NPR ${value.toLocaleString()}`;
+}
+
+export function statusTone(status: string): Tone {
+  const value = status.toLowerCase();
+
+  if (
+    value.includes("paid") ||
+    value.includes("approved") ||
+    value.includes("inside") ||
+    value.includes("activated") ||
+    value.includes("published") ||
+    value.includes("verified") ||
+    value.includes("resolved")
+  ) {
+    return "success";
+  }
+
+  if (
+    value.includes("pending") ||
+    value.includes("review") ||
+    value.includes("partial") ||
+    value.includes("draft") ||
+    value.includes("due")
+  ) {
+    return "warning";
+  }
+
+  if (
+    value.includes("overdue") ||
+    value.includes("outside") ||
+    value.includes("rejected") ||
+    value.includes("abuse") ||
+    value.includes("open")
+  ) {
+    return "danger";
+  }
+
+  return "slate";
+}
+
+export function humanize(value: string) {
+  return value
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export function StatusPill({
+  children,
+  tone,
+  className,
+}: {
+  children: ReactNode;
+  tone?: Tone;
+  className?: string;
+}) {
+  const resolvedTone =
+    tone ?? (typeof children === "string" ? statusTone(children) : "slate");
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold capitalize",
+        toneStyles[resolvedTone].pill,
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function AnimatedPage({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <motion.main
+      animate={{ opacity: 1, y: 0 }}
+      className={className}
+      initial={{ opacity: 0, y: 10 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.main>
+  );
+}
+
+export function SectionCard({
+  action,
+  children,
+  className,
+  description,
+  title,
+}: {
+  action?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  description?: string;
+  title?: string;
+}) {
+  return (
+    <section className={cn("app-card overflow-hidden", className)}>
+      {title ? (
+        <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+          <div>
+            <h2 className="text-lg font-semibold text-primary">{title}</h2>
+            {description ? (
+              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+            ) : null}
+          </div>
+          {action ? <div className="shrink-0">{action}</div> : null}
+        </div>
+      ) : null}
+      <div className={cn(title && "p-5")}>{children}</div>
+    </section>
+  );
+}
+
+export function MetricCard({
+  detail,
+  icon: Icon,
+  label,
+  tone,
+  value,
+}: {
+  detail: string;
+  icon: LucideIcon;
+  label: string;
+  tone: Tone;
+  value: string;
+}) {
+  return (
+    <motion.article
+      className="app-card p-5"
+      transition={{ duration: 0.2 }}
+      whileHover={{ y: -3 }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-primary">{value}</p>
+        </div>
+        <span className={cn("rounded-lg p-3", toneStyles[tone].icon)}>
+          <Icon className="size-5" />
+        </span>
+      </div>
+      <p className={cn("mt-4 text-xs font-semibold", toneStyles[tone].text)}>{detail}</p>
+    </motion.article>
+  );
+}
+
+export function TableView({
+  headers,
+  rows,
+}: {
+  headers: string[];
+  rows: Array<Array<ReactNode>>;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[760px] text-left text-sm">
+        <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+          <tr>
+            {headers.map((header) => (
+              <th className="px-4 py-3 font-semibold" key={header}>
+                {header}
+              </th>
+            ))}
+            <th className="px-4 py-3 text-right font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map((row, index) => (
+            <tr
+              className={cn(
+                "transition hover:bg-muted/30",
+                index === 1 && "bg-brand-teal-soft/25",
+              )}
+              key={index}
+            >
+              {row.map((cell, cellIndex) => (
+                <td className="px-4 py-4 align-middle" key={cellIndex}>
+                  {cell}
+                </td>
+              ))}
+              <td className="px-4 py-4 text-right">
+                <button
+                  aria-label="Row actions"
+                  className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
+                  type="button"
+                >
+                  <MoreVertical className="size-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export function FormField({
+  icon: Icon,
+  label,
+  placeholder,
+  type = "text",
+}: {
+  icon?: LucideIcon;
+  label: string;
+  placeholder: string;
+  type?: string;
+}) {
+  return (
+    <label className="block text-sm font-semibold text-primary">
+      {label}
+      <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
+        {Icon ? <Icon className="size-4 text-muted-foreground" /> : null}
+        <input
+          className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+          placeholder={placeholder}
+          type={type}
+        />
+      </span>
+    </label>
+  );
+}
+
+export function PublicShell({
+  active,
+  children,
+}: {
+  active: "blog" | "browse" | "compare" | "home" | "pricing" | "providers";
+  children: ReactNode;
+}) {
+  return (
+    <AnimatedPage className="min-h-screen bg-background text-foreground">
+      <PublicHeader active={active} />
+      {children}
+    </AnimatedPage>
+  );
+}
+
+// Extra Lucide icons & hooks for advanced public features
+import {
+  ChevronRight,
+  PhoneCall,
+  ChevronUp,
+  FileText,
+  List,
+  Eye,
+  Trash2,
+  Calendar,
+  AlertCircle as AlertIcon,
+  HelpCircle,
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+
+// Nepal Banner Illustration Graphic
+export function NepalBannerGraphic() {
+  return (
+    <svg
+      className="absolute right-0 bottom-0 h-full w-[45%] opacity-90 hidden md:block pointer-events-none"
+      viewBox="0 0 500 200"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Mountains */}
+      <path
+        d="M-50 180 L100 80 L220 160 L380 50 L500 180"
+        stroke="#0f766e"
+        strokeWidth="1.5"
+        strokeOpacity="0.15"
+        fill="none"
+      />
+      <path
+        d="M50 180 L200 90 L320 170 L450 70 L550 180"
+        stroke="#0f766e"
+        strokeWidth="1.5"
+        strokeOpacity="0.25"
+        fill="none"
+      />
+
+      {/* Bouddhanath Stupa */}
+      <g stroke="#0f766e" strokeWidth="1.5" fill="none" strokeOpacity="0.7">
+        <path d="M280 180 C280 135 360 135 360 180 Z" fill="#ccfbf1" fillOpacity="0.1" />
+        <rect x="310" y="117" width="20" height="18" fill="#ccfbf1" fillOpacity="0.2" />
+        <path d="M320 117 L320 75" strokeWidth="3" />
+        <line x1="313" y1="112" x2="327" y2="112" strokeWidth="1.2" />
+        <line x1="315" y1="106" x2="325" y2="106" strokeWidth="1.2" />
+        <line x1="317" y1="100" x2="323" y2="100" strokeWidth="1.2" />
+        <line x1="319" y1="94" x2="321" y2="94" strokeWidth="1.2" />
+        <circle cx="320" cy="71" r="3" fill="#0f766e" />
+        <path d="M314 125 C316 123 317 123 318 125" strokeWidth="1" />
+        <circle cx="316" cy="126" r="0.7" fill="#0f766e" />
+        <path d="M322 125 C324 123 325 123 326 125" strokeWidth="1" />
+        <circle cx="324" cy="126" r="0.7" fill="#0f766e" />
+        <path d="M320 127 L319.5 130" strokeWidth="1" />
+      </g>
+
+      {/* Pagoda Temple */}
+      <g stroke="#0f766e" strokeWidth="1.5" fill="none" strokeOpacity="0.6">
+        <rect
+          x="410"
+          y="140"
+          width="60"
+          height="40"
+          rx="1"
+          fill="#ccfbf1"
+          fillOpacity="0.1"
+        />
+        <rect
+          x="420"
+          y="125"
+          width="40"
+          height="15"
+          rx="1"
+          fill="#ccfbf1"
+          fillOpacity="0.15"
+        />
+        <path d="M395 125 L440 90 L485 125 Z" fill="#ccfbf1" fillOpacity="0.25" />
+        <rect x="427" y="78" width="26" height="12" fill="#ccfbf1" fillOpacity="0.15" />
+        <path d="M410 78 L440 50 L470 78 Z" fill="#ccfbf1" fillOpacity="0.3" />
+        <path d="M440 50 L440 40" strokeWidth="2" />
+        <circle cx="440" cy="38" r="3" fill="#0f766e" />
+      </g>
+    </svg>
+  );
+}
+
+// Breadcrumbs component
+export function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
+  return (
+    <nav className="mx-auto w-full max-w-[1360px] px-6 py-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-background">
+      {items.map((item, index) => (
+        <span key={item.label} className="flex items-center gap-2">
+          {index > 0 && <span className="text-muted-foreground/30 font-normal">/</span>}
+          {item.href ? (
+            <Link href={item.href} className="hover:text-brand-teal transition">
+              {item.label}
+            </Link>
+          ) : (
+            <span className="text-primary font-bold">{item.label}</span>
+          )}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+// HostelCard Component
+export function HostelCard({ hostel }: { hostel: HostelSummary }) {
+  return (
+    <motion.article
+      className="group overflow-hidden rounded-xl border border-border/80 bg-surface shadow-sm hover:shadow-md transition-all flex flex-col h-full"
+      transition={{ duration: 0.2 }}
+      whileHover={{ y: -4 }}
+    >
+      <Link href={`/hostels/${hostel.slug}`} className="flex flex-col h-full">
+        <div className="relative h-40 overflow-hidden shrink-0">
+          <div
+            className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-105"
+            style={{ backgroundImage: `url("${hostel.image}")` }}
+          />
+          <div className="absolute left-3 top-3">
+            <StatusPill
+              tone="success"
+              className="text-[10px] font-bold py-0.5 px-2 bg-emerald-50 text-emerald-700 border border-emerald-100/50"
+            >
+              Verified
+            </StatusPill>
+          </div>
+          <button
+            aria-label="Save hostel"
+            className="absolute right-3 top-3 inline-flex size-8 items-center justify-center rounded-full bg-white/85 text-muted-foreground transition hover:text-danger hover:bg-white"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            type="button"
+          >
+            <Heart className="size-4" />
+          </button>
+        </div>
+        <div className="space-y-2.5 p-3.5 flex-1 flex flex-col justify-between">
+          <div className="space-y-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3
+                className="font-bold text-sm text-primary group-hover:text-brand-teal transition line-clamp-1"
+                title={hostel.name}
+              >
+                {hostel.name}
+              </h3>
+              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-primary shrink-0">
+                <Star className="size-3.5 fill-warning text-warning" />
+                {hostel.rating}{" "}
+                <span className="text-[10px] font-normal text-muted-foreground">
+                  ({hostel.reviews})
+                </span>
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+              {hostel.area}, {hostel.city}
+            </p>
+          </div>
+
+          <div className="space-y-2.5">
+            <p className="font-extrabold text-sm text-primary">
+              {formatMoney(hostel.price)}{" "}
+              <span className="text-[10px] font-normal text-muted-foreground">
+                / month
+              </span>
+            </p>
+
+            <div className="flex items-center justify-between border-t border-border/50 pt-2 text-[10px] font-semibold text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Building2 className="size-3.5 text-muted-foreground/80" />
+                Vacancy {hostel.vacancy}
+              </span>
+              <span className="flex items-center gap-1">
+                <Wifi className="size-3.5 text-muted-foreground/80" />
+                Wi-Fi
+              </span>
+              <span className="flex items-center gap-1">
+                <Utensils className="size-3.5 text-muted-foreground/80" />
+                Food
+              </span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.article>
+  );
+}
+
+// HostelListCard Component for List View
+export function HostelListCard({ hostel }: { hostel: HostelSummary }) {
+  return (
+    <motion.article
+      className="group overflow-hidden rounded-xl border border-border/80 bg-surface shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row h-full md:h-44"
+      transition={{ duration: 0.2 }}
+      whileHover={{ y: -2 }}
+    >
+      <Link
+        href={`/hostels/${hostel.slug}`}
+        className="relative h-44 w-full md:w-64 shrink-0 overflow-hidden"
+      >
+        <div
+          className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-105"
+          style={{ backgroundImage: `url("${hostel.image}")` }}
+        />
+        <div className="absolute left-3 top-3">
+          <StatusPill
+            tone="success"
+            className="text-[10px] font-bold py-0.5 px-2 bg-emerald-50 text-emerald-700 border border-emerald-100/50"
+          >
+            Verified
+          </StatusPill>
+        </div>
+      </Link>
+      <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <Link href={`/hostels/${hostel.slug}`}>
+                <h3 className="text-base font-bold text-primary group-hover:text-brand-teal transition truncate">
+                  {hostel.name}
+                </h3>
+              </Link>
+              <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1 font-medium">
+                <MapPin className="size-3.5" /> {hostel.area}, {hostel.city}
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-primary shrink-0">
+              <Star className="size-3.5 fill-warning text-warning" />
+              {hostel.rating}{" "}
+              <span className="text-[10px] font-normal text-muted-foreground">
+                ({hostel.reviews})
+              </span>
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+            {hostel.description}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-2.5 mt-2">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base font-extrabold text-primary">
+              {formatMoney(hostel.price)}
+            </span>
+            <span className="text-[10px] font-normal text-muted-foreground">/ month</span>
+          </div>
+          <div className="flex items-center gap-3 text-[10px] font-semibold text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Building2 className="size-3.5 text-muted-foreground/80" />
+              Vacancy {hostel.vacancy}
+            </span>
+            <span className="flex items-center gap-1">
+              <Wifi className="size-3.5 text-muted-foreground/80" />
+              Wi-Fi
+            </span>
+            <span className="flex items-center gap-1">
+              <Utensils className="size-3.5 text-muted-foreground/80" />
+              Food
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}

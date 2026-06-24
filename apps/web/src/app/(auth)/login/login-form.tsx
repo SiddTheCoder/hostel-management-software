@@ -1,5 +1,6 @@
 "use client";
 
+import { EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
@@ -199,67 +200,105 @@ export function LoginForm() {
   }
 
   return (
-    <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+    <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
       {visibleError ? (
         <div
           aria-live="polite"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
         >
           {visibleError}
         </div>
       ) : null}
 
-      <label className="block text-sm font-semibold text-primary">
-        Email or phone
-        <input
-          autoComplete="username"
-          className="mt-2 h-12 w-full rounded-lg border border-border bg-background px-4 text-sm font-normal outline-none ring-secondary/20 transition focus:border-secondary focus:ring-4"
-          name="identifier"
-          placeholder="admin@example.com"
-          required
-          type="text"
-        />
-      </label>
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-primary">
+          Email or Phone Number
+          <span className="mt-2 flex h-11 items-center rounded-lg border border-border bg-role-resident-soft/40 px-3 text-primary transition focus-within:border-role-resident focus-within:ring-2 focus-within:ring-role-resident/20 dark:bg-muted/30">
+            <Mail className="mr-3 size-4 text-muted-foreground" />
+            <input
+              autoComplete="username"
+              className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+              name="identifier"
+              placeholder="name@example.com"
+              required
+              type="text"
+            />
+          </span>
+        </label>
 
-      <label className="block text-sm font-semibold text-primary">
-        Password
-        <input
-          autoComplete="current-password"
-          className="mt-2 h-12 w-full rounded-lg border border-border bg-background px-4 text-sm font-normal outline-none ring-secondary/20 transition focus:border-secondary focus:ring-4"
-          minLength={8}
-          name="password"
-          placeholder="Enter your password"
-          required
-          type="password"
-        />
-      </label>
+        <label className="block text-sm font-medium text-primary">
+          <span className="flex items-center justify-between">
+            Password
+            <span className="text-xs text-muted-foreground">Forgot password?</span>
+          </span>
+          <span className="mt-2 flex h-11 items-center rounded-lg border border-border bg-role-resident-soft/40 px-3 text-primary transition focus-within:border-role-resident focus-within:ring-2 focus-within:ring-role-resident/20 dark:bg-muted/30">
+            <LockKeyhole className="mr-3 size-4 text-muted-foreground" />
+            <input
+              autoComplete="current-password"
+              className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+              minLength={8}
+              name="password"
+              placeholder="••••••••"
+              required
+              type="password"
+            />
+            <button
+              aria-label="Password visibility is disabled in this demo"
+              className="ml-2 text-muted-foreground"
+              type="button"
+            >
+              <EyeOff className="size-4" />
+            </button>
+          </span>
+        </label>
+
+        <label className="flex items-center gap-3 text-sm text-muted-foreground">
+          <input
+            className="size-4 rounded border-border text-role-resident focus:ring-role-resident"
+            type="checkbox"
+          />
+          Remember me for 30 days
+        </label>
+      </div>
 
       <button
-        className="h-12 w-full rounded-lg bg-secondary text-sm font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="h-11 w-full rounded-lg bg-role-resident text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-slate-400"
         disabled={isSubmitting}
         type="submit"
       >
-        {isSubmitting ? "Signing in..." : "Login"}
+        {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          or
+        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          Or continue with
         </span>
         <div className="h-px flex-1 bg-border" />
       </div>
 
-      <div ref={googleButtonRef} className="min-h-11 w-full" />
+      <div ref={googleButtonRef} className="min-h-11 w-full overflow-hidden rounded-lg" />
       {!googleClientId ? (
-        <p className="text-sm text-muted-foreground">
-          Google sign-in is waiting for `NEXT_PUBLIC_GOOGLE_CLIENT_ID`.
-        </p>
+        <button
+          className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface text-sm font-medium text-primary transition hover:bg-muted dark:bg-card"
+          disabled
+          type="button"
+        >
+          <span className="font-bold text-[#4285f4]">G</span>
+          Google
+        </button>
       ) : !isGoogleReady || isGoogleSubmitting ? (
         <p className="text-sm text-muted-foreground">
           {isGoogleSubmitting ? "Completing Google sign-in..." : "Loading Google..."}
         </p>
       ) : null}
+
+      <p className="pt-8 text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <a className="font-medium text-role-resident hover:underline" href="/signup">
+          Sign up
+        </a>
+      </p>
     </form>
   );
 }

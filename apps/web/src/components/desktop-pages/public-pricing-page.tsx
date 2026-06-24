@@ -1,0 +1,341 @@
+"use client";
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import {
+  AlertCircle,
+  AlertCircle as AlertIcon,
+  ArrowRight,
+  BadgeCheck,
+  BedDouble,
+  Bell,
+  Building2,
+  Calendar,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Download,
+  Eye,
+  FileCheck2,
+  FileText,
+  Filter,
+  Grid2X2,
+  Heart,
+  HelpCircle,
+  Home,
+  KeyRound,
+  List,
+  LockKeyhole,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Moon,
+  MoreVertical,
+  Phone,
+  PhoneCall,
+  Plus,
+  QrCode,
+  Search,
+  Send,
+  ShieldCheck,
+  SlidersHorizontal,
+  Star,
+  Trash2,
+  Upload,
+  User,
+  UserRound,
+  Users,
+  Utensils,
+  Wifi,
+  WalletCards,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+import {
+  adminMetrics,
+  auditActivity,
+  complaints,
+  imageSet,
+  notices,
+  payments,
+  platformMetrics,
+  providers,
+  hostelListings,
+  residents,
+  weeklyMenu,
+  type HostelSummary,
+  type Tone,
+} from "@/lib/hostelhub-data";
+import {
+  AnimatedPage,
+  Breadcrumbs,
+  FormField,
+  HostelCard,
+  HostelListCard,
+  MetricCard,
+  NepalBannerGraphic,
+  PublicShell,
+  SectionCard,
+  StatusPill,
+  TableView,
+  formatMoney,
+  humanize,
+  metricIcons,
+  type AuthMode,
+  type PortalKind,
+} from "./shared";
+
+export function PublicPricingPage() {
+  const plans = [
+    {
+      name: "Starter",
+      desc: "Perfect for small hostels getting started with digital management.",
+      price: "2,900",
+      features: [
+        "1 Hostel / Branch",
+        "Up to 100 Residents",
+        "Core management features",
+        "Standard email support",
+      ],
+      tone: "teal" as const,
+      popular: false,
+    },
+    {
+      name: "Growth",
+      desc: "Ideal for growing hostels that need more power and flexibility.",
+      price: "5,900",
+      features: [
+        "Up to 5 Hostels / Branches",
+        "Up to 500 Residents",
+        "All Starter features, plus more",
+        "24/7 priority support",
+      ],
+      tone: "platform" as const,
+      popular: true,
+    },
+    {
+      name: "Enterprise",
+      desc: "For large hostel operators who need advanced control and scalability.",
+      price: "11,900",
+      features: [
+        "Unlimited Hostels / Branches",
+        "Unlimited Residents",
+        "All Growth features, plus more",
+        "Custom onboarding & training",
+      ],
+      tone: "success" as const,
+      popular: false,
+    },
+  ];
+
+  // FAQ collapses state
+  const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
+
+  const faqs = [
+    {
+      q: "Can I change my plan later?",
+      a: "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle. If you upgrade, the features will be unlocked immediately.",
+    },
+    {
+      q: "Is there a contract or lock-in period?",
+      a: "No, there's no long-term contract. You can cancel your subscription at any time without any termination charges.",
+    },
+    {
+      q: "Do you offer training and support?",
+      a: "Yes, all plans include onboarding guidance and 24/7 support via chat, email, and phone. Enterprise plans also include custom training sessions.",
+    },
+  ];
+
+  return (
+    <PublicShell active="pricing">
+      <section className="mx-auto max-w-[1240px] px-6 py-12 text-center space-y-12">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-extrabold text-primary leading-tight">
+            Choose the Right Plan for Your Hostel
+          </h1>
+          <p className="mx-auto max-w-2xl text-muted-foreground text-sm">
+            Simple, transparent pricing built to support hostels of all sizes across
+            Nepal.
+          </p>
+          <div className="flex flex-wrap justify-center gap-6 text-xs font-semibold text-primary pt-2">
+            <span className="flex items-center gap-1.5">
+              <Check className="size-4 text-brand-teal" /> No setup fees
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="size-4 text-brand-teal" /> Cancel anytime
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="size-4 text-brand-teal" /> Trusted by 10,000+ hostels
+            </span>
+          </div>
+        </div>
+
+        {/* Pricing Cards Grid */}
+        <div className="grid gap-6 md:grid-cols-3">
+          {plans.map((plan) => (
+            <SectionCard
+              className={cn(
+                "relative flex flex-col justify-between hover:shadow-lg transition-shadow duration-300",
+                plan.popular ? "ring-2 ring-brand-teal" : "",
+              )}
+              key={plan.name}
+            >
+              {plan.popular && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-teal px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                  &#9733; Most Popular
+                </span>
+              )}
+              <div className="p-6 text-left flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-primary">{plan.name}</h3>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground min-h-[36px]">
+                    {plan.desc}
+                  </p>
+                  <p className="mt-5 text-3xl font-extrabold text-primary">
+                    NPR {plan.price}{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      / month
+                    </span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Billed monthly
+                  </p>
+                  <ul className="mt-6 space-y-3 text-xs text-muted-foreground border-t border-border/40 pt-5">
+                    {plan.features.map((item) => (
+                      <li className="flex items-start gap-2" key={item}>
+                        <Check className="size-4 text-brand-teal shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Link
+                  className={cn(
+                    "mt-8 inline-flex w-full justify-center rounded-lg py-3 text-sm font-semibold shadow transition-all duration-200",
+                    plan.popular
+                      ? "bg-brand-teal text-white hover:brightness-110"
+                      : "bg-surface border border-brand-teal text-brand-teal hover:bg-brand-teal/5",
+                  )}
+                  href={{
+                    pathname: "/hostels/register",
+                    query: { plan: plan.name.toLowerCase() },
+                  }}
+                >
+                  Start Registration
+                </Link>
+              </div>
+            </SectionCard>
+          ))}
+        </div>
+
+        {/* Feature comparison table */}
+        <div className="space-y-6 pt-10 text-left">
+          <h3 className="text-xl font-bold text-primary">Compare Plans</h3>
+          <div className="border border-border rounded-xl bg-surface overflow-hidden shadow-sm">
+            <table className="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-border text-primary font-bold">
+                  <th className="p-4 w-[40%]">Features & Modules</th>
+                  <th className="p-4">Starter</th>
+                  <th className="p-4">Growth</th>
+                  <th className="p-4">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60 text-muted-foreground">
+                {[
+                  ["Public Hostel Listing on HostelHub", true, true, true],
+                  ["Resident Management & Room Allocation", true, true, true],
+                  ["Fee Tracking & Payments Receipts", true, true, true],
+                  ["Food Menu Management", true, true, true],
+                  ["Complaints & Feedback Pipeline", true, true, true],
+                  ["Maintenance & Service Providers", true, true, true],
+                  ["Reports & Advanced Analytics", true, true, true],
+                  ["Guardian portal Access", true, true, true],
+                  ["Custom Branding & Subdomains", false, false, true],
+                  ["Priority Onboarding & Multi-warden Roles", false, true, true],
+                ].map(([label, s, g, e]) => (
+                  <tr key={label as string} className="hover:bg-slate-50/50">
+                    <td className="p-4 font-medium text-primary">{label as string}</td>
+                    <td className="p-4">
+                      {s ? <Check className="size-4.5 text-brand-teal" /> : "-"}
+                    </td>
+                    <td className="p-4">
+                      {g ? <Check className="size-4.5 text-brand-teal" /> : "-"}
+                    </td>
+                    <td className="p-4">
+                      {e ? <Check className="size-4.5 text-brand-teal" /> : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Frequently Asked Questions */}
+        <div className="space-y-6 pt-10 text-left max-w-3xl mx-auto">
+          <h3 className="text-xl font-bold text-primary text-center">
+            Frequently Asked Questions
+          </h3>
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => (
+              <div
+                className="border border-border rounded-lg bg-surface overflow-hidden"
+                key={idx}
+              >
+                <button
+                  onClick={() => setOpenFaqIdx(openFaqIdx === idx ? null : idx)}
+                  className="w-full flex items-center justify-between p-4 font-semibold text-primary text-sm hover:bg-slate-50/50 transition text-left"
+                >
+                  <span>{faq.q}</span>
+                  {openFaqIdx === idx ? (
+                    <ChevronUp className="size-4" />
+                  ) : (
+                    <ChevronDown className="size-4" />
+                  )}
+                </button>
+                {openFaqIdx === idx && (
+                  <div className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3 bg-slate-50/30">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom CTA Card */}
+        <div className="rounded-xl border border-brand-teal/20 bg-brand-teal/5 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 text-left">
+          <div>
+            <h4 className="font-bold text-lg text-primary">
+              Ready to grow your hostel with HostelHub?
+            </h4>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xl">
+              Join thousands of hostel owners across Nepal who trust HostelHub to manage
+              room inventory, track resident monthly fees, issue digital notices, and
+              publish listings.
+            </p>
+          </div>
+          <Link
+            className="rounded-lg bg-brand-teal px-6 py-3 text-xs font-bold text-white shadow hover:brightness-115 transition whitespace-nowrap"
+            href="/hostels/register"
+          >
+            Start Your Registration &rarr;
+          </Link>
+        </div>
+      </section>
+    </PublicShell>
+  );
+}

@@ -1,0 +1,409 @@
+"use client";
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import {
+  AlertCircle,
+  AlertCircle as AlertIcon,
+  ArrowRight,
+  BadgeCheck,
+  BedDouble,
+  Bell,
+  Building2,
+  Calendar,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Download,
+  Eye,
+  FileCheck2,
+  FileText,
+  Filter,
+  Grid2X2,
+  Heart,
+  HelpCircle,
+  Home,
+  KeyRound,
+  List,
+  LockKeyhole,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Moon,
+  MoreVertical,
+  Phone,
+  PhoneCall,
+  Plus,
+  QrCode,
+  Search,
+  Send,
+  ShieldCheck,
+  SlidersHorizontal,
+  Star,
+  Trash2,
+  Upload,
+  User,
+  UserRound,
+  Users,
+  Utensils,
+  Wifi,
+  WalletCards,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+import {
+  adminMetrics,
+  auditActivity,
+  complaints,
+  imageSet,
+  notices,
+  payments,
+  platformMetrics,
+  providers,
+  hostelListings,
+  residents,
+  weeklyMenu,
+  type HostelSummary,
+  type Tone,
+} from "@/lib/hostelhub-data";
+import {
+  AnimatedPage,
+  Breadcrumbs,
+  FormField,
+  HostelCard,
+  HostelListCard,
+  MetricCard,
+  NepalBannerGraphic,
+  PublicShell,
+  SectionCard,
+  StatusPill,
+  TableView,
+  formatMoney,
+  humanize,
+  metricIcons,
+  type AuthMode,
+  type PortalKind,
+} from "./shared";
+
+export function PublicInquiryPage() {
+  const searchParams = useSearchParams();
+  const hostelSlug = searchParams
+    ? searchParams.get("hostel") || "green-view-hostel"
+    : "green-view-hostel";
+  const preselectedRoom = searchParams ? searchParams.get("room") || "" : "";
+
+  const hostel = hostelListings.find((h) => h.slug === hostelSlug) ?? hostelListings[0];
+
+  // Room type selection state
+  const [selectedRoomType, setSelectedRoomType] = useState(
+    preselectedRoom || "single-room",
+  );
+
+  // Submitted success state
+  const [submitted, setSubmitted] = useState(false);
+
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Hostels", href: "/hostels" },
+    { label: hostel.name, href: `/hostels/${hostel.slug}` },
+    { label: "Inquiry" },
+  ];
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <PublicShell active="browse">
+      <Breadcrumbs items={breadcrumbItems} />
+
+      <section className="mx-auto grid max-w-[1360px] gap-8 px-6 pb-12 lg:grid-cols-[0.4fr_0.6fr]">
+        {/* Left Hostel Card Summary */}
+        <div className="space-y-5">
+          <SectionCard title="Inquire About This Hostel">
+            <div className="p-4 space-y-4">
+              <div
+                className="h-48 rounded-lg bg-cover bg-center relative"
+                style={{ backgroundImage: `url("${hostel.image}")` }}
+              >
+                <div className="absolute right-3 top-3">
+                  <StatusPill tone="success">Verified</StatusPill>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-primary">{hostel.name}</h1>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <MapPin className="size-3 text-brand-teal" /> {hostel.address}
+                </p>
+                <div className="mt-2.5 flex items-center gap-1 text-xs text-warning">
+                  <Star className="size-3.5 fill-warning text-warning" />
+                  <span className="font-semibold">{hostel.rating}</span>
+                  <span className="text-muted-foreground font-normal">
+                    ({hostel.reviews} reviews)
+                  </span>
+                </div>
+              </div>
+
+              <div className="border-t border-border/50 pt-3 flex justify-between items-center">
+                <p className="text-sm font-bold text-primary">
+                  {formatMoney(hostel.price)}{" "}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    / month
+                  </span>
+                </p>
+                <button
+                  onClick={() => alert("Image gallery view coming soon!")}
+                  className="rounded border border-border px-2 py-1 text-[10px] font-semibold text-muted-foreground hover:bg-slate-50 transition"
+                >
+                  View Photos
+                </button>
+              </div>
+
+              {/* Room select radio cards */}
+              <div className="border-t border-border/50 pt-4 space-y-2">
+                <p className="text-xs font-bold text-primary">Select Room Type</p>
+                {[
+                  { id: "single-room", name: "Single Room", rent: 9600 },
+                  { id: "double-room", name: "Double Room", rent: 7500 },
+                  { id: "triple-room", name: "Triple Room", rent: 6000 },
+                ].map((room) => (
+                  <button
+                    key={room.id}
+                    onClick={() => setSelectedRoomType(room.id)}
+                    className={cn(
+                      "w-full text-left rounded-lg border p-3 flex justify-between items-center transition",
+                      selectedRoomType === room.id
+                        ? "border-brand-teal bg-brand-teal/5 text-brand-teal ring-1 ring-brand-teal"
+                        : "border-border bg-surface text-primary hover:bg-slate-50",
+                    )}
+                  >
+                    <div>
+                      <p className="text-xs font-bold">{room.name}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {formatMoney(room.rent)} / month
+                      </p>
+                    </div>
+                    <div
+                      className={cn(
+                        "size-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                        selectedRoomType === room.id
+                          ? "border-brand-teal bg-brand-teal"
+                          : "border-muted-foreground/45 bg-transparent",
+                      )}
+                    >
+                      {selectedRoomType === room.id && (
+                        <div className="size-1.5 rounded-full bg-white" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="border-t border-border/50 pt-3 grid grid-cols-2 gap-2.5 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <ShieldCheck className="size-3.5 text-brand-teal" /> Wi-Fi (100 Mbps)
+                </div>
+                <div className="flex items-center gap-1">
+                  <Utensils className="size-3.5 text-brand-teal" /> Meals (3 Times)
+                </div>
+                <div className="flex items-center gap-1">
+                  <ShieldCheck className="size-3.5 text-brand-teal" /> Laundry Included
+                </div>
+                <div className="flex items-center gap-1">
+                  <BadgeCheck className="size-3.5 text-brand-teal" /> 24/7 CCTV & Guards
+                </div>
+              </div>
+
+              <div className="border-t border-border/50 pt-3 text-[11px] text-muted-foreground space-y-1.5">
+                <p className="font-semibold text-primary">About This Hostel</p>
+                <p className="leading-relaxed">
+                  Clean, safe and student-friendly environment. Fully furnished rooms with
+                  study tables and wardrobes. 24/7 warden support and secure premises.
+                  Close to colleges, markets and public transport.
+                </p>
+              </div>
+
+              <div className="bg-emerald-50 text-[10px] text-success rounded-lg p-3 mt-3 flex items-start gap-1.5">
+                <ShieldCheck className="size-4 shrink-0 text-success" fill="none" />
+                <span>Trusted by 10,000+ students and families across Nepal.</span>
+              </div>
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* Right Form column */}
+        <div>
+          <SectionCard
+            action={
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-brand-teal font-semibold">
+                <ShieldCheck className="size-4 text-brand-teal" />
+                <span>Verified Secure Encryption</span>
+              </div>
+            }
+            title="Your Inquiry Details"
+            description="Please fill in the details below and we'll share it with the hostel. No payments required to submit inquiry."
+          >
+            {submitted ? (
+              <div className="p-8 text-center space-y-4">
+                <div className="size-16 rounded-full bg-emerald-100 text-success flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="size-10" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary">
+                    Inquiry Submitted Successfully!
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+                    Thank you! Your inquiry details have been forwarded to {hostel.name}
+                    &apos;s warden. They will review your preferences and contact you
+                    shortly at your registered number.
+                  </p>
+                </div>
+                <div className="pt-4">
+                  <button
+                    onClick={() => setSubmitted(false)}
+                    className="rounded-lg bg-brand-teal px-6 py-2.5 text-xs font-semibold text-white shadow hover:brightness-105 transition"
+                  >
+                    Send Another Inquiry
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleFormSubmit} className="space-y-4 p-1">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    icon={UserRound}
+                    label="Full Name *"
+                    placeholder="Enter your full name"
+                  />
+                  <div>
+                    <label className="block text-sm font-semibold text-primary">
+                      Phone Number *
+                      <span className="mt-2 flex h-12 items-center gap-2 rounded-lg border border-border bg-surface px-3 shadow-sm focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
+                        <select className="bg-transparent text-xs font-semibold text-primary border-none outline-none cursor-pointer">
+                          <option>NP (+977)</option>
+                          <option>IN (+91)</option>
+                        </select>
+                        <span className="text-muted-foreground/30">|</span>
+                        <input
+                          className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+                          placeholder="98XXXXXXXX"
+                          required
+                          type="tel"
+                        />
+                      </span>
+                    </label>
+                  </div>
+                  <FormField
+                    icon={Mail}
+                    label="Email Address *"
+                    placeholder="Enter your email address"
+                    type="email"
+                  />
+                  <div>
+                    <label className="block text-sm font-semibold text-primary">
+                      Gender *
+                      <select className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary">
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-primary">
+                      Preferred Room Type *
+                      <select
+                        value={selectedRoomType}
+                        onChange={(e) => setSelectedRoomType(e.target.value)}
+                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
+                      >
+                        <option value="single-room">Single Room</option>
+                        <option value="double-room">Double Room</option>
+                        <option value="triple-room">Triple Room</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-primary">
+                      Expected Move-in Date *
+                      <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm focus-within:border-brand-teal transition">
+                        <Calendar className="size-4 text-muted-foreground" />
+                        <input
+                          className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground cursor-pointer"
+                          required
+                          type="date"
+                        />
+                      </span>
+                    </label>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-primary">
+                      Your Budget (Monthly) *
+                      <select className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary">
+                        <option value="">Select your budget range</option>
+                        <option value="under-8k">Under NPR 8,000</option>
+                        <option value="8k-10k">NPR 8,000 - 10,000</option>
+                        <option value="above-10k">Above NPR 10,000</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <label className="block text-sm font-semibold text-primary">
+                  Additional Notes (Optional)
+                  <textarea
+                    maxLength={300}
+                    className="mt-2 min-h-24 w-full rounded-lg border border-border bg-surface p-3 text-sm font-normal outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/15 transition placeholder:text-muted-foreground"
+                    placeholder="Tell the hostel about your study location, dietary constraints, or schedule preferences."
+                  />
+                  <span className="text-[10px] text-muted-foreground text-right block mt-1">
+                    Max 300 characters
+                  </span>
+                </label>
+
+                <div className="flex items-start gap-2 pt-2">
+                  <input
+                    required
+                    className="size-4 rounded border-border mt-0.5 cursor-pointer"
+                    type="checkbox"
+                    id="agree"
+                  />
+                  <label
+                    htmlFor="agree"
+                    className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
+                  >
+                    I agree that my details will be shared with {hostel.name} and I may be
+                    contacted by the hostel administration regarding availability.
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-teal font-semibold text-white shadow hover:brightness-110 transition"
+                >
+                  <Send className="size-4" /> Submit Inquiry
+                </button>
+
+                <p className="text-[10px] text-center text-muted-foreground mt-3">
+                  Your information is secure and will only be used for this inquiry.
+                </p>
+              </form>
+            )}
+          </SectionCard>
+        </div>
+      </section>
+    </PublicShell>
+  );
+}

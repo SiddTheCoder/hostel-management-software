@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Chelsea_Market, Geist_Mono, Poppins } from "next/font/google";
+import { Geist, Geist_Mono, Poppins } from "next/font/google";
+
+import { ThemeProvider } from "@/components/theme-provider";
+
 import "./globals.css";
+
+const geistSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+});
 
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
   weight: ["400", "500", "600", "700"],
-});
-
-const chelseaMarket = Chelsea_Market({
-  subsets: ["latin"],
-  variable: "--font-chelsea-market",
-  weight: "400",
 });
 
 const geistMono = Geist_Mono({
@@ -32,9 +34,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${chelseaMarket.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+          enableSystem={false}
+          forcedTheme="light"
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

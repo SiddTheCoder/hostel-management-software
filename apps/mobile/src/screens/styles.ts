@@ -6,6 +6,24 @@ export const screenStyles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
   },
+  card: {
+    backgroundColor: "#ffffff",
+    borderColor: "#e2e8f0",
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 10,
+    padding: 16,
+  },
+  chip: {
+    alignSelf: "flex-start",
+    backgroundColor: "#dcfce7",
+    borderRadius: 999,
+    color: "#047857",
+    fontSize: 12,
+    fontWeight: "700",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
   button: {
     alignItems: "center",
     backgroundColor: "#10b981",
@@ -33,6 +51,10 @@ export const screenStyles = StyleSheet.create({
   field: {
     gap: 8,
   },
+  filterRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
   input: {
     backgroundColor: "#ffffff",
     borderColor: "#cbd5e1",
@@ -46,6 +68,25 @@ export const screenStyles = StyleSheet.create({
     color: "#0f172a",
     fontSize: 13,
     fontWeight: "700",
+  },
+  meta: {
+    color: "#64748b",
+    fontSize: 12,
+  },
+  row: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "space-between",
+  },
+  scrollContent: {
+    gap: 16,
+    padding: 20,
+  },
+  sectionTitle: {
+    color: "#0f172a",
+    fontSize: 18,
+    fontWeight: "800",
   },
   stack: {
     gap: 16,

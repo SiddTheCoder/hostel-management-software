@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { AuthSession } from "../api/client";
 import { LoginScreen } from "../screens/LoginScreen";
 import { OtpVerificationScreen } from "../screens/OtpVerificationScreen";
+import { PublicHostelDetailScreen } from "../screens/PublicHostelDetailScreen";
 import { PublicHomeScreen } from "../screens/PublicHomeScreen";
 import { ResidentHomeScreen } from "../screens/ResidentHomeScreen";
 import { SignupScreen } from "../screens/SignupScreen";
@@ -21,6 +22,10 @@ export type RootStackParamList = {
   };
   PublicHome: {
     session: AuthSession;
+  };
+  PublicHostelDetail: {
+    session: AuthSession;
+    slug: string;
   };
   ResidentHome: {
     session: AuthSession;
@@ -53,6 +58,11 @@ export function AppNavigator() {
           component={PublicHomeScreen}
           name="PublicHome"
           options={{ headerBackVisible: false, title: "Public Mode" }}
+        />
+        <Stack.Screen
+          component={PublicHostelDetailScreen}
+          name="PublicHostelDetail"
+          options={{ title: "Hostel Detail" }}
         />
         <Stack.Screen
           component={ResidentHomeScreen}
