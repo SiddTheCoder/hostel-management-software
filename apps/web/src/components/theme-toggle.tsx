@@ -1,8 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -11,13 +10,20 @@ type ThemeToggleProps = {
 };
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-  const isDark = resolvedTheme === "dark";
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    document.documentElement.classList.toggle("dark", next);
+    setIsDark(next);
+  };
+
   const label = mounted
     ? isDark
       ? "Switch to light theme"
@@ -31,7 +37,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         "inline-flex size-10 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground shadow-sm transition hover:border-secondary hover:text-secondary dark:bg-card",
         className,
       )}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={toggleTheme}
       title={mounted ? (isDark ? "Light theme" : "Dark theme") : "Toggle color theme"}
       type="button"
     >
