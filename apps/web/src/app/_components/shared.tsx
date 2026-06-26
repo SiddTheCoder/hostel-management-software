@@ -257,16 +257,7 @@ export function AnimatedPage({
   children: ReactNode;
   className?: string;
 }) {
-  return (
-    <motion.main
-      animate={{ opacity: 1, y: 0 }}
-      className={className}
-      initial={{ opacity: 0, y: 10 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.main>
-  );
+  return <main className={className}>{children}</main>;
 }
 
 export function SectionCard({

@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import { PublicHostelListingPage } from "@/components/desktop-ui";
 
 export default function HostelListingPage() {
-  return <PublicHostelListingPage />;
+  return (
+    <Suspense fallback={null}>
+      <PublicHostelListingPage />
+    </Suspense>
+  );
 }

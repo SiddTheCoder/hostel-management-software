@@ -2,15 +2,13 @@
 
 import type { ReactNode } from "react";
 
-export function ThemeProvider({
-  children,
-}: {
-  attribute?: string;
-  children: ReactNode;
-  defaultTheme?: string;
-  disableTransitionOnChange?: boolean;
-  enableSystem?: boolean;
-  forcedTheme?: string;
-}) {
+/**
+ * Lightweight theme provider.
+ *
+ * The project forces "light" as the base theme (see layout.tsx).
+ * Dark mode toggling is handled manually via `document.documentElement.classList`
+ * in ThemeToggle. No external theme library is needed.
+ */
+export function ThemeProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

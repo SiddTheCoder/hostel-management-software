@@ -94,8 +94,7 @@ export const imageSet = {
     "https://lh3.googleusercontent.com/aida-public/AB6AXuD1-SY6nYMfJeBhWdWrSuvEenaYBnNOTn7pSSE2aNXoY_lWHLLqbzsCrDH5XcKx1judCfF2YLYFwvAeisxrS_qZtPUpAc3WJ5zwQNWo2dezVnCuZjAAKky0epdQ0Fga3ktgAyLrFeiYNjVBkCvr_7stey_cBNIgbUmd6Tv8SHF_8csJWuHPNAybBXTHcVbnW-LMzfUY-4rzpKNibVH9UuH7fmo_FNVeuK4pxxxhlu4V9QdmFabnlUZbbqqapacY79s2aF-LMAqhFdU",
   lobby:
     "https://lh3.googleusercontent.com/aida-public/AB6AXuAD0NmbtkszFG87IhrLCwa2eHWDmk4NxOgpfoid2_zjZOx8uWA_hMcSeKmVOMRSjh6cGCyLc1Z9nGlZcL0Ki792qNxyaYBty13f2J3WQOuXIX_srJKrKQdS6r3NM_RDpDB3vErb3M4AXliIEEDa0efsPzIkws2iSLR5sBqDWjn4m6sUtt9ldLyN6Qa-ajl1zvazFY7UZ_2dAjeEU277a2C041A_ZzYl0_2dfHrJqKF0tb0-ivW1NlN_H88HwOtS1kTCG90Xs6WE0dc",
-  room:
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=80",
+  room: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=80",
   foodA:
     "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
   foodB:
@@ -380,8 +379,7 @@ export const notices: NoticeRecord[] = [
     date: "Yesterday",
     visibility: "Residents and guardians",
     status: "published",
-    detail:
-      "June monthly fee is due on 25th June 2026. Please make the payment on time.",
+    detail: "June monthly fee is due on 25th June 2026. Please make the payment on time.",
   },
   {
     id: "not_003",

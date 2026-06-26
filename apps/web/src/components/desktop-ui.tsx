@@ -1,12 +1,12 @@
 "use client";
 
-export { PublicHomePage } from "./desktop-pages/public-home-page";
-export { PublicHostelListingPage } from "./desktop-pages/public-hostel-listing-page";
-export { PublicHostelDetailPage } from "./desktop-pages/public-hostel-detail-page";
-export { PublicComparePage } from "./desktop-pages/public-compare-page";
-export { PublicInquiryPage } from "./desktop-pages/public-inquiry-page";
-export { PublicPricingPage } from "./desktop-pages/public-pricing-page";
-export { PublicHostelRegistrationPage } from "./desktop-pages/public-hostel-registration-page";
-export { ServiceProviderRegistrationPage } from "./desktop-pages/service-provider-registration-page";
-export { AuthExperiencePage } from "./desktop-pages/auth-experience-page";
-export { PortalExperiencePage } from "./desktop-pages/portal-experience-page";
+export { PublicHomePage } from "@/app/_components/public-home-page";
+export { PublicHostelListingPage } from "@/app/_components/public-hostel-listing-page";
+export { PublicHostelDetailPage } from "@/app/_components/public-hostel-detail-page";
+export { PublicComparePage } from "@/app/_components/public-compare-page";
+export { PublicInquiryPage } from "@/app/_components/public-inquiry-page";
+export { PublicPricingPage } from "@/app/_components/public-pricing-page";
+export { PublicHostelRegistrationPage } from "@/app/_components/public-hostel-registration-page";
+export { ServiceProviderRegistrationPage } from "@/app/_components/service-provider-registration-page";
+export { AuthExperiencePage } from "@/app/_components/auth-experience-page";
+export { PortalExperiencePage } from "@/app/_components/portal-experience-page";

@@ -248,7 +248,12 @@ export const mockHostels: Hostel[] = [
     foodIncluded: false,
     description:
       "Modern co-living space for working professionals and students. Flexible rules, individual study spaces.",
-    rules: ["Mutual respect", "Clean common areas", "Inform before guests", "No loud music after 10 PM"],
+    rules: [
+      "Mutual respect",
+      "Clean common areas",
+      "Inform before guests",
+      "No loud music after 10 PM",
+    ],
     contact: {
       phone: "+977-9801234570",
       email: "newbaneshwor@example.com",

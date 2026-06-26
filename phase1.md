@@ -30,7 +30,7 @@ Build the system backbone:
 - [x] Portal route protection exists for platform, hostel admin/warden, resident, and guardian routes.
 - [x] Base MongoDB models exist.
 - [x] Full Phase 1 web/backend auth implementation is complete.
-- [ ] Mobile app shell is deferred for now by user direction.
+- [x] Mobile app shell is complete with all Phase 1 auth screens.
 - [x] Phase 1 web automated QA gate is complete.
 - [x] DB-backed seed and live auth smoke tests pass against the configured MongoDB Atlas URI.
 - [ ] External OTP delivery is blank by current decision and pending the later Nepal-based email provider/SMS sender setup.
@@ -164,20 +164,17 @@ Build the system backbone:
 
 ## 5. Mobile Tasks
 
-Deferred for now by user direction. Some scaffold files were started, but mobile is
-not part of the current completion gate.
-
-- [ ] Expo app setup.
-- [ ] Navigation structure.
-- [ ] Login screen.
-- [ ] Signup screen with phone OTP, email OTP, password, and Google options.
-- [ ] OTP verification screen.
-- [ ] Secure token storage.
-- [ ] API client.
+- [x] Expo app setup.
+- [x] Navigation structure.
+- [x] Login screen.
+- [x] Signup screen with phone OTP, email OTP, password, and Google options.
+- [x] OTP verification screen.
+- [x] Secure token storage.
+- [x] API client.
 - [x] Mobile refresh-token API contract documented.
 - [x] Mobile login can receive refresh token using `x-hostelhub-client: mobile`.
-- [ ] Public mode shell.
-- [ ] Resident mode shell.
+- [x] Public mode shell.
+- [x] Resident mode shell.
 
 ---
 
@@ -242,3 +239,4 @@ delivery remains blank by design until provider setup is chosen.
 | 2026-06-22 | Phase 1 tracker created from `step_plans.md`; completed baseline items marked from committed Phase 0 foundation. |
 | 2026-06-22 | Completed web/backend Phase 1 implementation: OTP registration, Google auth endpoint/linking, refresh-token rotation, API guards, platform placeholders, portal current-user/logout, and automated web QA. Manual DB/provider checks remain pending until MongoDB and phase 1 keys are available. |
 | 2026-06-22 | MongoDB Atlas seed and live auth smoke passed. Email OTP provider was intentionally blanked for later Nepal-based provider selection; OTP registration currently works in development delivery mode. |
+| 2026-06-25 | Completed mobile Phase 1 implementation: Expo setup, navigation, login/signup/OTP screens, secure token storage, API client with mobile header, public/resident mode shells. |

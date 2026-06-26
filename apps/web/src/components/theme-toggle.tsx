@@ -1,7 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,13 +10,7 @@ type ThemeToggleProps = {
 };
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -24,11 +18,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     setIsDark(next);
   };
 
-  const label = mounted
-    ? isDark
-      ? "Switch to light theme"
-      : "Switch to dark theme"
-    : "Toggle color theme";
+  const label = isDark ? "Switch to light theme" : "Switch to dark theme";
 
   return (
     <button
@@ -38,10 +28,10 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         className,
       )}
       onClick={toggleTheme}
-      title={mounted ? (isDark ? "Light theme" : "Dark theme") : "Toggle color theme"}
+      title={isDark ? "Light theme" : "Dark theme"}
       type="button"
     >
-      {mounted && isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </button>
   );
 }
