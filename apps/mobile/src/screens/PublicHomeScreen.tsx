@@ -137,6 +137,13 @@ export function PublicHomeScreen({ navigation, route }: Props) {
             </View>
 
             <TouchableOpacity
+              onPress={() => navigation.navigate("ResidentActivation", { session })}
+              style={screenStyles.button}
+            >
+              <Text style={screenStyles.buttonText}>Activate resident access</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               onPress={handleLogout}
               style={[screenStyles.button, screenStyles.buttonSecondary]}
             >

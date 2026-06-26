@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 
-import { PortalExperiencePage } from "@/components/desktop-ui";
+import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
 
 export default function GuardianScreenPage() {
   const params = useParams<{ screen: string }>();

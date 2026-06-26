@@ -1,4 +1,4 @@
-import { PortalExperiencePage } from "@/components/desktop-ui";
+import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
 
 export default function HostelProfilePage() {
   return <PortalExperiencePage portal="admin" screen="profile" />;

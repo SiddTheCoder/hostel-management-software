@@ -216,7 +216,7 @@ export function PublicHostelDetailPage() {
                     ? "border-brand-teal"
                     : "border-transparent opacity-85 hover:opacity-100",
                 )}
-                key={img}
+                key={`${img}-${idx}`}
                 onClick={() => setCurrentImgIdx(idx)}
                 type="button"
               >

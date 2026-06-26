@@ -1,0 +1,45 @@
+import { z } from "zod";
+
+const objectIdSchema = z.string().regex(/^[a-f\d]{24}$/i, "Invalid object id.");
+const monthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Use YYYY-MM format.");
+
+export const paymentListQuerySchema = z.object({
+  hostelId: objectIdSchema.optional(),
+  month: monthSchema.optional(),
+  residentId: objectIdSchema.optional(),
+  status: z.enum(["UNPAID", "PAID", "PARTIAL", "OVERDUE", "PENDING_PROOF"]).optional(),
+});
+
+export const paymentCreateSchema = z.object({
+  hostelId: objectIdSchema.optional(),
+  residentId: objectIdSchema,
+  month: monthSchema,
+  dueAmount: z.coerce.number().nonnegative(),
+  paidAmount: z.coerce.number().nonnegative().default(0),
+  dueDate: z.coerce.date(),
+  paidDate: z.coerce.date().optional(),
+  status: z
+    .enum(["UNPAID", "PAID", "PARTIAL", "OVERDUE", "PENDING_PROOF"])
+    .default("UNPAID"),
+  paymentMethod: z
+    .enum(["CASH", "ESEWA", "KHALTI", "FONEPAY", "BANK_TRANSFER", "OTHER"])
+    .optional(),
+  remarks: z.string().trim().max(500).optional(),
+});
+
+export const paymentUpdateSchema = paymentCreateSchema
+  .omit({ residentId: true })
+  .partial()
+  .extend({
+    hostelId: objectIdSchema.optional(),
+  });
+
+export const paymentProofSubmitSchema = z.object({
+  proofImageAssetId: z.string().trim().min(1).max(240),
+  transactionCode: z.string().trim().max(120).optional(),
+});
+
+export const paymentProofReviewSchema = z.object({
+  hostelId: objectIdSchema.optional(),
+  rejectionReason: z.string().trim().min(3).max(500).optional(),
+});

@@ -1,99 +1,20 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import {
-  AlertCircle,
   AlertCircle as AlertIcon,
-  ArrowRight,
-  BadgeCheck,
-  BedDouble,
-  Bell,
-  Building2,
-  Calendar,
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  ChevronDown,
   ChevronRight,
-  ChevronUp,
-  Download,
-  Eye,
-  FileCheck2,
-  FileText,
   Filter,
   Grid2X2,
-  Heart,
-  HelpCircle,
-  Home,
-  KeyRound,
   List,
-  LockKeyhole,
-  Mail,
-  MapPin,
-  MessageSquare,
-  Moon,
-  MoreVertical,
-  Phone,
-  PhoneCall,
-  Plus,
-  QrCode,
   Search,
-  Send,
-  ShieldCheck,
-  SlidersHorizontal,
-  Star,
-  Trash2,
-  Upload,
-  User,
-  UserRound,
-  Users,
-  Utensils,
-  Wifi,
-  WalletCards,
-  Wrench,
-  X,
-  type LucideIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
-import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
-import {
-  AnimatedPage,
-  Breadcrumbs,
-  FormField,
-  HostelCard,
-  HostelListCard,
-  MetricCard,
-  NepalBannerGraphic,
-  PublicShell,
-  SectionCard,
-  StatusPill,
-  TableView,
-  formatMoney,
-  humanize,
-  metricIcons,
-  type AuthMode,
-  type PortalKind,
-} from "./shared";
+import { hostelListings } from "@/lib/hostelhub-data";
+import { HostelCard, HostelListCard, NepalBannerGraphic, PublicShell } from "./shared";
 
 export function PublicHostelListingPage() {
   const searchParams = useSearchParams();
@@ -108,9 +29,6 @@ export function PublicHostelListingPage() {
   const [selectedFood, setSelectedFood] = useState<string>("Any");
   const [selectedFacilities, setSelectedFacilities] = useState<string>("All Facilities");
   const [sortBy, setSortBy] = useState<string>("Recommended");
-
-  // Dropdown UI states
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     let result = hostelListings.filter((hostel) => {
@@ -172,9 +90,6 @@ export function PublicHostelListingPage() {
     sortBy,
   ]);
 
-  const toggleDropdown = (dropdown: string) => {
-    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
-  };
   return (
     <PublicShell active="browse">
       {/* Hero Banner Section with Nepal Silhouette Graphic */}

@@ -49,6 +49,90 @@ export type PublicHostel = {
   verificationStatus: "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED";
 };
 
+export type ResidentSummary = {
+  depositAmount: number;
+  email?: string;
+  firstName: string;
+  fullName?: string;
+  id: string;
+  lastName: string;
+  phone: string;
+  status: string;
+};
+
+export type ResidentDashboard = {
+  feeStatus: {
+    dueAmount: number;
+    pendingProofs: number;
+    unpaidCount: number;
+  };
+  foodMenu: ResidentFoodMenu[];
+  hostel: {
+    name: string;
+    location?: {
+      area?: string;
+      city?: string;
+    };
+  } | null;
+  nightStatus: {
+    status: string;
+  };
+  notices: ResidentNotice[];
+  resident: ResidentSummary;
+  roomBed: {
+    bed: {
+      bedNumber: string;
+      status: string;
+    } | null;
+    room: {
+      roomNumber: string;
+      roomType: string;
+    } | null;
+  };
+};
+
+export type ResidentPayment = {
+  dueAmount: number;
+  dueDate: string;
+  id: string;
+  month: string;
+  paidAmount: number;
+  status: string;
+};
+
+export type ResidentPaymentProof = {
+  id: string;
+  paymentId: string;
+  proofImageAssetId: string;
+  status: string;
+  transactionCode?: string;
+};
+
+export type ResidentFoodMenu = {
+  date: string;
+  id: string;
+  items: string[];
+  mealType: string;
+  timing: string;
+};
+
+export type ResidentFoodPhoto = {
+  caption?: string;
+  date: string;
+  id: string;
+  mealType: string;
+  photoAssetId: string;
+};
+
+export type ResidentNotice = {
+  category: string;
+  content: string;
+  id: string;
+  isRead?: boolean;
+  isUrgent: boolean;
+  title: string;
+};
+
 type ApiSuccess<T> = {
   data: T;
   message: string;
@@ -70,7 +154,7 @@ async function apiRequest<T>(
   options: {
     accessToken?: string;
     body?: unknown;
-    method?: "GET" | "POST";
+    method?: "GET" | "PATCH" | "POST";
   } = {},
 ) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -202,5 +286,153 @@ export function createPublicInquiry(
   }>(`/api/v1/public/hostels/${hostelId}/inquiries`, {
     body: input,
     method: "POST",
+  });
+}
+
+export function getActivationStatus(accessToken: string) {
+  return apiRequest<{
+    isActivated: boolean;
+    resident: ResidentSummary | null;
+  }>("/api/v1/resident/activation-status", {
+    accessToken,
+  });
+}
+
+export function activateResident(
+  accessToken: string,
+  input: {
+    code: string;
+    deviceInfo?: Record<string, unknown>;
+    sessionInfo?: Record<string, unknown>;
+  },
+) {
+  return apiRequest<AuthSession & { resident: ResidentSummary }>(
+    "/api/v1/resident/activate",
+    {
+      accessToken,
+      body: {
+        code: input.code,
+        deviceInfo: input.deviceInfo ?? {},
+        sessionInfo: input.sessionInfo ?? {},
+      },
+      method: "POST",
+    },
+  );
+}
+
+export function getResidentDashboard(accessToken: string) {
+  return apiRequest<{ dashboard: ResidentDashboard }>("/api/v1/resident/dashboard", {
+    accessToken,
+  });
+}
+
+export function getResidentProfile(accessToken: string) {
+  return apiRequest<{
+    profile: {
+      emergencyContacts: Array<{
+        id: string;
+        name: string;
+        phone: string;
+        relation: string;
+      }>;
+      guardians: Array<{
+        firstName: string;
+        id: string;
+        lastName: string;
+        phone: string;
+        relation: string;
+      }>;
+      resident: ResidentSummary;
+      roomBed: ResidentDashboard["roomBed"];
+    };
+  }>("/api/v1/resident/profile", {
+    accessToken,
+  });
+}
+
+export function listResidentPayments(accessToken: string) {
+  return apiRequest<{
+    payments: ResidentPayment[];
+    proofs: ResidentPaymentProof[];
+  }>("/api/v1/resident/payments", {
+    accessToken,
+  });
+}
+
+export function submitPaymentProof(
+  accessToken: string,
+  paymentId: string,
+  input: {
+    proofImageAssetId: string;
+    transactionCode?: string;
+  },
+) {
+  return apiRequest<{
+    proof: ResidentPaymentProof;
+  }>(`/api/v1/resident/payments/${paymentId}/proof`, {
+    accessToken,
+    body: input,
+    method: "POST",
+  });
+}
+
+export function listResidentFood(accessToken: string) {
+  return apiRequest<{
+    menus: ResidentFoodMenu[];
+    photos: ResidentFoodPhoto[];
+  }>("/api/v1/resident/food", {
+    accessToken,
+  });
+}
+
+export function submitFoodFeedback(
+  accessToken: string,
+  input: {
+    comment?: string;
+    date: string;
+    isAnonymous: boolean;
+    mealType: string;
+    menuId?: string;
+    rating: number;
+  },
+) {
+  return apiRequest<unknown>("/api/v1/resident/food/feedback", {
+    accessToken,
+    body: input,
+    method: "POST",
+  });
+}
+
+export function uploadResidentFoodPhoto(
+  accessToken: string,
+  input: {
+    caption?: string;
+    date: string;
+    mealType: string;
+    photoAssetId: string;
+  },
+) {
+  return apiRequest<unknown>("/api/v1/resident/food/photos", {
+    accessToken,
+    body: input,
+    method: "POST",
+  });
+}
+
+export function listResidentNotices(accessToken: string) {
+  return apiRequest<{
+    notices: ResidentNotice[];
+  }>("/api/v1/resident/notices", {
+    accessToken,
+  });
+}
+
+export function markNoticeAsRead(accessToken: string, noticeId: string) {
+  return apiRequest<{
+    notice: ResidentNotice;
+  }>(`/api/v1/resident/notices/${noticeId}/read`, {
+    accessToken,
+    body: {},
+    method: "PATCH",
   });
 }

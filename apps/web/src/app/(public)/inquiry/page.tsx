@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 
-import { PublicInquiryPage } from "@/components/desktop-ui";
+import { PublicInquiryPage } from "@/app/_components/public-inquiry-page";
+import { InquiryPageSkeleton } from "@/components/public-page-skeletons";
 
 export default function InquiryPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<InquiryPageSkeleton />}>
       <PublicInquiryPage />
     </Suspense>
   );

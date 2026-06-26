@@ -1,5 +1,5 @@
-import { PortalExperiencePage } from "@/components/desktop-ui";
+import { ResidentDashboardPageContent } from "@/app/_components/resident-portal-pages";
 
 export default function ResidentDashboardPage() {
-  return <PortalExperiencePage portal="resident" screen="dashboard" />;
+  return <ResidentDashboardPageContent />;
 }

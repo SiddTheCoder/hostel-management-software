@@ -1,0 +1,410 @@
+import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const routeMocks = vi.hoisted(() => ({
+  activateResident: vi.fn(),
+  approvePaymentProof: vi.fn(),
+  createFoodMenu: vi.fn(),
+  createNotice: vi.fn(),
+  createPaymentRecord: vi.fn(),
+  generateActivationCode: vi.fn(),
+  getActivationStatus: vi.fn(),
+  getResidentDashboard: vi.fn(),
+  getResidentProfile: vi.fn(),
+  getResidentReceipt: vi.fn(),
+  listFoodForResident: vi.fn(),
+  listFoodMenus: vi.fn(),
+  listNotices: vi.fn(),
+  listNoticesForResident: vi.fn(),
+  listPayments: vi.fn(),
+  listResidentPayments: vi.fn(),
+  markNoticeAsRead: vi.fn(),
+  regenerateActivationCode: vi.fn(),
+  rejectPaymentProof: vi.fn(),
+  requireApiPrincipal: vi.fn(),
+  requireHostelStaffPrincipal: vi.fn(),
+  requireResidentPrincipal: vi.fn(),
+  submitFoodFeedback: vi.fn(),
+  submitPaymentProof: vi.fn(),
+  updateFoodMenu: vi.fn(),
+  updateNotice: vi.fn(),
+  updatePaymentRecord: vi.fn(),
+  uploadFoodPhoto: vi.fn(),
+}));
+
+vi.mock("@/lib/api-auth", () => ({
+  requireApiPrincipal: routeMocks.requireApiPrincipal,
+  requireHostelStaffPrincipal: routeMocks.requireHostelStaffPrincipal,
+  requireResidentPrincipal: routeMocks.requireResidentPrincipal,
+}));
+
+vi.mock("@/modules/residents/activation.service", () => ({
+  activateResident: routeMocks.activateResident,
+  generateActivationCode: routeMocks.generateActivationCode,
+  getActivationStatus: routeMocks.getActivationStatus,
+  regenerateActivationCode: routeMocks.regenerateActivationCode,
+}));
+
+vi.mock("@/modules/residents/resident-dashboard.service", () => ({
+  getResidentDashboard: routeMocks.getResidentDashboard,
+  getResidentProfile: routeMocks.getResidentProfile,
+}));
+
+vi.mock("@/modules/payments/payment.service", () => ({
+  approvePaymentProof: routeMocks.approvePaymentProof,
+  createPaymentRecord: routeMocks.createPaymentRecord,
+  getResidentReceipt: routeMocks.getResidentReceipt,
+  listPayments: routeMocks.listPayments,
+  listResidentPayments: routeMocks.listResidentPayments,
+  rejectPaymentProof: routeMocks.rejectPaymentProof,
+  submitPaymentProof: routeMocks.submitPaymentProof,
+  updatePaymentRecord: routeMocks.updatePaymentRecord,
+}));
+
+vi.mock("@/modules/food/food.service", () => ({
+  createFoodMenu: routeMocks.createFoodMenu,
+  listFoodForResident: routeMocks.listFoodForResident,
+  listFoodMenus: routeMocks.listFoodMenus,
+  submitFoodFeedback: routeMocks.submitFoodFeedback,
+  updateFoodMenu: routeMocks.updateFoodMenu,
+  uploadFoodPhoto: routeMocks.uploadFoodPhoto,
+}));
+
+vi.mock("@/modules/notices/notice.service", () => ({
+  createNotice: routeMocks.createNotice,
+  listNotices: routeMocks.listNotices,
+  listNoticesForResident: routeMocks.listNoticesForResident,
+  markNoticeAsRead: routeMocks.markNoticeAsRead,
+  updateNotice: routeMocks.updateNotice,
+}));
+
+import * as adminActivationRoute from "@/app/api/v1/hostel-admin/residents/[id]/activation-code/route";
+import * as residentActivateRoute from "@/app/api/v1/resident/activate/route";
+import * as residentActivationStatusRoute from "@/app/api/v1/resident/activation-status/route";
+import * as residentDashboardRoute from "@/app/api/v1/resident/dashboard/route";
+import * as residentMeRoute from "@/app/api/v1/resident/me/route";
+import * as adminPaymentsRoute from "@/app/api/v1/hostel-admin/payments/route";
+import * as adminPaymentDetailRoute from "@/app/api/v1/hostel-admin/payments/[id]/route";
+import * as residentPaymentsRoute from "@/app/api/v1/resident/payments/route";
+import * as residentPaymentProofRoute from "@/app/api/v1/resident/payments/[paymentId]/proof/route";
+import * as approvePaymentProofRoute from "@/app/api/v1/hostel-admin/payment-proofs/[id]/approve/route";
+import * as rejectPaymentProofRoute from "@/app/api/v1/hostel-admin/payment-proofs/[id]/reject/route";
+import * as residentReceiptRoute from "@/app/api/v1/resident/receipts/[id]/route";
+import * as adminFoodMenuRoute from "@/app/api/v1/hostel-admin/food/menu/route";
+import * as adminFoodMenuDetailRoute from "@/app/api/v1/hostel-admin/food/menu/[id]/route";
+import * as adminFoodPhotosRoute from "@/app/api/v1/hostel-admin/food/photos/route";
+import * as residentFoodRoute from "@/app/api/v1/resident/food/route";
+import * as residentFoodFeedbackRoute from "@/app/api/v1/resident/food/feedback/route";
+import * as residentFoodPhotosRoute from "@/app/api/v1/resident/food/photos/route";
+import * as adminNoticesRoute from "@/app/api/v1/hostel-admin/notices/route";
+import * as adminNoticeDetailRoute from "@/app/api/v1/hostel-admin/notices/[id]/route";
+import * as residentNoticesRoute from "@/app/api/v1/resident/notices/route";
+import * as residentNoticeReadRoute from "@/app/api/v1/resident/notices/[id]/read/route";
+import { Role } from "@/lib/roles";
+
+const staffPrincipal = {
+  hostelIds: ["64f0f0f0f0f0f0f0f0f0f0f1"],
+  role: Role.HOSTEL_ADMIN,
+  sessionId: "session-1",
+  userId: "64f0f0f0f0f0f0f0f0f0f0f2",
+};
+
+const residentPrincipal = {
+  hostelIds: ["64f0f0f0f0f0f0f0f0f0f0f1"],
+  role: Role.RESIDENT,
+  sessionId: "session-2",
+  userId: "64f0f0f0f0f0f0f0f0f0f0f3",
+};
+
+function routeContext<T extends Record<string, string>>(params: T) {
+  return {
+    params: Promise.resolve(params),
+  };
+}
+
+function request(
+  path: string,
+  options: {
+    body?: unknown;
+    method?: "GET" | "POST" | "PATCH";
+    mobile?: boolean;
+  } = {},
+) {
+  return new NextRequest(`https://hostelhub.local${path}`, {
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    headers: {
+      ...(options.body ? { "content-type": "application/json" } : {}),
+      ...(options.mobile ? { "x-hostelhub-client": "mobile" } : {}),
+    },
+    method: options.method ?? "GET",
+  });
+}
+
+describe("resident daily-use routes", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    routeMocks.requireApiPrincipal.mockResolvedValue(residentPrincipal);
+    routeMocks.requireHostelStaffPrincipal.mockResolvedValue(staffPrincipal);
+    routeMocks.requireResidentPrincipal.mockResolvedValue(residentPrincipal);
+  });
+
+  it("generates activation codes and activates residents with a mobile session", async () => {
+    routeMocks.generateActivationCode.mockResolvedValue({
+      activation: { code: "ABCD1234", id: "activation-1" },
+    });
+    routeMocks.activateResident.mockResolvedValue({
+      activation: { id: "activation-1", status: "USED" },
+      resident: { id: "resident-1", status: "ACTIVE" },
+      session: {
+        accessToken: "access-next",
+        refreshToken: "refresh-next",
+        user: { id: residentPrincipal.userId, role: Role.RESIDENT },
+      },
+    });
+
+    const generateResponse = await adminActivationRoute.POST(
+      request("/api/v1/hostel-admin/residents/64f0f0f0f0f0f0f0f0f0f0f4/activation-code", {
+        body: { expiresInHours: 24 },
+        method: "POST",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f4" }),
+    );
+    const activateResponse = await residentActivateRoute.POST(
+      request("/api/v1/resident/activate", {
+        body: { code: "ABCD1234", deviceInfo: { os: "ios" } },
+        method: "POST",
+        mobile: true,
+      }),
+    );
+    const activatePayload = await activateResponse.json();
+
+    expect(generateResponse.status).toBe(201);
+    expect(activateResponse.status).toBe(200);
+    expect(activatePayload.data.refreshToken).toBe("refresh-next");
+    expect(routeMocks.generateActivationCode).toHaveBeenCalledWith(
+      "64f0f0f0f0f0f0f0f0f0f0f4",
+      { expiresInHours: 24 },
+      staffPrincipal,
+    );
+    expect(routeMocks.activateResident).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "ABCD1234", deviceInfo: { os: "ios" } }),
+      residentPrincipal,
+    );
+  });
+
+  it("loads activation status, dashboard, and resident profile", async () => {
+    routeMocks.getActivationStatus.mockResolvedValue({ isActivated: true });
+    routeMocks.getResidentDashboard.mockResolvedValue({ dashboard: { notices: [] } });
+    routeMocks.getResidentProfile.mockResolvedValue({ profile: { guardians: [] } });
+
+    const statusResponse = await residentActivationStatusRoute.GET(
+      request("/api/v1/resident/activation-status?code=ABCD1234"),
+    );
+    const dashboardResponse = await residentDashboardRoute.GET(
+      request("/api/v1/resident/dashboard"),
+    );
+    const meResponse = await residentMeRoute.GET(request("/api/v1/resident/me"));
+
+    expect(statusResponse.status).toBe(200);
+    expect(dashboardResponse.status).toBe(200);
+    expect(meResponse.status).toBe(200);
+    expect(routeMocks.getActivationStatus).toHaveBeenCalledWith(
+      { code: "ABCD1234" },
+      residentPrincipal,
+    );
+  });
+
+  it("handles admin and resident payment workflows", async () => {
+    routeMocks.createPaymentRecord.mockResolvedValue({ payment: { id: "payment-1" } });
+    routeMocks.listPayments.mockResolvedValue({ payments: [], proofs: [] });
+    routeMocks.updatePaymentRecord.mockResolvedValue({ payment: { id: "payment-1" } });
+    routeMocks.listResidentPayments.mockResolvedValue({ payments: [], proofs: [] });
+    routeMocks.submitPaymentProof.mockResolvedValue({ proof: { id: "proof-1" } });
+    routeMocks.approvePaymentProof.mockResolvedValue({ receipt: { id: "receipt-1" } });
+    routeMocks.rejectPaymentProof.mockResolvedValue({ proof: { status: "REJECTED" } });
+    routeMocks.getResidentReceipt.mockResolvedValue({ receipt: { id: "receipt-1" } });
+
+    const createResponse = await adminPaymentsRoute.POST(
+      request("/api/v1/hostel-admin/payments", {
+        body: {
+          dueAmount: 8500,
+          dueDate: "2030-01-10",
+          month: "2030-01",
+          residentId: "64f0f0f0f0f0f0f0f0f0f0f4",
+        },
+        method: "POST",
+      }),
+    );
+    const listResponse = await adminPaymentsRoute.GET(
+      request("/api/v1/hostel-admin/payments?status=UNPAID"),
+    );
+    const updateResponse = await adminPaymentDetailRoute.PATCH(
+      request("/api/v1/hostel-admin/payments/64f0f0f0f0f0f0f0f0f0f0f5", {
+        body: { status: "PARTIAL" },
+        method: "PATCH",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f5" }),
+    );
+    const residentListResponse = await residentPaymentsRoute.GET(
+      request("/api/v1/resident/payments"),
+    );
+    const proofResponse = await residentPaymentProofRoute.POST(
+      request("/api/v1/resident/payments/64f0f0f0f0f0f0f0f0f0f0f5/proof", {
+        body: { proofImageAssetId: "asset-1", transactionCode: "TXN-1" },
+        method: "POST",
+      }),
+      routeContext({ paymentId: "64f0f0f0f0f0f0f0f0f0f0f5" }),
+    );
+    const approveResponse = await approvePaymentProofRoute.PATCH(
+      request("/api/v1/hostel-admin/payment-proofs/64f0f0f0f0f0f0f0f0f0f0f6/approve", {
+        body: {},
+        method: "PATCH",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f6" }),
+    );
+    const rejectResponse = await rejectPaymentProofRoute.PATCH(
+      request("/api/v1/hostel-admin/payment-proofs/64f0f0f0f0f0f0f0f0f0f0f6/reject", {
+        body: { rejectionReason: "Unreadable proof" },
+        method: "PATCH",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f6" }),
+    );
+    const receiptResponse = await residentReceiptRoute.GET(
+      request("/api/v1/resident/receipts/64f0f0f0f0f0f0f0f0f0f0f7"),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f7" }),
+    );
+
+    expect(createResponse.status).toBe(201);
+    expect(listResponse.status).toBe(200);
+    expect(updateResponse.status).toBe(200);
+    expect(residentListResponse.status).toBe(200);
+    expect(proofResponse.status).toBe(201);
+    expect(approveResponse.status).toBe(200);
+    expect(rejectResponse.status).toBe(200);
+    expect(receiptResponse.status).toBe(200);
+  });
+
+  it("handles admin and resident food workflows", async () => {
+    routeMocks.createFoodMenu.mockResolvedValue({ menu: { id: "menu-1" } });
+    routeMocks.listFoodMenus.mockResolvedValue({ menus: [] });
+    routeMocks.updateFoodMenu.mockResolvedValue({ menu: { id: "menu-1" } });
+    routeMocks.uploadFoodPhoto.mockResolvedValue({ photo: { id: "photo-1" } });
+    routeMocks.listFoodForResident.mockResolvedValue({ menus: [], photos: [] });
+    routeMocks.submitFoodFeedback.mockResolvedValue({ feedback: { id: "feedback-1" } });
+
+    const menuBody = {
+      date: "2030-01-01",
+      dayOfWeek: "TUESDAY",
+      items: ["Dal", "Rice"],
+      mealType: "DINNER",
+      timing: "7 PM",
+      weekStartDate: "2029-12-30",
+    };
+
+    const createResponse = await adminFoodMenuRoute.POST(
+      request("/api/v1/hostel-admin/food/menu", {
+        body: menuBody,
+        method: "POST",
+      }),
+    );
+    const listResponse = await adminFoodMenuRoute.GET(
+      request("/api/v1/hostel-admin/food/menu?mealType=DINNER"),
+    );
+    const updateResponse = await adminFoodMenuDetailRoute.PATCH(
+      request("/api/v1/hostel-admin/food/menu/64f0f0f0f0f0f0f0f0f0f0f8", {
+        body: { specialNotes: "Extra curd" },
+        method: "PATCH",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f8" }),
+    );
+    const adminPhotoResponse = await adminFoodPhotosRoute.POST(
+      request("/api/v1/hostel-admin/food/photos", {
+        body: { date: "2030-01-01", mealType: "DINNER", photoAssetId: "asset-1" },
+        method: "POST",
+      }),
+    );
+    const residentFoodResponse = await residentFoodRoute.GET(
+      request("/api/v1/resident/food"),
+    );
+    const feedbackResponse = await residentFoodFeedbackRoute.POST(
+      request("/api/v1/resident/food/feedback", {
+        body: {
+          date: "2030-01-01",
+          isAnonymous: false,
+          mealType: "DINNER",
+          rating: 4,
+        },
+        method: "POST",
+      }),
+    );
+    const residentPhotoResponse = await residentFoodPhotosRoute.POST(
+      request("/api/v1/resident/food/photos", {
+        body: { date: "2030-01-01", mealType: "DINNER", photoAssetId: "asset-2" },
+        method: "POST",
+      }),
+    );
+
+    expect(createResponse.status).toBe(201);
+    expect(listResponse.status).toBe(200);
+    expect(updateResponse.status).toBe(200);
+    expect(adminPhotoResponse.status).toBe(201);
+    expect(residentFoodResponse.status).toBe(200);
+    expect(feedbackResponse.status).toBe(201);
+    expect(residentPhotoResponse.status).toBe(201);
+  });
+
+  it("handles admin and resident notice workflows", async () => {
+    routeMocks.createNotice.mockResolvedValue({ notice: { id: "notice-1" } });
+    routeMocks.listNotices.mockResolvedValue({ notices: [] });
+    routeMocks.updateNotice.mockResolvedValue({ notice: { id: "notice-1" } });
+    routeMocks.listNoticesForResident.mockResolvedValue({ notices: [] });
+    routeMocks.markNoticeAsRead.mockResolvedValue({ notice: { isRead: true } });
+
+    const createResponse = await adminNoticesRoute.POST(
+      request("/api/v1/hostel-admin/notices", {
+        body: { content: "Dining hall closes early.", isUrgent: true, title: "Dinner" },
+        method: "POST",
+      }),
+    );
+    const listResponse = await adminNoticesRoute.GET(
+      request("/api/v1/hostel-admin/notices?category=GENERAL"),
+    );
+    const updateResponse = await adminNoticeDetailRoute.PATCH(
+      request("/api/v1/hostel-admin/notices/64f0f0f0f0f0f0f0f0f0f0f9", {
+        body: { title: "Dinner update" },
+        method: "PATCH",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f9" }),
+    );
+    const residentListResponse = await residentNoticesRoute.GET(
+      request("/api/v1/resident/notices"),
+    );
+    const readResponse = await residentNoticeReadRoute.PATCH(
+      request("/api/v1/resident/notices/64f0f0f0f0f0f0f0f0f0f0f9/read", {
+        body: {},
+        method: "PATCH",
+      }),
+      routeContext({ id: "64f0f0f0f0f0f0f0f0f0f0f9" }),
+    );
+
+    expect(createResponse.status).toBe(201);
+    expect(listResponse.status).toBe(200);
+    expect(updateResponse.status).toBe(200);
+    expect(residentListResponse.status).toBe(200);
+    expect(readResponse.status).toBe(200);
+  });
+
+  it("rejects invalid payment payloads before calling the service", async () => {
+    const response = await adminPaymentsRoute.POST(
+      request("/api/v1/hostel-admin/payments", {
+        body: { dueAmount: -1, month: "January" },
+        method: "POST",
+      }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(payload.errorCode).toBe("VALIDATION_ERROR");
+    expect(routeMocks.createPaymentRecord).not.toHaveBeenCalled();
+  });
+});

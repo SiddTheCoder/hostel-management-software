@@ -6,7 +6,12 @@ import { LoginScreen } from "../screens/LoginScreen";
 import { OtpVerificationScreen } from "../screens/OtpVerificationScreen";
 import { PublicHostelDetailScreen } from "../screens/PublicHostelDetailScreen";
 import { PublicHomeScreen } from "../screens/PublicHomeScreen";
+import { ResidentActivationScreen } from "../screens/ResidentActivationScreen";
+import { ResidentFoodScreen } from "../screens/ResidentFoodScreen";
 import { ResidentHomeScreen } from "../screens/ResidentHomeScreen";
+import { ResidentNoticesScreen } from "../screens/ResidentNoticesScreen";
+import { ResidentPaymentsScreen } from "../screens/ResidentPaymentsScreen";
+import { ResidentProfileScreen } from "../screens/ResidentProfileScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 
 export type RootStackParamList = {
@@ -28,6 +33,21 @@ export type RootStackParamList = {
     slug: string;
   };
   ResidentHome: {
+    session: AuthSession;
+  };
+  ResidentActivation: {
+    session: AuthSession;
+  };
+  ResidentFood: {
+    session: AuthSession;
+  };
+  ResidentNotices: {
+    session: AuthSession;
+  };
+  ResidentPayments: {
+    session: AuthSession;
+  };
+  ResidentProfile: {
     session: AuthSession;
   };
   Signup: undefined;
@@ -68,6 +88,31 @@ export function AppNavigator() {
           component={ResidentHomeScreen}
           name="ResidentHome"
           options={{ headerBackVisible: false, title: "Resident Mode" }}
+        />
+        <Stack.Screen
+          component={ResidentActivationScreen}
+          name="ResidentActivation"
+          options={{ title: "Activate Resident Access" }}
+        />
+        <Stack.Screen
+          component={ResidentProfileScreen}
+          name="ResidentProfile"
+          options={{ title: "My Profile" }}
+        />
+        <Stack.Screen
+          component={ResidentPaymentsScreen}
+          name="ResidentPayments"
+          options={{ title: "Payments" }}
+        />
+        <Stack.Screen
+          component={ResidentFoodScreen}
+          name="ResidentFood"
+          options={{ title: "Food" }}
+        />
+        <Stack.Screen
+          component={ResidentNoticesScreen}
+          name="ResidentNotices"
+          options={{ title: "Notices" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

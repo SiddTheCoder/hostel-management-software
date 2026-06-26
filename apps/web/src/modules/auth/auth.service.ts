@@ -228,7 +228,7 @@ async function dispatchOtpChallenge(input: {
   };
 }
 
-async function issueSessionForUser(
+export async function issueSessionForUser(
   user: {
     _id: unknown;
     email?: string | null;

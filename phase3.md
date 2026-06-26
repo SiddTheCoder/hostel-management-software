@@ -1,8 +1,8 @@
 # Phase 3 - Resident System + Payments + Food
 
 **Phase in roadmap:** Phase 3  
-**Status:** Not Started  
-**Started:** TBD  
+**Status:** Implementation Complete - Manual QA Pending  
+**Started:** 2026-06-26  
 **Source:** `step_plans.md` Phase 3  
 **Rule:** Every work item below is a checkbox. Tick a task only after implementation and verification. If a task is partly started but not verified, keep it unchecked and add a note.
 
@@ -24,15 +24,15 @@ Build the resident daily-use foundation:
 
 ## 2. Current Progress Summary
 
-- [ ] Phase 3 implementation started.
-- [ ] Resident registration module complete.
-- [ ] QR activation module complete.
-- [ ] Resident dashboard complete.
-- [ ] Payment records module complete.
-- [ ] Food transparency module complete.
-- [ ] Notice system module complete.
-- [ ] Mobile resident flows complete.
-- [ ] Phase 3 automated QA gate complete.
+- [x] Phase 3 implementation started.
+- [x] Resident registration module complete.
+- [x] QR activation module complete.
+- [x] Resident dashboard complete.
+- [x] Payment records module complete.
+- [x] Food transparency module complete.
+- [x] Notice system module complete.
+- [x] Mobile resident flows complete.
+- [x] Phase 3 automated QA gate complete.
 - [ ] Phase 3 manual QA gate complete.
 
 ---
@@ -45,89 +45,89 @@ Build the resident daily-use foundation:
 
 **Models:**
 
-- [ ] Add `Resident` model with fields:
-  - [ ] `hostelId`
-  - [ ] `userId` (optional, linked after activation)
-  - [ ] `firstName`
-  - [ ] `lastName`
-  - [ ] `phone`
-  - [ ] `email`
-  - [ ] `roomId`
-  - [ ] `bedId`
-  - [ ] `moveInDate`
-  - [ ] `depositAmount`
-  - [ ] `status` (pending, active, suspended, moved_out)
-  - [ ] `createdBy`
-  - [ ] `updatedBy`
-  - [ ] `createdAt`
-  - [ ] `updatedAt`
-  - [ ] Soft delete fields: `isDeleted`, `deletedAt`, `deletedBy`
-- [ ] Add `Guardian` model with fields:
-  - [ ] `residentId`
-  - [ ] `firstName`
-  - [ ] `lastName`
-  - [ ] `phone`
-  - [ ] `email`
-  - [ ] `relation`
-  - [ ] `isPrimary`
-  - [ ] `createdAt`
-  - [ ] `updatedAt`
-- [ ] Add `EmergencyContact` model with fields:
-  - [ ] `residentId`
-  - [ ] `name`
-  - [ ] `phone`
-  - [ ] `relation`
-  - [ ] `isPrimary`
-  - [ ] `createdAt`
-  - [ ] `updatedAt`
-- [ ] Add `ResidentDocument` model with fields:
-  - [ ] `residentId`
-  - [ ] `hostelId`
-  - [ ] `documentType`
-  - [ ] `fileAssetId`
-  - [ ] `uploadedBy`
-  - [ ] `uploadedAt`
+- [x] Add `Resident` model with fields:
+  - [x] `hostelId`
+  - [x] `userId` (optional, linked after activation)
+  - [x] `firstName`
+  - [x] `lastName`
+  - [x] `phone`
+  - [x] `email`
+  - [x] `roomId`
+  - [x] `bedId`
+  - [x] `moveInDate`
+  - [x] `depositAmount`
+  - [x] `status` (pending, active, suspended, moved_out)
+  - [x] `createdBy`
+  - [x] `updatedBy`
+  - [x] `createdAt`
+  - [x] `updatedAt`
+  - [x] Soft delete fields: `isDeleted`, `deletedAt`, `deletedBy`
+- [x] Add `Guardian` model with fields:
+  - [x] `residentId`
+  - [x] `firstName`
+  - [x] `lastName`
+  - [x] `phone`
+  - [x] `email`
+  - [x] `relation`
+  - [x] `isPrimary`
+  - [x] `createdAt`
+  - [x] `updatedAt`
+- [x] Add `EmergencyContact` model with fields:
+  - [x] `residentId`
+  - [x] `name`
+  - [x] `phone`
+  - [x] `relation`
+  - [x] `isPrimary`
+  - [x] `createdAt`
+  - [x] `updatedAt`
+- [x] Add `ResidentDocument` model with fields:
+  - [x] `residentId`
+  - [x] `hostelId`
+  - [x] `documentType`
+  - [x] `fileAssetId`
+  - [x] `uploadedBy`
+  - [x] `uploadedAt`
 
 **Service Layer:**
 
-- [ ] Implement `createResident` service function.
-- [ ] Implement `listResidents` service function with hostel tenant filter.
-- [ ] Implement `getResidentById` service function with hostel tenant check.
-- [ ] Implement `updateResident` service function with hostel tenant check.
-- [ ] Implement `updateResidentStatus` service function with hostel tenant check and audit log.
-- [ ] Implement `addGuardian` service function.
-- [ ] Implement `addEmergencyContact` service function.
-- [ ] Implement room/bed assignment validation (check vacancy, hostel match).
+- [x] Implement `createResident` service function.
+- [x] Implement `listResidents` service function with hostel tenant filter.
+- [x] Implement `getResidentById` service function with hostel tenant check.
+- [x] Implement `updateResident` service function with hostel tenant check.
+- [x] Implement `updateResidentStatus` service function with hostel tenant check and audit log.
+- [x] Implement `addGuardian` service function.
+- [x] Implement `addEmergencyContact` service function.
+- [x] Implement room/bed assignment validation (check vacancy, hostel match).
 
 **Validation:**
 
-- [ ] Add `residentCreateSchema` with Zod.
-- [ ] Add `residentUpdateSchema` with Zod.
-- [ ] Add `residentStatusSchema` with Zod.
-- [ ] Add `guardianCreateSchema` with Zod.
-- [ ] Add `emergencyContactCreateSchema` with Zod.
+- [x] Add `residentCreateSchema` with Zod.
+- [x] Add `residentUpdateSchema` with Zod.
+- [x] Add `residentStatusSchema` with Zod.
+- [x] Add `guardianCreateSchema` with Zod.
+- [x] Add `emergencyContactCreateSchema` with Zod.
 
 **APIs:**
 
-- [ ] `POST /api/v1/hostel-admin/residents`
-- [ ] `GET /api/v1/hostel-admin/residents`
-- [ ] `GET /api/v1/hostel-admin/residents/:id`
-- [ ] `PATCH /api/v1/hostel-admin/residents/:id`
-- [ ] `PATCH /api/v1/hostel-admin/residents/:id/status`
-- [ ] `POST /api/v1/hostel-admin/residents/:id/guardians`
-- [ ] `POST /api/v1/hostel-admin/residents/:id/emergency-contacts`
+- [x] `POST /api/v1/hostel-admin/residents`
+- [x] `GET /api/v1/hostel-admin/residents`
+- [x] `GET /api/v1/hostel-admin/residents/:id`
+- [x] `PATCH /api/v1/hostel-admin/residents/:id`
+- [x] `PATCH /api/v1/hostel-admin/residents/:id/status`
+- [x] `POST /api/v1/hostel-admin/residents/:id/guardians`
+- [x] `POST /api/v1/hostel-admin/residents/:id/emergency-contacts`
 
 **Permissions:**
 
-- [ ] Enforce hostel admin/warden role for all resident management APIs.
-- [ ] Enforce hostel tenant isolation for all resident queries.
-- [ ] Audit log for resident creation, status changes.
+- [x] Enforce hostel admin/warden role for all resident management APIs.
+- [x] Enforce hostel tenant isolation for all resident queries.
+- [x] Audit log for resident creation, status changes.
 
 **Indexes:**
 
-- [ ] Add indexes: `residents: hostelId, userId, phone, status, roomId, bedId`
-- [ ] Add indexes: `guardians: residentId, phone`
-- [ ] Add indexes: `emergency_contacts: residentId`
+- [x] Add indexes: `residents: hostelId, userId, phone, status, roomId, bedId`
+- [x] Add indexes: `guardians: residentId, phone`
+- [x] Add indexes: `emergency_contacts: residentId`
 
 ---
 
@@ -146,56 +146,56 @@ Build the resident daily-use foundation:
 
 **Models:**
 
-- [ ] Add `QRActivation` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId`
-  - [ ] `codeHash` (hashed activation code)
-  - [ ] `code` (plain code - only for generation, not stored)
-  - [ ] `expiresAt`
-  - [ ] `usedAt`
-  - [ ] `usedBy` (userId)
-  - [ ] `deviceInfo`
-  - [ ] `sessionInfo`
-  - [ ] `createdBy`
-  - [ ] `createdAt`
-  - [ ] `status` (pending, used, expired, cancelled)
+- [x] Add `QRActivation` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId`
+  - [x] `codeHash` (hashed activation code)
+  - [x] `code` (plain code - only for generation, not stored)
+  - [x] `expiresAt`
+  - [x] `usedAt`
+  - [x] `usedBy` (userId)
+  - [x] `deviceInfo`
+  - [x] `sessionInfo`
+  - [x] `createdBy`
+  - [x] `createdAt`
+  - [x] `status` (pending, used, expired, cancelled)
 
 **Service Layer:**
 
-- [ ] Implement `generateActivationCode` service function.
-- [ ] Implement code hashing before storage.
-- [ ] Implement `activateResident` service function:
-  - [ ] Verify logged-in user.
-  - [ ] Verify code hash match.
-  - [ ] Check code not used/expired.
-  - [ ] Link `resident.userId` to current user.
-  - [ ] Mark QR as used with metadata.
-  - [ ] Prevent duplicate active resident profiles per account.
-  - [ ] Audit log activation event.
-- [ ] Implement `getActivationStatus` service function.
-- [ ] Implement `regenerateActivationCode` service function (admin only).
+- [x] Implement `generateActivationCode` service function.
+- [x] Implement code hashing before storage.
+- [x] Implement `activateResident` service function:
+  - [x] Verify logged-in user.
+  - [x] Verify code hash match.
+  - [x] Check code not used/expired.
+  - [x] Link `resident.userId` to current user.
+  - [x] Mark QR as used with metadata.
+  - [x] Prevent duplicate active resident profiles per account.
+  - [x] Audit log activation event.
+- [x] Implement `getActivationStatus` service function.
+- [x] Implement `regenerateActivationCode` service function (admin only).
 
 **Validation:**
 
-- [ ] Add `activationCodeSchema` with Zod.
-- [ ] Add resident activation input validation.
+- [x] Add `activationCodeSchema` with Zod.
+- [x] Add resident activation input validation.
 
 **APIs:**
 
-- [ ] `POST /api/v1/hostel-admin/residents/:id/activation-code`
-- [ ] `POST /api/v1/resident/activate`
-- [ ] `GET /api/v1/resident/activation-status`
-- [ ] `GET /api/v1/resident/me`
+- [x] `POST /api/v1/hostel-admin/residents/:id/activation-code`
+- [x] `POST /api/v1/resident/activate`
+- [x] `GET /api/v1/resident/activation-status`
+- [x] `GET /api/v1/resident/me`
 
 **Permissions:**
 
-- [ ] Admin can generate activation codes for own hostel residents.
-- [ ] Logged-in user can activate only once per code.
-- [ ] Activated resident can access only own hostel data.
+- [x] Admin can generate activation codes for own hostel residents.
+- [x] Logged-in user can activate only once per code.
+- [x] Activated resident can access only own hostel data.
 
 **Indexes:**
 
-- [ ] Add indexes: `qr_activations: hostelId, residentId, codeHash, expiresAt, usedAt, status`
+- [x] Add indexes: `qr_activations: hostelId, residentId, codeHash, expiresAt, usedAt, status`
 
 ---
 
@@ -203,26 +203,26 @@ Build the resident daily-use foundation:
 
 **Service Layer:**
 
-- [ ] Implement `getResidentDashboard` service function returning:
-  - [ ] Hostel summary
-  - [ ] Room/bed assignment
-  - [ ] Fee status summary
-  - [ ] Recent notices
-  - [ ] Food menu summary
-  - [ ] Recent complaints
-  - [ ] Night status summary
-- [ ] Implement `getResidentProfile` service function.
-- [ ] Enforce resident can only see own data.
+- [x] Implement `getResidentDashboard` service function returning:
+  - [x] Hostel summary
+  - [x] Room/bed assignment
+  - [x] Fee status summary
+  - [x] Recent notices
+  - [x] Food menu summary
+  - [x] Recent complaints
+  - [x] Night status summary
+- [x] Implement `getResidentProfile` service function.
+- [x] Enforce resident can only see own data.
 
 **APIs:**
 
-- [ ] `GET /api/v1/resident/dashboard`
-- [ ] `GET /api/v1/resident/profile`
+- [x] `GET /api/v1/resident/dashboard`
+- [x] `GET /api/v1/resident/profile`
 
 **Permissions:**
 
-- [ ] Resident role required.
-- [ ] Returns only current resident's data.
+- [x] Resident role required.
+- [x] Returns only current resident's data.
 
 ---
 
@@ -232,95 +232,95 @@ Build the resident daily-use foundation:
 
 **Models:**
 
-- [ ] Add `Payment` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId`
-  - [ ] `month` (YYYY-MM format)
-  - [ ] `dueAmount`
-  - [ ] `paidAmount`
-  - [ ] `dueDate`
-  - [ ] `paidDate`
-  - [ ] `status` (unpaid, paid, partial, overdue, pending_proof)
-  - [ ] `paymentMethod` (cash, esewa, khalti, fonepay, bank_transfer, other)
-  - [ ] `remarks`
-  - [ ] `createdBy`
-  - [ ] `updatedBy`
-  - [ ] `createdAt`
-  - [ ] `updatedAt`
-- [ ] Add `PaymentProof` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId`
-  - [ ] `paymentId`
-  - [ ] `proofImageAssetId`
-  - [ ] `transactionCode`
-  - [ ] `submittedAt`
-  - [ ] `submittedBy`
-  - [ ] `reviewedBy`
-  - [ ] `reviewedAt`
-  - [ ] `status` (pending, approved, rejected)
-  - [ ] `rejectionReason`
-- [ ] Add `Receipt` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId`
-  - [ ] `paymentId`
-  - [ ] `receiptNumber`
-  - [ ] `issuedAt`
-  - [ ] `issuedBy`
-  - [ ] `amount`
-  - [ ] `month`
-- [ ] Add `DepositRecord` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId`
-  - [ ] `amount`
-  - [ ] `paidDate`
-  - [ ] `status` (held, refunded, forfeited)
-  - [ ] `refundedDate`
-  - [ ] `refundedAmount`
-  - [ ] `remarks`
+- [x] Add `Payment` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId`
+  - [x] `month` (YYYY-MM format)
+  - [x] `dueAmount`
+  - [x] `paidAmount`
+  - [x] `dueDate`
+  - [x] `paidDate`
+  - [x] `status` (unpaid, paid, partial, overdue, pending_proof)
+  - [x] `paymentMethod` (cash, esewa, khalti, fonepay, bank_transfer, other)
+  - [x] `remarks`
+  - [x] `createdBy`
+  - [x] `updatedBy`
+  - [x] `createdAt`
+  - [x] `updatedAt`
+- [x] Add `PaymentProof` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId`
+  - [x] `paymentId`
+  - [x] `proofImageAssetId`
+  - [x] `transactionCode`
+  - [x] `submittedAt`
+  - [x] `submittedBy`
+  - [x] `reviewedBy`
+  - [x] `reviewedAt`
+  - [x] `status` (pending, approved, rejected)
+  - [x] `rejectionReason`
+- [x] Add `Receipt` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId`
+  - [x] `paymentId`
+  - [x] `receiptNumber`
+  - [x] `issuedAt`
+  - [x] `issuedBy`
+  - [x] `amount`
+  - [x] `month`
+- [x] Add `DepositRecord` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId`
+  - [x] `amount`
+  - [x] `paidDate`
+  - [x] `status` (held, refunded, forfeited)
+  - [x] `refundedDate`
+  - [x] `refundedAmount`
+  - [x] `remarks`
 
 **Service Layer:**
 
-- [ ] Implement `createPaymentRecord` service function (admin only).
-- [ ] Implement `listPayments` service function with hostel/resident filters.
-- [ ] Implement `updatePaymentRecord` service function (admin only).
-- [ ] Implement `submitPaymentProof` service function (resident).
-- [ ] Implement `approvePaymentProof` service function (admin).
-- [ ] Implement `rejectPaymentProof` service function (admin).
-- [ ] Implement `generateReceipt` service function.
-- [ ] Auto-update payment status when proof is approved.
-- [ ] Audit log payment status changes and proof decisions.
+- [x] Implement `createPaymentRecord` service function (admin only).
+- [x] Implement `listPayments` service function with hostel/resident filters.
+- [x] Implement `updatePaymentRecord` service function (admin only).
+- [x] Implement `submitPaymentProof` service function (resident).
+- [x] Implement `approvePaymentProof` service function (admin).
+- [x] Implement `rejectPaymentProof` service function (admin).
+- [x] Implement `generateReceipt` service function.
+- [x] Auto-update payment status when proof is approved.
+- [x] Audit log payment status changes and proof decisions.
 
 **Validation:**
 
-- [ ] Add `paymentCreateSchema` with Zod.
-- [ ] Add `paymentUpdateSchema` with Zod.
-- [ ] Add `paymentProofSubmitSchema` with Zod.
-- [ ] Add `paymentProofReviewSchema` with Zod.
+- [x] Add `paymentCreateSchema` with Zod.
+- [x] Add `paymentUpdateSchema` with Zod.
+- [x] Add `paymentProofSubmitSchema` with Zod.
+- [x] Add `paymentProofReviewSchema` with Zod.
 
 **APIs:**
 
-- [ ] `POST /api/v1/hostel-admin/payments`
-- [ ] `GET /api/v1/hostel-admin/payments`
-- [ ] `PATCH /api/v1/hostel-admin/payments/:id`
-- [ ] `POST /api/v1/resident/payments/:paymentId/proof`
-- [ ] `GET /api/v1/resident/payments`
-- [ ] `PATCH /api/v1/hostel-admin/payment-proofs/:id/approve`
-- [ ] `PATCH /api/v1/hostel-admin/payment-proofs/:id/reject`
-- [ ] `GET /api/v1/resident/receipts/:id`
+- [x] `POST /api/v1/hostel-admin/payments`
+- [x] `GET /api/v1/hostel-admin/payments`
+- [x] `PATCH /api/v1/hostel-admin/payments/:id`
+- [x] `POST /api/v1/resident/payments/:paymentId/proof`
+- [x] `GET /api/v1/resident/payments`
+- [x] `PATCH /api/v1/hostel-admin/payment-proofs/:id/approve`
+- [x] `PATCH /api/v1/hostel-admin/payment-proofs/:id/reject`
+- [x] `GET /api/v1/resident/receipts/:id`
 
 **Permissions:**
 
-- [ ] Admin can create/update payments for own hostel.
-- [ ] Resident can view own payments.
-- [ ] Resident can submit proof for own payments.
-- [ ] Admin can approve/reject proofs for own hostel.
-- [ ] Resident can view own receipts.
+- [x] Admin can create/update payments for own hostel.
+- [x] Resident can view own payments.
+- [x] Resident can submit proof for own payments.
+- [x] Admin can approve/reject proofs for own hostel.
+- [x] Resident can view own receipts.
 
 **Indexes:**
 
-- [ ] Add indexes: `payments: hostelId, residentId, month, status, dueDate`
-- [ ] Add indexes: `payment_proofs: hostelId, residentId, paymentId, status`
-- [ ] Add indexes: `receipts: hostelId, residentId, paymentId`
+- [x] Add indexes: `payments: hostelId, residentId, month, status, dueDate`
+- [x] Add indexes: `payment_proofs: hostelId, residentId, paymentId, status`
+- [x] Add indexes: `receipts: hostelId, residentId, paymentId`
 
 ---
 
@@ -328,75 +328,75 @@ Build the resident daily-use foundation:
 
 **Models:**
 
-- [ ] Add `FoodMenu` model with fields:
-  - [ ] `hostelId`
-  - [ ] `date` or `weekStartDate`
-  - [ ] `dayOfWeek`
-  - [ ] `mealType` (breakfast, lunch, snacks, dinner)
-  - [ ] `items` (array of food item names)
-  - [ ] `timing`
-  - [ ] `specialNotes`
-  - [ ] `createdBy`
-  - [ ] `updatedBy`
-  - [ ] `createdAt`
-  - [ ] `updatedAt`
-- [ ] Add `FoodPhoto` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId` (optional, if resident uploads)
-  - [ ] `mealType`
-  - [ ] `date`
-  - [ ] `photoAssetId`
-  - [ ] `caption`
-  - [ ] `uploadedBy`
-  - [ ] `uploadedAt`
-- [ ] Add `FoodFeedback` model with fields:
-  - [ ] `hostelId`
-  - [ ] `residentId`
-  - [ ] `menuId` (optional)
-  - [ ] `date`
-  - [ ] `mealType`
-  - [ ] `rating` (1-5)
-  - [ ] `comment`
-  - [ ] `isAnonymous`
-  - [ ] `createdAt`
+- [x] Add `FoodMenu` model with fields:
+  - [x] `hostelId`
+  - [x] `date` or `weekStartDate`
+  - [x] `dayOfWeek`
+  - [x] `mealType` (breakfast, lunch, snacks, dinner)
+  - [x] `items` (array of food item names)
+  - [x] `timing`
+  - [x] `specialNotes`
+  - [x] `createdBy`
+  - [x] `updatedBy`
+  - [x] `createdAt`
+  - [x] `updatedAt`
+- [x] Add `FoodPhoto` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId` (optional, if resident uploads)
+  - [x] `mealType`
+  - [x] `date`
+  - [x] `photoAssetId`
+  - [x] `caption`
+  - [x] `uploadedBy`
+  - [x] `uploadedAt`
+- [x] Add `FoodFeedback` model with fields:
+  - [x] `hostelId`
+  - [x] `residentId`
+  - [x] `menuId` (optional)
+  - [x] `date`
+  - [x] `mealType`
+  - [x] `rating` (1-5)
+  - [x] `comment`
+  - [x] `isAnonymous`
+  - [x] `createdAt`
 
 **Service Layer:**
 
-- [ ] Implement `createFoodMenu` service function (admin).
-- [ ] Implement `listFoodMenus` service function with hostel/date filters.
-- [ ] Implement `updateFoodMenu` service function (admin).
-- [ ] Implement `uploadFoodPhoto` service function (admin or resident).
-- [ ] Implement `submitFoodFeedback` service function (resident).
-- [ ] Implement `listFoodForResident` service function (resident view).
+- [x] Implement `createFoodMenu` service function (admin).
+- [x] Implement `listFoodMenus` service function with hostel/date filters.
+- [x] Implement `updateFoodMenu` service function (admin).
+- [x] Implement `uploadFoodPhoto` service function (admin or resident).
+- [x] Implement `submitFoodFeedback` service function (resident).
+- [x] Implement `listFoodForResident` service function (resident view).
 
 **Validation:**
 
-- [ ] Add `foodMenuCreateSchema` with Zod.
-- [ ] Add `foodMenuUpdateSchema` with Zod.
-- [ ] Add `foodPhotoUploadSchema` with Zod.
-- [ ] Add `foodFeedbackSchema` with Zod.
+- [x] Add `foodMenuCreateSchema` with Zod.
+- [x] Add `foodMenuUpdateSchema` with Zod.
+- [x] Add `foodPhotoUploadSchema` with Zod.
+- [x] Add `foodFeedbackSchema` with Zod.
 
 **APIs:**
 
-- [ ] `POST /api/v1/hostel-admin/food/menu`
-- [ ] `GET /api/v1/hostel-admin/food/menu`
-- [ ] `PATCH /api/v1/hostel-admin/food/menu/:id`
-- [ ] `POST /api/v1/hostel-admin/food/photos`
-- [ ] `GET /api/v1/resident/food`
-- [ ] `POST /api/v1/resident/food/feedback`
+- [x] `POST /api/v1/hostel-admin/food/menu`
+- [x] `GET /api/v1/hostel-admin/food/menu`
+- [x] `PATCH /api/v1/hostel-admin/food/menu/:id`
+- [x] `POST /api/v1/hostel-admin/food/photos`
+- [x] `GET /api/v1/resident/food`
+- [x] `POST /api/v1/resident/food/feedback`
 
 **Permissions:**
 
-- [ ] Admin can manage menu for own hostel.
-- [ ] Admin/resident can upload food photos for own hostel.
-- [ ] Resident can view food menu/photos for own hostel.
-- [ ] Resident can submit feedback for own hostel.
+- [x] Admin can manage menu for own hostel.
+- [x] Admin/resident can upload food photos for own hostel.
+- [x] Resident can view food menu/photos for own hostel.
+- [x] Resident can submit feedback for own hostel.
 
 **Indexes:**
 
-- [ ] Add indexes: `food_menus: hostelId, date, weekStartDate, mealType`
-- [ ] Add indexes: `food_photos: hostelId, date, mealType`
-- [ ] Add indexes: `food_feedback: hostelId, residentId, date`
+- [x] Add indexes: `food_menus: hostelId, date, weekStartDate, mealType`
+- [x] Add indexes: `food_photos: hostelId, date, mealType`
+- [x] Add indexes: `food_feedback: hostelId, residentId, date`
 
 ---
 
@@ -404,52 +404,52 @@ Build the resident daily-use foundation:
 
 **Models:**
 
-- [ ] Add `Notice` model with fields:
-  - [ ] `hostelId`
-  - [ ] `title`
-  - [ ] `content`
-  - [ ] `category` (general, urgent, event, rule, maintenance, etc.)
-  - [ ] `isUrgent`
-  - [ ] `publishedAt`
-  - [ ] `expiresAt`
-  - [ ] `createdBy`
-  - [ ] `updatedBy`
-  - [ ] `createdAt`
-  - [ ] `updatedAt`
-- [ ] Add `NoticeReadStatus` model with fields:
-  - [ ] `noticeId`
-  - [ ] `userId`
-  - [ ] `readAt`
+- [x] Add `Notice` model with fields:
+  - [x] `hostelId`
+  - [x] `title`
+  - [x] `content`
+  - [x] `category` (general, urgent, event, rule, maintenance, etc.)
+  - [x] `isUrgent`
+  - [x] `publishedAt`
+  - [x] `expiresAt`
+  - [x] `createdBy`
+  - [x] `updatedBy`
+  - [x] `createdAt`
+  - [x] `updatedAt`
+- [x] Add `NoticeReadStatus` model with fields:
+  - [x] `noticeId`
+  - [x] `userId`
+  - [x] `readAt`
 
 **Service Layer:**
 
-- [ ] Implement `createNotice` service function (admin).
-- [ ] Implement `listNotices` service function with hostel filter.
-- [ ] Implement `listNoticesForResident` service function with read status.
-- [ ] Implement `markNoticeAsRead` service function (resident).
+- [x] Implement `createNotice` service function (admin).
+- [x] Implement `listNotices` service function with hostel filter.
+- [x] Implement `listNoticesForResident` service function with read status.
+- [x] Implement `markNoticeAsRead` service function (resident).
 
 **Validation:**
 
-- [ ] Add `noticeCreateSchema` with Zod.
-- [ ] Add `noticeUpdateSchema` with Zod.
+- [x] Add `noticeCreateSchema` with Zod.
+- [x] Add `noticeUpdateSchema` with Zod.
 
 **APIs:**
 
-- [ ] `POST /api/v1/hostel-admin/notices`
-- [ ] `GET /api/v1/hostel-admin/notices`
-- [ ] `GET /api/v1/resident/notices`
-- [ ] `PATCH /api/v1/resident/notices/:id/read`
+- [x] `POST /api/v1/hostel-admin/notices`
+- [x] `GET /api/v1/hostel-admin/notices`
+- [x] `GET /api/v1/resident/notices`
+- [x] `PATCH /api/v1/resident/notices/:id/read`
 
 **Permissions:**
 
-- [ ] Admin can create/list notices for own hostel.
-- [ ] Resident can view notices for own hostel.
-- [ ] Resident can mark notices as read.
+- [x] Admin can create/list notices for own hostel.
+- [x] Resident can view notices for own hostel.
+- [x] Resident can mark notices as read.
 
 **Indexes:**
 
-- [ ] Add indexes: `notices: hostelId, category, publishedAt, expiresAt`
-- [ ] Add indexes: `notice_read_status: noticeId, userId, readAt`
+- [x] Add indexes: `notices: hostelId, category, publishedAt, expiresAt`
+- [x] Add indexes: `notice_read_status: noticeId, userId, readAt`
 
 ---
 
@@ -457,72 +457,72 @@ Build the resident daily-use foundation:
 
 ### 4.1 Hostel Admin Resident Management
 
-- [ ] Add `/hostel-admin/residents` page with list view.
-- [ ] Add resident create form.
-- [ ] Add resident detail/edit page.
-- [ ] Add guardian management UI.
-- [ ] Add emergency contact management UI.
-- [ ] Add QR/code generation button and display.
-- [ ] Connect to resident APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/hostel-admin/residents` page with list view.
+- [x] Add resident create form.
+- [x] Add resident detail/edit page.
+- [x] Add guardian management UI.
+- [x] Add emergency contact management UI.
+- [x] Add QR/code generation button and display.
+- [x] Connect to resident APIs.
+- [x] Empty/loading/error states.
 
 ### 4.2 Hostel Admin Payment Management
 
-- [ ] Add `/hostel-admin/payments` page.
-- [ ] Add payment record creation form.
-- [ ] Add payment list with filters (resident, month, status).
-- [ ] Add payment proof review UI.
-- [ ] Add approve/reject actions.
-- [ ] Connect to payment APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/hostel-admin/payments` page.
+- [x] Add payment record creation form.
+- [x] Add payment list with filters (resident, month, status).
+- [x] Add payment proof review UI.
+- [x] Add approve/reject actions.
+- [x] Connect to payment APIs.
+- [x] Empty/loading/error states.
 
 ### 4.3 Hostel Admin Food Management
 
-- [ ] Add `/hostel-admin/food` page.
-- [ ] Add weekly menu creation/edit form.
-- [ ] Add food photo upload UI.
-- [ ] Connect to food APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/hostel-admin/food` page.
+- [x] Add weekly menu creation/edit form.
+- [x] Add food photo upload UI.
+- [x] Connect to food APIs.
+- [x] Empty/loading/error states.
 
 ### 4.4 Hostel Admin Notice Management
 
-- [ ] Add `/hostel-admin/notices` page.
-- [ ] Add notice creation form.
-- [ ] Add notice list view.
-- [ ] Connect to notice APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/hostel-admin/notices` page.
+- [x] Add notice creation form.
+- [x] Add notice list view.
+- [x] Connect to notice APIs.
+- [x] Empty/loading/error states.
 
 ### 4.5 Resident Dashboard
 
-- [ ] Add `/resident/dashboard` page with summary cards.
-- [ ] Connect to resident dashboard API.
-- [ ] Display hostel info, room/bed, fee summary, recent notices.
-- [ ] Empty/loading/error states.
+- [x] Add `/resident/dashboard` page with summary cards.
+- [x] Connect to resident dashboard API.
+- [x] Display hostel info, room/bed, fee summary, recent notices.
+- [x] Empty/loading/error states.
 
 ### 4.6 Resident Payment View
 
-- [ ] Add `/resident/payments` page.
-- [ ] Add payment proof upload UI.
-- [ ] Add transaction code input.
-- [ ] Connect to payment and proof APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/resident/payments` page.
+- [x] Add payment proof upload UI.
+- [x] Add transaction code input.
+- [x] Connect to payment and proof APIs.
+- [x] Empty/loading/error states.
 
 ### 4.7 Resident Food View
 
-- [ ] Add `/resident/food` page.
-- [ ] Display weekly menu.
-- [ ] Display food photos.
-- [ ] Add feedback submission form.
-- [ ] Connect to food APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/resident/food` page.
+- [x] Display weekly menu.
+- [x] Display food photos.
+- [x] Add feedback submission form.
+- [x] Connect to food APIs.
+- [x] Empty/loading/error states.
 
 ### 4.8 Resident Notice View
 
-- [ ] Add `/resident/notices` page.
-- [ ] Display notices with read/unread status.
-- [ ] Add mark-as-read action.
-- [ ] Connect to notice APIs.
-- [ ] Empty/loading/error states.
+- [x] Add `/resident/notices` page.
+- [x] Display notices with read/unread status.
+- [x] Add mark-as-read action.
+- [x] Connect to notice APIs.
+- [x] Empty/loading/error states.
 
 ---
 
@@ -530,52 +530,52 @@ Build the resident daily-use foundation:
 
 ### 5.1 QR Activation
 
-- [ ] Build QR scan screen using device camera.
-- [ ] Build manual code entry screen.
-- [ ] Build activation flow after login.
-- [ ] Show activation status (pending/success/error).
-- [ ] Handle already-activated state.
-- [ ] Connect to activation API.
+- [x] Build QR scan screen using device camera.
+- [x] Build manual code entry screen.
+- [x] Build activation flow after login.
+- [x] Show activation status (pending/success/error).
+- [x] Handle already-activated state.
+- [x] Connect to activation API.
 
 ### 5.2 Resident Dashboard
 
-- [ ] Build resident dashboard home screen.
-- [ ] Display hostel summary card.
-- [ ] Display room/bed info.
-- [ ] Display fee status summary.
-- [ ] Add quick action buttons (food, payments, notices, complaints, SOS).
-- [ ] Connect to resident dashboard API.
+- [x] Build resident dashboard home screen.
+- [x] Display hostel summary card.
+- [x] Display room/bed info.
+- [x] Display fee status summary.
+- [x] Add quick action buttons (food, payments, notices, complaints, SOS).
+- [x] Connect to resident dashboard API.
 
 ### 5.3 Resident Profile
 
-- [ ] Build resident profile screen.
-- [ ] Display resident details (read-only or editable basic fields).
-- [ ] Connect to resident profile API.
+- [x] Build resident profile screen.
+- [x] Display resident details (read-only or editable basic fields).
+- [x] Connect to resident profile API.
 
 ### 5.4 Food View
 
-- [ ] Build food menu screen.
-- [ ] Display today's menu and weekly menu.
-- [ ] Display food photos.
-- [ ] Add feedback submission form.
-- [ ] Connect to food APIs.
+- [x] Build food menu screen.
+- [x] Display today's menu and weekly menu.
+- [x] Display food photos.
+- [x] Add feedback submission form.
+- [x] Connect to food APIs.
 
 ### 5.5 Payment View
 
-- [ ] Build payment list screen.
-- [ ] Display payment status (paid, unpaid, pending proof).
-- [ ] Build payment proof upload screen.
-- [ ] Add image picker for proof photo.
-- [ ] Add transaction code input.
-- [ ] Connect to payment APIs.
+- [x] Build payment list screen.
+- [x] Display payment status (paid, unpaid, pending proof).
+- [x] Build payment proof upload screen.
+- [x] Add image picker for proof photo.
+- [x] Add transaction code input.
+- [x] Connect to payment APIs.
 
 ### 5.6 Notices View
 
-- [ ] Build notices feed screen.
-- [ ] Display unread badge.
-- [ ] Show notice detail view.
-- [ ] Add mark-as-read action.
-- [ ] Connect to notice APIs.
+- [x] Build notices feed screen.
+- [x] Display unread badge.
+- [x] Show notice detail view.
+- [x] Add mark-as-read action.
+- [x] Connect to notice APIs.
 
 ---
 
@@ -583,17 +583,17 @@ Build the resident daily-use foundation:
 
 ### 6.1 Automated Tests
 
-- [ ] Resident creation API tests.
-- [ ] Resident tenant isolation tests (admin cannot see other hostel residents).
-- [ ] QR activation tests (code verification, expiry, one-time use).
-- [ ] Resident dashboard API tests (only own data returned).
-- [ ] Payment creation tests.
-- [ ] Payment proof approval/rejection tests.
-- [ ] Payment tenant isolation tests.
-- [ ] Food menu/feedback tests.
-- [ ] Food tenant isolation tests.
-- [ ] Notice creation/read status tests.
-- [ ] Notice tenant isolation tests.
+- [x] Resident creation API tests.
+- [x] Resident tenant isolation tests (admin cannot see other hostel residents).
+- [x] QR activation tests (code verification, expiry, one-time use).
+- [x] Resident dashboard API tests (only own data returned).
+- [x] Payment creation tests.
+- [x] Payment proof approval/rejection tests.
+- [x] Payment tenant isolation tests.
+- [x] Food menu/feedback tests.
+- [x] Food tenant isolation tests.
+- [x] Notice creation/read status tests.
+- [x] Notice tenant isolation tests.
 
 ### 6.2 Manual QA
 
@@ -616,24 +616,24 @@ Build the resident daily-use foundation:
 
 ### 6.3 Required Verification Commands
 
-- [ ] `npm --prefix apps/web run format:check`
-- [ ] `npm run web:test`
-- [ ] `npm run web:lint`
-- [ ] `npm run web:build`
-- [ ] `npm run mobile:typecheck`
+- [x] `npm --prefix apps/web run format:check`
+- [x] `npm run web:test`
+- [x] `npm run web:lint`
+- [x] `npm run web:build`
+- [x] `npm run mobile:typecheck`
 
 ---
 
 ## 7. Phase 3 Done Means
 
-- [ ] Hostel admin can register residents.
-- [ ] Resident can activate dashboard using QR/code.
-- [ ] Payment tracking works.
-- [ ] Payment proof upload and admin review works.
-- [ ] Food transparency system works.
-- [ ] Notices work.
-- [ ] Mobile app has resident activation, dashboard, and daily-use basics.
-- [ ] Tenant isolation verified for all resident-scoped data.
+- [x] Hostel admin can register residents.
+- [x] Resident can activate dashboard using QR/code.
+- [x] Payment tracking works.
+- [x] Payment proof upload and admin review works.
+- [x] Food transparency system works.
+- [x] Notices work.
+- [x] Mobile app has resident activation, dashboard, and daily-use basics.
+- [x] Tenant isolation verified for all resident-scoped data.
 
 ---
 
@@ -642,3 +642,5 @@ Build the resident daily-use foundation:
 | Date | Update |
 |---|---|
 | 2026-06-25 | Phase 3 tracker created from `step_plans.md`. Ready for implementation. |
+| 2026-06-26 | Started Phase 3. Completed resident registration backend slice: models, validation, hostel-admin APIs, service tenant checks, bed assignment validation, audit logs, and route/service tests. |
+| 2026-06-26 | Completed Phase 3 implementation across resident activation, dashboard, payments, food, notices, admin/resident web screens, mobile resident flows, and automated QA. Manual device/browser QA remains pending. |
