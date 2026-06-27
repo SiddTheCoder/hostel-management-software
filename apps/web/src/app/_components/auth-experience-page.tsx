@@ -62,21 +62,6 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
-import {
   AnimatedPage,
   Breadcrumbs,
   FormField,
@@ -95,6 +80,9 @@ import {
   type PortalKind,
 } from "./shared";
 
+const AUTH_HERO_IMAGE =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuAD0NmbtkszFG87IhrLCwa2eHWDmk4NxOgpfoid2_zjZOx8uWA_hMcSeKmVOMRSjh6cGCyLc1Z9nGlZcL0Ki792qNxyaYBty13f2J3WQOuXIX_srJKrKQdS6r3NM_RDpDB3vErb3M4AXliIEEDa0efsPzIkws2iSLR5sBqDWjn4m6sUtt9ldLyN6Qa-ajl1zvazFY7UZ_2dAjeEU277a2C041A_ZzYl0_2dfHrJqKF0tb0-ivW1NlN_H88HwOtS1kTCG90Xs6WE0dc";
+
 export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
   const content = {
     activation: {
@@ -107,7 +95,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
     },
     otp: {
       title: "Verify your account",
-      subtitle: "Enter the 6-digit OTP sent to your phone or email.",
+      subtitle: "Enter the 6-digit OTP sent to your email.",
     },
     reset: {
       title: "Reset Your Password",
@@ -159,7 +147,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
           </div>
           <div
             className="absolute bottom-0 left-0 h-[330px] w-full bg-cover bg-center"
-            style={{ backgroundImage: `url("${imageSet.lobby}")` }}
+            style={{ backgroundImage: `url("${AUTH_HERO_IMAGE}")` }}
           />
         </section>
         <section className="flex items-center justify-center px-6 py-12">
@@ -171,8 +159,8 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                 <>
                   <FormField
                     icon={User}
-                    label="Email or Phone Number"
-                    placeholder="Enter your email or phone number"
+                    label="Email"
+                    placeholder="Enter your email"
                   />
                   <FormField
                     icon={LockKeyhole}
@@ -254,8 +242,8 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
 
               {mode === "signup" ? (
                 <>
-                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted p-1">
-                    {["Email", "Phone", "Google"].map((item) => (
+                  <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
+                    {["Email OTP", "Google"].map((item) => (
                       <button
                         className="rounded-md bg-white px-3 py-2 text-sm font-semibold shadow-sm"
                         key={item}
@@ -343,7 +331,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                   </div>
                   <FormField
                     icon={Mail}
-                    label="Email or Phone"
+                    label="Email"
                     placeholder="name@example.com"
                   />
                   <FormField icon={KeyRound} label="OTP Code" placeholder="000000" />

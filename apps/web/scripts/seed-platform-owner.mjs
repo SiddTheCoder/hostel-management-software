@@ -10,13 +10,13 @@ const { loadEnvConfig } = nextEnv;
 
 loadEnvConfig(repoRoot);
 
-const DEFAULT_DEV_PASSWORD = "ChangeMe123!";
+const DEFAULT_DEV_PASSWORD = "admin";
 const isProduction = process.env.NODE_ENV === "production";
-const email = (process.env.SEED_PLATFORM_OWNER_EMAIL ?? "platform.owner@hostelhub.local")
+const email = (process.env.SEED_PLATFORM_OWNER_EMAIL ?? "superadmin@gmail.com")
   .trim()
   .toLowerCase();
 const phone = process.env.SEED_PLATFORM_OWNER_PHONE?.trim();
-const name = (process.env.SEED_PLATFORM_OWNER_NAME ?? "Platform Owner").trim();
+const name = (process.env.SEED_PLATFORM_OWNER_NAME ?? "Super Admin").trim();
 const password = process.env.SEED_PLATFORM_OWNER_PASSWORD ?? DEFAULT_DEV_PASSWORD;
 
 if (!process.env.MONGODB_URI) {
@@ -27,12 +27,12 @@ if (!email) {
   throw new Error("SEED_PLATFORM_OWNER_EMAIL is required.");
 }
 
-if (password.length < 8) {
-  throw new Error("SEED_PLATFORM_OWNER_PASSWORD must be at least 8 characters.");
+if (!password) {
+  throw new Error("SEED_PLATFORM_OWNER_PASSWORD is required.");
 }
 
 if (isProduction && password === DEFAULT_DEV_PASSWORD) {
-  throw new Error("Refusing to seed production with the default development password.");
+  console.warn("Seeding production with the locked demo super-admin password.");
 }
 
 const userSchema = new mongoose.Schema(
@@ -100,4 +100,4 @@ await mongoose.disconnect();
 console.log("Platform owner seed ready:");
 console.log(`  email: ${user.email}`);
 console.log(`  role: ${user.role}`);
-console.log("  password: value from SEED_PLATFORM_OWNER_PASSWORD");
+console.log(`  password: ${password}`);

@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
+import { Role } from "@/lib/roles";
 import { assertHostelAccess } from "@/lib/tenant";
 import { AuditLogModel } from "@/models/AuditLog";
 import { BedModel } from "@/models/Bed";
@@ -14,6 +15,7 @@ import { InquiryModel } from "@/models/Inquiry";
 import { RatingReviewModel } from "@/models/RatingReview";
 import { InquiryNoteModel } from "@/models/InquiryNote";
 import { RoomModel } from "@/models/Room";
+import { UserModel } from "@/models/User";
 import type {
   bedCreateSchema,
   bedUpdateSchema,
@@ -30,6 +32,7 @@ import type {
   platformHostelCreateSchema,
   platformHostelListQuerySchema,
   publicHostelCompareQuerySchema,
+  publicHostelApplicationCreateSchema,
   publicInquiryCreateSchema,
   publicHostelListQuerySchema,
   roomCreateSchema,
@@ -38,6 +41,9 @@ import type {
 import type { z } from "zod";
 
 type PlatformHostelCreateInput = z.infer<typeof platformHostelCreateSchema>;
+type PublicHostelApplicationCreateInput = z.infer<
+  typeof publicHostelApplicationCreateSchema
+>;
 type PlatformHostelListQuery = z.infer<typeof platformHostelListQuerySchema>;
 type HostelRejectInput = z.infer<typeof hostelRejectSchema>;
 type PublicHostelListQuery = z.infer<typeof publicHostelListQuerySchema>;
@@ -69,6 +75,7 @@ type HostelRecord = {
     phone?: string;
   };
   createdAt?: Date;
+  demoDataLabel?: string;
   description?: string;
   facilities?: string[];
   food?: {
@@ -78,6 +85,7 @@ type HostelRecord = {
     notes?: string;
   };
   hostelType?: "BOYS" | "GIRLS" | "CO_LIVING";
+  isDemoData?: boolean;
   location: {
     address?: string;
     area: string;
@@ -123,18 +131,26 @@ type HostelApplicationRecord = {
   submittedBy: Types.ObjectId;
 };
 
+type UserOwnerRecord = {
+  _id: Types.ObjectId;
+  role?: string;
+};
+
 type HostelStatus = HostelRecord["status"];
 
 type InquiryStatus = "NEW" | "CONTACTED" | "VISIT_SCHEDULED" | "CONVERTED" | "CLOSED";
 
 type InquiryRecord = {
   _id: Types.ObjectId;
+  budgetRange?: string;
   createdAt?: Date;
   email?: string;
+  gender?: string;
   hostelId: Types.ObjectId;
   message?: string;
   name: string;
   phone: string;
+  preferredRoomType?: string;
   preferredVisitDate?: Date;
   source: "PUBLIC_WEBSITE" | "ADMIN_CREATED";
   status: InquiryStatus;
@@ -247,11 +263,13 @@ function serializeHostel(hostel: HostelRecord) {
     capacitySummary: hostel.capacitySummary ?? {},
     contact: hostel.contact ?? {},
     createdAt: hostel.createdAt?.toISOString(),
+    demoDataLabel: hostel.demoDataLabel ?? "",
     description: hostel.description ?? "",
     facilities: hostel.facilities ?? [],
     food: hostel.food ?? {},
     hostelType: hostel.hostelType ?? "CO_LIVING",
     id: hostel._id.toString(),
+    isDemoData: Boolean(hostel.isDemoData),
     location: hostel.location,
     name: hostel.name,
     ownerId: hostel.ownerId.toString(),
@@ -274,11 +292,13 @@ function serializeHostel(hostel: HostelRecord) {
 function serializePublicHostel(hostel: HostelRecord) {
   return {
     capacitySummary: hostel.capacitySummary ?? {},
+    demoDataLabel: hostel.demoDataLabel ?? "",
     description: hostel.description ?? "",
     facilities: hostel.facilities ?? [],
     food: hostel.food ?? {},
     hostelType: hostel.hostelType ?? "CO_LIVING",
     id: hostel._id.toString(),
+    isDemoData: Boolean(hostel.isDemoData),
     location: hostel.location,
     name: hostel.name,
     photos: (hostel.photos ?? []).map((photo) => ({
@@ -296,13 +316,16 @@ function serializePublicHostel(hostel: HostelRecord) {
 
 function serializeInquiry(inquiry: InquiryRecord) {
   return {
+    budgetRange: inquiry.budgetRange ?? "",
     createdAt: inquiry.createdAt?.toISOString(),
     email: inquiry.email ?? "",
+    gender: inquiry.gender ?? "",
     hostelId: inquiry.hostelId.toString(),
     id: inquiry._id.toString(),
     message: inquiry.message ?? "",
     name: inquiry.name,
     phone: inquiry.phone,
+    preferredRoomType: inquiry.preferredRoomType ?? "",
     preferredVisitDate: inquiry.preferredVisitDate?.toISOString(),
     source: inquiry.source,
     status: inquiry.status,
@@ -552,6 +575,45 @@ async function findScopedInquiry(
   return inquiry;
 }
 
+async function findOrCreatePublicHostelOwner(
+  applicant: PublicHostelApplicationCreateInput["applicant"],
+) {
+  const contactFilter: Array<{ email?: string; phone?: string }> = [
+    { phone: applicant.phone },
+  ];
+
+  if (applicant.email) {
+    contactFilter.push({ email: applicant.email.toLowerCase() });
+  }
+
+  const existingUser = await UserModel.findOne({
+    $or: contactFilter,
+    isDeleted: { $ne: true },
+  }).lean<UserOwnerRecord | null>();
+
+  if (existingUser) {
+    if (existingUser.role !== Role.HOSTEL_OWNER) {
+      throw new HostelServiceError(
+        "This contact already belongs to another account role.",
+        "HOSTEL_OWNER_CONTACT_CONFLICT",
+        409,
+      );
+    }
+
+    return existingUser._id;
+  }
+
+  const user = await UserModel.create({
+    email: applicant.email,
+    name: applicant.name,
+    phone: applicant.phone,
+    role: Role.HOSTEL_OWNER,
+    status: "INVITED",
+  });
+
+  return user._id as Types.ObjectId;
+}
+
 export async function createPlatformHostelApplication(
   input: PlatformHostelCreateInput,
   principal: ApiPrincipal,
@@ -619,6 +681,99 @@ export async function createPlatformHostelApplication(
 
   await auditHostelAction(principal, hostel._id, "HOSTEL_APPLICATION_CREATED", {
     ownerId: ownerId.toString(),
+  });
+
+  const createdHostel = await findHostelByIdOrThrow(hostel._id.toString());
+  const createdApplication = await HostelApplicationModel.findById(
+    application._id,
+  ).lean<HostelApplicationRecord | null>();
+
+  return {
+    application: serializeApplication(createdApplication),
+    hostel: serializeHostel(createdHostel),
+  };
+}
+
+export async function registerPublicHostelApplication(
+  input: PublicHostelApplicationCreateInput,
+) {
+  await connectToDatabase();
+
+  const ownerId = await findOrCreatePublicHostelOwner(input.applicant);
+  const slug = await uniqueSlug(input.name, input.location.area);
+
+  const hostel = await HostelModel.create({
+    capacitySummary: input.capacitySummary,
+    contact: input.contact,
+    createdBy: ownerId,
+    description: input.description,
+    facilities: input.facilities,
+    food: input.food,
+    hostelType: input.hostelType,
+    location: input.location,
+    name: input.name,
+    ownerId,
+    photos: input.photos,
+    pricing: input.pricing,
+    roomTypes: input.roomTypes,
+    rules: input.rules,
+    slug,
+    status: "PENDING_APPROVAL",
+    updatedBy: ownerId,
+    verificationStatus: "PENDING",
+  });
+
+  const application = await HostelApplicationModel.create({
+    applicantId: ownerId,
+    hostelId: hostel._id,
+    notes: input.notes,
+    snapshot: {
+      applicant: input.applicant,
+      capacitySummary: input.capacitySummary,
+      contact: input.contact,
+      documents: input.documents,
+      location: input.location,
+      name: input.name,
+      pricing: input.pricing,
+      roomConfigurations: input.roomConfigurations,
+      selectedPlan: input.selectedPlan,
+    },
+    status: "PENDING",
+    submittedBy: ownerId,
+  });
+
+  await HostelVerificationModel.create({
+    createdBy: ownerId,
+    hostelId: hostel._id,
+    status: "PENDING",
+    updatedBy: ownerId,
+  });
+
+  if (input.documents.length > 0) {
+    await HostelDocumentModel.insertMany(
+      input.documents.map((document) => ({
+        createdBy: ownerId,
+        documentType: document.documentType,
+        fileAssetId: document.fileAssetId,
+        fileUrl: document.fileUrl,
+        hostelId: hostel._id,
+        ownerId,
+        status: "PENDING",
+        updatedBy: ownerId,
+      })),
+    );
+  }
+
+  await AuditLogModel.create({
+    action: "PUBLIC_HOSTEL_APPLICATION_SUBMITTED",
+    actorId: ownerId,
+    entityId: hostel._id.toString(),
+    entityType: "Hostel",
+    hostelId: hostel._id,
+    metadata: {
+      selectedPlan: input.selectedPlan,
+      submittedFrom: "public-registration",
+    },
   });
 
   const createdHostel = await findHostelByIdOrThrow(hostel._id.toString());
@@ -1005,14 +1160,16 @@ export async function comparePublicHostels(query: PublicHostelCompareQuery) {
 }
 
 export async function createPublicHostelInquiry(
-  hostelId: string,
+  hostelRef: string,
   input: PublicInquiryCreateInput,
 ) {
   await connectToDatabase();
 
-  const objectId = normalizeObjectId(hostelId);
+  const hostelLookup = Types.ObjectId.isValid(hostelRef)
+    ? { _id: normalizeObjectId(hostelRef) }
+    : { slug: hostelRef };
   const hostel = await HostelModel.findOne({
-    _id: objectId,
+    ...hostelLookup,
     isDeleted: false,
     status: "PUBLISHED",
     verificationStatus: "VERIFIED",
@@ -1024,7 +1181,7 @@ export async function createPublicHostelInquiry(
 
   const inquiry = await InquiryModel.create({
     ...input,
-    hostelId: objectId,
+    hostelId: hostel._id,
     source: "PUBLIC_WEBSITE",
     status: "NEW",
   });

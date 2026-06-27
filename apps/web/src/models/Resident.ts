@@ -19,6 +19,8 @@ const residentSchema = new Schema(
     },
     createdBy: { ref: "User", type: Schema.Types.ObjectId },
     updatedBy: { ref: "User", type: Schema.Types.ObjectId },
+    isDemoData: { type: Boolean, default: false },
+    demoDataLabel: { type: String, trim: true },
     isDeleted: { type: Boolean, default: false },
     deletedAt: Date,
     deletedBy: { ref: "User", type: Schema.Types.ObjectId },

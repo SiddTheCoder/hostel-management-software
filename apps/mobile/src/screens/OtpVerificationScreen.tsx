@@ -30,7 +30,6 @@ export function OtpVerificationScreen({ navigation, route }: Props) {
         name: route.params.name,
         otpChallengeId: route.params.challengeId,
         password: route.params.password,
-        phone: route.params.phone,
       });
 
       await saveSession(session);

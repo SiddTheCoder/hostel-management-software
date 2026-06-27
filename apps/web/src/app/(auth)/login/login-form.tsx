@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
@@ -72,9 +72,12 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [isGoogleReady, setIsGoogleReady] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const routeError = searchParams.get("error");
   const visibleError = error || (routeError ? routeErrorMessages[routeError] : "");
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -173,13 +176,12 @@ export function LoginForm() {
     setError("");
     setIsSubmitting(true);
 
-    const formData = new FormData(event.currentTarget);
-    const identifier = String(formData.get("identifier") ?? "");
-    const password = String(formData.get("password") ?? "");
-
     try {
       const response = await fetch("/api/v1/auth/login", {
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({
+          identifier: identifier.trim().toLowerCase(),
+          password,
+        }),
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +202,7 @@ export function LoginForm() {
   }
 
   return (
-    <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
+    <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
       {visibleError ? (
         <div
           aria-live="polite"
@@ -212,16 +214,18 @@ export function LoginForm() {
 
       <div className="space-y-4">
         <label className="block text-sm font-medium text-primary">
-          Email or Phone Number
+          Email
           <span className="mt-2 flex h-11 items-center rounded-lg border border-border bg-role-resident-soft/40 px-3 text-primary transition focus-within:border-role-resident focus-within:ring-2 focus-within:ring-role-resident/20 dark:bg-muted/30">
             <Mail className="mr-3 size-4 text-muted-foreground" />
             <input
-              autoComplete="username"
+              autoComplete="email"
               className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
               name="identifier"
+              onChange={(event) => setIdentifier(event.target.value)}
               placeholder="name@example.com"
               required
-              type="text"
+              type="email"
+              value={identifier}
             />
           </span>
         </label>
@@ -229,25 +233,32 @@ export function LoginForm() {
         <label className="block text-sm font-medium text-primary">
           <span className="flex items-center justify-between">
             Password
-            <span className="text-xs text-muted-foreground">Forgot password?</span>
+            <a
+              className="text-xs font-medium text-role-resident hover:underline"
+              href="/reset-password"
+            >
+              Forgot password?
+            </a>
           </span>
           <span className="mt-2 flex h-11 items-center rounded-lg border border-border bg-role-resident-soft/40 px-3 text-primary transition focus-within:border-role-resident focus-within:ring-2 focus-within:ring-role-resident/20 dark:bg-muted/30">
             <LockKeyhole className="mr-3 size-4 text-muted-foreground" />
             <input
               autoComplete="current-password"
               className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
-              minLength={8}
               name="password"
+              onChange={(event) => setPassword(event.target.value)}
               placeholder="••••••••"
               required
-              type="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
             />
             <button
-              aria-label="Password visibility is disabled in this demo"
+              aria-label={showPassword ? "Hide password" : "Show password"}
               className="ml-2 text-muted-foreground"
+              onClick={() => setShowPassword((current) => !current)}
               type="button"
             >
-              <EyeOff className="size-4" />
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </span>
         </label>
@@ -268,6 +279,31 @@ export function LoginForm() {
       >
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
+
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+        <p className="font-bold uppercase tracking-wide">Demo logins</p>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {[
+            ["Super admin", "superadmin@gmail.com"],
+            ["Hostel admin", "hosteladmin1@gmail.com"],
+          ].map(([label, email]) => (
+            <button
+              className="rounded-md border border-amber-300 bg-white px-2 py-1.5 text-left font-semibold text-amber-900"
+              key={email}
+              onClick={() => {
+                setIdentifier(email);
+                setPassword("admin");
+              }}
+              type="button"
+            >
+              {label}
+              <span className="block truncate font-mono text-[11px] font-normal">
+                {email} / admin
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
@@ -293,7 +329,7 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <p className="pt-8 text-center text-sm text-muted-foreground">
+      <p className="pt-2 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <a className="font-medium text-role-resident hover:underline" href="/signup">
           Sign up

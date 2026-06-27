@@ -1,0 +1,128 @@
+import type { HostelSummary } from "@/app/_components/public-hostel-types";
+
+export const DEFAULT_HOSTEL_IMAGE =
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=80";
+
+export type PublicHostel = {
+  capacitySummary?: {
+    totalBeds?: number;
+    totalRooms?: number;
+    vacantBeds?: number;
+  };
+  comparison?: {
+    foodScore?: number;
+    locationText?: string;
+    monthlyFee?: {
+      currency?: string;
+      max?: number;
+      min?: number;
+    };
+    ratingSummary?: {
+      averageRating?: number;
+      total?: number;
+    };
+    vacancy?: number;
+  };
+  contact?: {
+    email?: string;
+    phone?: string;
+  };
+  description?: string;
+  facilities: string[];
+  food?: {
+    hasNonVeg?: boolean;
+    hasVeg?: boolean;
+    mealsPerDay?: number;
+    notes?: string;
+  };
+  hostelType: "BOYS" | "GIRLS" | "CO_LIVING";
+  id: string;
+  location: {
+    address?: string;
+    area: string;
+    city?: string;
+    province?: string;
+  };
+  name: string;
+  photos: Array<{
+    alt?: string;
+    id?: string;
+    url?: string;
+  }>;
+  pricing?: {
+    admissionFee?: number;
+    currency?: string;
+    monthlyRentMax?: number;
+    monthlyRentMin?: number;
+  };
+  roomTypes: string[];
+  rules: string[];
+  slug: string;
+  verificationStatus: "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED";
+};
+
+export function hostelTypeToUi(type: PublicHostel["hostelType"]): HostelSummary["type"] {
+  if (type === "BOYS") {
+    return "boys";
+  }
+
+  if (type === "GIRLS") {
+    return "girls";
+  }
+
+  return "co-living";
+}
+
+export function formatHostelAddress(hostel: PublicHostel) {
+  return (
+    hostel.comparison?.locationText ||
+    [hostel.location.address, hostel.location.area, hostel.location.city]
+      .filter(Boolean)
+      .join(", ")
+  );
+}
+
+export function hasFood(hostel: PublicHostel) {
+  return Boolean(
+    hostel.food?.mealsPerDay ||
+    hostel.food?.hasVeg ||
+    hostel.food?.hasNonVeg ||
+    hostel.facilities.some((facility) => /food|meal|mess/i.test(facility)),
+  );
+}
+
+export function mapPublicHostelToSummary(hostel: PublicHostel): HostelSummary {
+  return {
+    address: formatHostelAddress(hostel),
+    area: hostel.location.area,
+    city: hostel.location.city ?? "Kathmandu",
+    description: hostel.description ?? "",
+    facilities: hostel.facilities,
+    foodScore: hostel.comparison?.foodScore ?? 0,
+    id: hostel.id,
+    image: hostel.photos.find((photo) => photo.url)?.url ?? DEFAULT_HOSTEL_IMAGE,
+    name: hostel.name,
+    owner: "Verified hostel",
+    price:
+      hostel.comparison?.monthlyFee?.min ??
+      hostel.pricing?.monthlyRentMin ??
+      hostel.pricing?.monthlyRentMax ??
+      0,
+    rating: hostel.comparison?.ratingSummary?.averageRating ?? 0,
+    reviews: hostel.comparison?.ratingSummary?.total ?? 0,
+    roomTypes: hostel.roomTypes,
+    slug: hostel.slug,
+    status: "published",
+    type: hostelTypeToUi(hostel.hostelType),
+    vacancy: hostel.comparison?.vacancy ?? hostel.capacitySummary?.vacantBeds ?? 0,
+    verified: hostel.verificationStatus === "VERIFIED",
+  };
+}
+
+export function roomTypeLabel(roomType: string) {
+  return roomType
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}

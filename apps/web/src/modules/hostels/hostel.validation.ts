@@ -79,6 +79,30 @@ export const platformHostelCreateSchema = z.object({
   rules: textArraySchema,
 });
 
+export const publicHostelApplicationCreateSchema = platformHostelCreateSchema
+  .omit({ ownerId: true })
+  .extend({
+    applicant: z.object({
+      email: z.string().trim().email().optional(),
+      name: z.string().trim().min(2).max(120),
+      phone: z.string().trim().min(7).max(24),
+    }),
+    roomConfigurations: z
+      .array(
+        z.object({
+          bedsPerRoom: z.coerce.number().int().nonnegative(),
+          mealInclusion: z.enum(["Included", "Not Included", "Optional"]),
+          monthlyRent: z.coerce.number().nonnegative().optional(),
+          rooms: z.coerce.number().int().nonnegative(),
+          roomType: z.string().trim().min(1).max(80),
+          vacantBeds: z.coerce.number().int().nonnegative().default(0),
+        }),
+      )
+      .max(30)
+      .default([]),
+    selectedPlan: z.string().trim().min(2).max(80),
+  });
+
 export const platformHostelListQuerySchema = z.object({
   status: z
     .enum(["DRAFT", "PENDING_APPROVAL", "APPROVED", "PUBLISHED", "REJECTED", "SUSPENDED"])
@@ -131,10 +155,13 @@ export const inquiryStatusSchema = z.enum([
 ]);
 
 export const publicInquiryCreateSchema = z.object({
+  budgetRange: z.string().trim().max(80).optional(),
   email: z.string().trim().email().optional(),
+  gender: z.string().trim().max(40).optional(),
   message: z.string().trim().max(1200).optional(),
   name: z.string().trim().min(2).max(120),
   phone: z.string().trim().min(7).max(24),
+  preferredRoomType: z.string().trim().max(80).optional(),
   preferredVisitDate: z.coerce.date().optional(),
 });
 

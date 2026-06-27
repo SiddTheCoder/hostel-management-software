@@ -1,159 +1,300 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import {
-  AlertCircle,
-  AlertCircle as AlertIcon,
-  ArrowRight,
-  BadgeCheck,
-  BedDouble,
-  Bell,
   Building2,
-  Calendar,
-  CalendarDays,
   Check,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Download,
-  Eye,
   FileCheck2,
-  FileText,
-  Filter,
-  Grid2X2,
-  Heart,
-  HelpCircle,
-  Home,
-  KeyRound,
-  List,
-  LockKeyhole,
-  Mail,
-  MapPin,
-  MessageSquare,
-  Moon,
-  MoreVertical,
-  Phone,
-  PhoneCall,
   Plus,
-  QrCode,
-  Search,
-  Send,
-  ShieldCheck,
-  SlidersHorizontal,
-  Star,
   Trash2,
   Upload,
-  User,
-  UserRound,
-  Users,
-  Utensils,
-  Wifi,
-  WalletCards,
-  Wrench,
-  X,
-  type LucideIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
-import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
-import {
-  AnimatedPage,
-  Breadcrumbs,
-  FormField,
-  HostelCard,
-  HostelListCard,
-  MetricCard,
-  NepalBannerGraphic,
-  PublicShell,
-  SectionCard,
-  StatusPill,
-  TableView,
-  formatMoney,
-  humanize,
-  metricIcons,
-  type AuthMode,
-  type PortalKind,
-} from "./shared";
+
+import { PublicShell, SectionCard, formatMoney } from "./shared";
+
+type RoomConfig = {
+  bedsPerRoom: string;
+  id: string;
+  mealInclusion: "Included" | "Not Included" | "Optional";
+  monthlyRent: string;
+  rooms: string;
+  roomType: string;
+  vacantBeds: string;
+};
+
+type DocumentConfig = {
+  documentType: string;
+  fileUrl: string;
+  id: string;
+};
+
+const facilityOptions = [
+  "Wi-Fi",
+  "Study Room",
+  "CCTV Security",
+  "Hot Water",
+  "Laundry",
+  "Meals Included",
+  "Parking",
+  "Power Backup",
+  "RO Water",
+  "Housekeeping",
+  "First Aid",
+  "Visitor Lounge",
+];
+
+const plans = [
+  {
+    capacity: "Up to 100 residents",
+    id: "starter",
+    name: "Starter Plan",
+    price: 2900,
+  },
+  {
+    capacity: "Up to 500 residents",
+    id: "growth",
+    name: "Growth Plan",
+    price: 5900,
+  },
+  {
+    capacity: "Unlimited branches & beds",
+    id: "enterprise",
+    name: "Enterprise Plan",
+    price: 11900,
+  },
+];
+
+function splitLines(value: string) {
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function numberValue(value: string) {
+  const parsed = Number(value);
+
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+function createRoom(): RoomConfig {
+  return {
+    bedsPerRoom: "",
+    id: crypto.randomUUID(),
+    mealInclusion: "Included",
+    monthlyRent: "",
+    rooms: "",
+    roomType: "",
+    vacantBeds: "",
+  };
+}
+
+function createDocument(documentType = ""): DocumentConfig {
+  return {
+    documentType,
+    fileUrl: "",
+    id: crypto.randomUUID(),
+  };
+}
 
 export function PublicHostelRegistrationPage() {
   const [step, setStep] = useState(1);
+  const [selectedPlan, setSelectedPlan] = useState(plans[1].id);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // Registration local state data
   const [hostelName, setHostelName] = useState("");
-  const [hostelType, setHostelType] = useState("");
+  const [hostelType, setHostelType] = useState<"BOYS" | "CO_LIVING" | "GIRLS">(
+    "CO_LIVING",
+  );
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [capacity, setCapacity] = useState("");
-  const [category, setCategory] = useState("boys");
   const [description, setDescription] = useState("");
+  const [address, setAddress] = useState("");
+  const [area, setArea] = useState("");
+  const [city, setCity] = useState("Kathmandu");
+  const [province, setProvince] = useState("Bagmati");
+  const [facilities, setFacilities] = useState<string[]>([
+    "Wi-Fi",
+    "CCTV Security",
+    "Hot Water",
+    "Meals Included",
+  ]);
+  const [rules, setRules] = useState("");
+  const [rooms, setRooms] = useState<RoomConfig[]>([createRoom()]);
+  const [admissionFee, setAdmissionFee] = useState("");
+  const [mealsPerDay, setMealsPerDay] = useState("3");
+  const [hasVeg, setHasVeg] = useState(true);
+  const [hasNonVeg, setHasNonVeg] = useState(true);
+  const [foodNotes, setFoodNotes] = useState("");
+  const [photoUrls, setPhotoUrls] = useState("");
+  const [documents, setDocuments] = useState<DocumentConfig[]>([
+    createDocument("Ownership proof"),
+    createDocument("Business registration"),
+  ]);
+
+  const selectedPlanDetail = plans.find((plan) => plan.id === selectedPlan) ?? plans[1];
+
+  const capacitySummary = useMemo(() => {
+    return rooms.reduce(
+      (summary, room) => {
+        const roomCount = numberValue(room.rooms) ?? 0;
+        const bedsPerRoom = numberValue(room.bedsPerRoom) ?? 0;
+        const vacantBeds = numberValue(room.vacantBeds) ?? 0;
+
+        return {
+          totalBeds: summary.totalBeds + roomCount * bedsPerRoom,
+          totalRooms: summary.totalRooms + roomCount,
+          vacantBeds: summary.vacantBeds + vacantBeds,
+        };
+      },
+      { totalBeds: 0, totalRooms: 0, vacantBeds: 0 },
+    );
+  }, [rooms]);
+
+  const rentValues = rooms
+    .map((room) => numberValue(room.monthlyRent))
+    .filter((value): value is number => typeof value === "number");
 
   const stepsList = [
     { key: 1, label: "Package" },
     { key: 2, label: "Basic Info" },
-    { key: 3, label: "Location & Facilities" },
-    { key: 4, label: "Rooms & Pricing" },
+    { key: 3, label: "Location" },
+    { key: 4, label: "Rooms" },
     { key: 5, label: "Documents" },
     { key: 6, label: "Review" },
   ];
 
-  const handleNextStep = () => {
-    if (step < 6) {
-      setStep(step + 1);
-    } else {
-      setSubmitted(true);
-    }
-  };
+  function toggleFacility(facility: string) {
+    setFacilities((current) =>
+      current.includes(facility)
+        ? current.filter((item) => item !== facility)
+        : [...current, facility],
+    );
+  }
 
-  const handlePrevStep = () => {
-    if (step > 1) {
-      setStep(step - 1);
+  function updateRoom(id: string, next: Partial<RoomConfig>) {
+    setRooms((current) =>
+      current.map((room) => (room.id === id ? { ...room, ...next } : room)),
+    );
+  }
+
+  function updateDocument(id: string, next: Partial<DocumentConfig>) {
+    setDocuments((current) =>
+      current.map((document) =>
+        document.id === id ? { ...document, ...next } : document,
+      ),
+    );
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setMessage("");
+
+    const roomConfigurations = rooms
+      .filter((room) => room.roomType.trim())
+      .map((room) => ({
+        bedsPerRoom: numberValue(room.bedsPerRoom) ?? 0,
+        mealInclusion: room.mealInclusion,
+        monthlyRent: numberValue(room.monthlyRent),
+        rooms: numberValue(room.rooms) ?? 0,
+        roomType: room.roomType.trim(),
+        vacantBeds: numberValue(room.vacantBeds) ?? 0,
+      }));
+
+    try {
+      await browserApi("/api/v1/public/hostels/register", {
+        body: JSON.stringify({
+          applicant: {
+            email: email.trim() || undefined,
+            name: ownerName.trim(),
+            phone: phone.trim(),
+          },
+          capacitySummary,
+          contact: {
+            email: email.trim() || undefined,
+            phone: phone.trim(),
+          },
+          description: description.trim() || undefined,
+          documents: documents
+            .filter((document) => document.documentType.trim() && document.fileUrl.trim())
+            .map((document) => ({
+              documentType: document.documentType.trim(),
+              fileUrl: document.fileUrl.trim(),
+            })),
+          facilities,
+          food: {
+            hasNonVeg,
+            hasVeg,
+            mealsPerDay: numberValue(mealsPerDay),
+            notes: foodNotes.trim() || undefined,
+          },
+          hostelType,
+          location: {
+            address: address.trim() || undefined,
+            area: area.trim(),
+            city: city.trim(),
+            province: province.trim() || undefined,
+          },
+          name: hostelName.trim(),
+          notes: `Selected plan: ${selectedPlanDetail.name}`,
+          photos: splitLines(photoUrls).map((url) => ({
+            alt: hostelName.trim(),
+            url,
+          })),
+          pricing: {
+            admissionFee: numberValue(admissionFee),
+            currency: "NPR",
+            monthlyRentMax: rentValues.length > 0 ? Math.max(...rentValues) : undefined,
+            monthlyRentMin: rentValues.length > 0 ? Math.min(...rentValues) : undefined,
+          },
+          roomConfigurations,
+          roomTypes: roomConfigurations.map((room) => room.roomType),
+          rules: splitLines(rules),
+          selectedPlan,
+        }),
+        method: "POST",
+      });
+
+      setSubmitted(true);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Could not submit hostel application.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <PublicShell active="pricing">
-      <section className="mx-auto max-w-[1360px] px-6 py-8">
-        {/* Registration Header */}
+      <form className="mx-auto max-w-[1360px] px-6 py-8" onSubmit={submit}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary">Register New Hostel</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create your hostel listing in a few simple steps
+            Submit a production-ready hostel listing for platform review.
           </p>
         </div>
 
-        {/* Stepper Progress Indicator */}
-        <div className="mb-8 max-w-4xl mx-auto border border-border rounded-xl bg-surface p-4 shadow-sm flex justify-between items-center overflow-x-auto">
-          {stepsList.map((st, idx) => {
-            const isCompleted = step > st.key || submitted;
-            const isActive = step === st.key && !submitted;
+        <div className="mx-auto mb-8 flex max-w-4xl items-center justify-between overflow-x-auto rounded-xl border border-border bg-surface p-4 shadow-sm">
+          {stepsList.map((item, index) => {
+            const isCompleted = step > item.key || submitted;
+            const isActive = step === item.key && !submitted;
+
             return (
-              <div className="flex items-center flex-1 last:flex-initial" key={st.key}>
-                <div className="text-center flex flex-col items-center">
+              <div className="flex flex-1 items-center last:flex-initial" key={item.key}>
+                <div className="flex flex-col items-center text-center">
                   <span
                     className={cn(
-                      "size-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors duration-200",
+                      "flex size-8 items-center justify-center rounded-full text-xs font-bold transition-colors duration-200",
                       isCompleted
                         ? "bg-success text-white"
                         : isActive
@@ -161,557 +302,561 @@ export function PublicHostelRegistrationPage() {
                           : "bg-muted text-muted-foreground",
                     )}
                   >
-                    {isCompleted ? <Check className="size-4" /> : st.key}
+                    {isCompleted ? <Check className="size-4" /> : item.key}
                   </span>
-                  <p className="mt-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
-                    {st.label}
+                  <p className="mt-2 whitespace-nowrap text-[10px] font-semibold text-muted-foreground">
+                    {item.label}
                   </p>
                 </div>
-                {idx < stepsList.length - 1 && (
-                  <div className="h-0.5 flex-1 bg-border mx-3 min-w-[20px]" />
-                )}
+                {index < stepsList.length - 1 ? (
+                  <div className="mx-3 h-0.5 min-w-5 flex-1 bg-border" />
+                ) : null}
               </div>
             );
           })}
         </div>
 
+        {message ? (
+          <div className="mb-5 rounded-lg border border-danger/25 bg-red-50 p-3 text-sm text-danger">
+            {message}
+          </div>
+        ) : null}
+
         {submitted ? (
-          /* Successful Submission Screen */
-          <div className="max-w-xl mx-auto rounded-xl border border-border bg-surface p-10 text-center space-y-5 shadow">
-            <div className="size-16 rounded-full bg-emerald-100 text-success flex items-center justify-center mx-auto">
+          <div className="mx-auto max-w-xl space-y-5 rounded-xl border border-border bg-surface p-10 text-center shadow">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-success">
               <CheckCircle2 className="size-10" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-primary">You&apos;re All Set!</h2>
+              <h2 className="text-2xl font-bold text-primary">Application Submitted</h2>
               <p className="text-sm text-muted-foreground">
-                Your hostel registration application will go for review.
-              </p>
-              <p className="text-xs text-muted-foreground leading-relaxed pt-2">
-                Our platform inspection team will verify your uploaded documents,
-                ownership proof, room inventory details, and address coordinates. You will
-                receive an email or phone update within 1-2 business days once approved
-                and published.
+                Your hostel listing, owner contact, room configuration, pricing, and
+                verification documents were saved for platform review.
               </p>
             </div>
-            <div className="pt-4 flex justify-center gap-3">
-              <Link
-                href="/"
-                className="rounded-lg bg-brand-teal px-6 py-2.5 text-xs font-semibold text-white shadow hover:brightness-105 transition"
-              >
-                Return to Homepage
-              </Link>
-            </div>
+            <Link
+              className="inline-flex rounded-lg bg-brand-teal px-6 py-2.5 text-xs font-semibold text-white shadow transition hover:brightness-105"
+              href="/"
+            >
+              Return to Homepage
+            </Link>
           </div>
         ) : (
-          /* Multi-step Forms */
           <div className="grid max-w-[1360px] gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-            {/* Left Form Block */}
             <div className="space-y-5">
-              {step === 1 && (
+              {step === 1 ? (
                 <SectionCard
-                  title="Step 1 of 5: Select Package"
-                  description="Select the platform billing plan for your property listing."
+                  description="Select the billing plan for this property listing."
+                  title="Step 1 of 6: Package"
                 >
-                  <div className="space-y-4 p-1">
-                    <p className="text-xs text-muted-foreground">
-                      Choose the plan that fits your branch capacity:
-                    </p>
-                    {[
-                      {
-                        id: "starter",
-                        name: "Starter Plan",
-                        price: 2900,
-                        capacity: "Up to 100 residents",
-                      },
-                      {
-                        id: "pro",
-                        name: "Pro Plan (Most Popular)",
-                        price: 5900,
-                        capacity: "Up to 500 residents",
-                      },
-                      {
-                        id: "enterprise",
-                        name: "Enterprise Plan",
-                        price: 11900,
-                        capacity: "Unlimited branches & beds",
-                      },
-                    ].map((plan) => (
-                      <div
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {plans.map((plan) => (
+                      <button
+                        className={cn(
+                          "rounded-xl border p-4 text-left transition",
+                          selectedPlan === plan.id
+                            ? "border-brand-teal bg-brand-teal/5"
+                            : "border-border bg-surface hover:bg-slate-50",
+                        )}
                         key={plan.id}
-                        className="rounded-xl border border-border p-4 bg-surface hover:bg-slate-50/50 flex justify-between items-center"
+                        onClick={() => setSelectedPlan(plan.id)}
+                        type="button"
                       >
-                        <div>
-                          <p className="text-sm font-bold text-primary">{plan.name}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {plan.capacity}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-extrabold text-brand-teal">
-                            NPR {plan.price} / mo
-                          </p>
-                          <span className="text-[10px] text-muted-foreground">
-                            Billed monthly
-                          </span>
-                        </div>
-                      </div>
+                        <p className="text-sm font-bold text-primary">{plan.name}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {plan.capacity}
+                        </p>
+                        <p className="mt-4 text-sm font-extrabold text-brand-teal">
+                          {formatMoney(plan.price)} / mo
+                        </p>
+                      </button>
                     ))}
                   </div>
                 </SectionCard>
-              )}
+              ) : null}
 
-              {step === 2 && (
+              {step === 2 ? (
                 <SectionCard
-                  title="Step 2 of 5: Basic Information"
-                  description="Tell us the basic operational details about your hostel."
+                  description="These fields become the owner contact and draft hostel record."
+                  title="Step 2 of 6: Basic Information"
                 >
-                  <div className="space-y-4 p-1">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          Hostel Name *
-                          <input
-                            className="mt-2 flex h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal transition"
-                            onChange={(e) => setHostelName(e.target.value)}
-                            placeholder="Enter hostel name"
-                            value={hostelName}
-                            required
-                          />
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          Hostel Type *
-                          <select
-                            onChange={(e) => setHostelType(e.target.value)}
-                            value={hostelType}
-                            className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal cursor-pointer text-primary"
-                          >
-                            <option value="">Select hostel type</option>
-                            <option value="Boys Hostel">Boys Hostel</option>
-                            <option value="Girls Hostel">Girls Hostel</option>
-                            <option value="Co-living / Mixed">Co-living / Mixed</option>
-                          </select>
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          Owner Full Name *
-                          <input
-                            className="mt-2 flex h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal transition"
-                            onChange={(e) => setOwnerName(e.target.value)}
-                            placeholder="Enter owner full name"
-                            value={ownerName}
-                            required
-                          />
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          Contact Phone *
-                          <input
-                            className="mt-2 flex h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal transition"
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="98XXXXXXXX"
-                            value={phone}
-                            required
-                            type="tel"
-                          />
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          Email Address *
-                          <input
-                            className="mt-2 flex h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal transition"
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Enter email address"
-                            value={email}
-                            required
-                            type="email"
-                          />
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          Total Capacity (Beds) *
-                          <input
-                            className="mt-2 flex h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal transition"
-                            onChange={(e) => setCapacity(e.target.value)}
-                            placeholder="e.g. 50"
-                            value={capacity}
-                            required
-                            type="number"
-                          />
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-semibold text-primary">
-                        Hostel Category *
-                      </p>
-                      <div className="grid grid-cols-3 gap-3 mt-2">
-                        {["boys", "girls", "co-living"].map((cat) => (
-                          <button
-                            key={cat}
-                            type="button"
-                            onClick={() => setCategory(cat)}
-                            className={cn(
-                              "border rounded-xl p-4 flex flex-col items-center capitalize gap-2 transition",
-                              category === cat
-                                ? "border-brand-teal bg-brand-teal/5 text-brand-teal"
-                                : "border-border bg-surface",
-                            )}
-                          >
-                            <Building2 className="size-5" />
-                            <span className="text-xs font-semibold">{cat}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <label className="block text-sm font-semibold text-primary">
-                      Short Description *
-                      <textarea
-                        maxLength={300}
-                        onChange={(e) => setDescription(e.target.value)}
-                        value={description}
-                        className="mt-2 min-h-24 w-full rounded-lg border border-border bg-surface p-3 text-sm font-normal outline-none focus:border-brand-teal transition"
-                        placeholder="Write a short description about your hostel..."
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Hostel Name
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setHostelName(event.target.value)}
+                        required
+                        value={hostelName}
                       />
-                      <span className="text-[10px] text-muted-foreground block text-right mt-1">
-                        {description.length}/300 characters
-                      </span>
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Hostel Type
+                      <select
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) =>
+                          setHostelType(event.target.value as typeof hostelType)
+                        }
+                        value={hostelType}
+                      >
+                        <option value="BOYS">Boys Hostel</option>
+                        <option value="GIRLS">Girls Hostel</option>
+                        <option value="CO_LIVING">Co-living</option>
+                      </select>
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Owner Full Name
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setOwnerName(event.target.value)}
+                        required
+                        value={ownerName}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Contact Phone
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setPhone(event.target.value)}
+                        required
+                        type="tel"
+                        value={phone}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Email Address
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setEmail(event.target.value)}
+                        type="email"
+                        value={email}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary md:col-span-2">
+                      Description
+                      <textarea
+                        className="min-h-28 rounded-lg border border-border bg-surface p-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        maxLength={2000}
+                        onChange={(event) => setDescription(event.target.value)}
+                        required
+                        value={description}
+                      />
                     </label>
                   </div>
                 </SectionCard>
-              )}
+              ) : null}
 
-              {step === 3 && (
+              {step === 3 ? (
                 <SectionCard
-                  title="Step 3 of 5: Location & Facilities"
-                  description="Provide the map location coordinates and select hostel amenities."
+                  description="Location and amenities are used by browse, detail, and compare screens."
+                  title="Step 3 of 6: Location & Facilities"
                 >
-                  <div className="space-y-5 p-1">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <FormField
-                        icon={MapPin}
-                        label="Address Line *"
-                        placeholder="e.g. Bagdol, Lalitpur"
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Area
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setArea(event.target.value)}
+                        required
+                        value={area}
                       />
-                      <div>
-                        <label className="block text-sm font-semibold text-primary">
-                          City *
-                          <select className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal cursor-pointer text-primary">
-                            <option>Lalitpur</option>
-                            <option>Kathmandu</option>
-                            <option>Pokhara</option>
-                            <option>Bhaktapur</option>
-                          </select>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Checkbox facilities list */}
-                    <div>
-                      <p className="text-sm font-semibold text-primary mb-3">
-                        Hostel Facilities
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {[
-                          "Wi-Fi",
-                          "Study Room",
-                          "CCTV Security",
-                          "Hot Water",
-                          "Laundry",
-                          "Meals Included",
-                          "Parking",
-                          "Power Backup",
-                          "RO Water",
-                        ].map((item) => (
-                          <label
-                            className="flex items-center gap-2 border border-border rounded-lg p-3 cursor-pointer bg-surface text-xs font-semibold"
-                            key={item}
-                          >
-                            <input
-                              defaultChecked
-                              className="size-4 rounded text-brand-teal"
-                              type="checkbox"
-                            />
-                            <span>{item}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      City
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setCity(event.target.value)}
+                        required
+                        value={city}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Province
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setProvince(event.target.value)}
+                        value={province}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Address
+                      <input
+                        className="h-12 rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                        onChange={(event) => setAddress(event.target.value)}
+                        value={address}
+                      />
+                    </label>
                   </div>
-                </SectionCard>
-              )}
-
-              {step === 4 && (
-                <SectionCard
-                  title="Step 4 of 5: Rooms & Pricing"
-                  description="List all available room configurations and prices."
-                >
-                  <div className="space-y-4 p-1 overflow-x-auto">
-                    <table className="w-full border-collapse text-left text-xs min-w-[600px]">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-border text-primary font-bold">
-                          <th className="p-3">Room Type</th>
-                          <th className="p-3">No. of Rooms</th>
-                          <th className="p-3">Beds per Room</th>
-                          <th className="p-3">Vacancy</th>
-                          <th className="p-3">Monthly Rent (NPR)</th>
-                          <th className="p-3">Meal Inclusion</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border/60">
-                        {[
-                          ["Single Room", "10", "1", "3", "9,600", "Included"],
-                          ["Double Sharing", "8", "2", "2", "7,500", "Included"],
-                          ["Triple Sharing", "6", "3", "1", "6,000", "Optional"],
-                          ["Dormitory (6 Beds)", "4", "6", "8", "4,500", "Not Included"],
-                        ].map(([type, cnt, beds, vac, rent, meal]) => (
-                          <tr key={type} className="hover:bg-slate-50/50">
-                            <td className="p-3 font-semibold text-primary">{type}</td>
-                            <td className="p-3">
-                              <input
-                                type="number"
-                                defaultValue={cnt}
-                                className="w-16 border rounded p-1 text-center"
-                              />
-                            </td>
-                            <td className="p-3">
-                              <input
-                                type="number"
-                                defaultValue={beds}
-                                className="w-16 border rounded p-1 text-center"
-                              />
-                            </td>
-                            <td className="p-3">
-                              <input
-                                type="number"
-                                defaultValue={vac}
-                                className="w-16 border rounded p-1 text-center"
-                              />
-                            </td>
-                            <td className="p-3">
-                              <input
-                                type="text"
-                                defaultValue={rent}
-                                className="w-24 border rounded p-1 text-center"
-                              />
-                            </td>
-                            <td className="p-3">
-                              <select
-                                defaultValue={meal}
-                                className="border rounded p-1 bg-transparent"
-                              >
-                                <option>Included</option>
-                                <option>Optional</option>
-                                <option>Not Included</option>
-                              </select>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </SectionCard>
-              )}
-
-              {step === 5 && (
-                <SectionCard
-                  title="Step 5 of 5: Documents & Verification"
-                  description="Upload official documents to qualify your property verification status."
-                >
-                  <div className="space-y-4 p-1 text-xs">
-                    {[
-                      {
-                        label: "Ownership Proof",
-                        desc: "Property deed or purchase certificate",
-                        file: "ownership_deed.pdf",
-                        status: "uploaded",
-                      },
-                      {
-                        label: "Citizenship ID",
-                        desc: "Owner citizenship card front/back",
-                        file: "citizenship_front.jpg",
-                        status: "uploaded",
-                      },
-                      {
-                        label: "PAN / VAT Document",
-                        desc: "Official business registration certificate",
-                        file: "pan_card.pdf",
-                        status: "uploaded",
-                      },
-                      {
-                        label: "Hostel License / Registration",
-                        desc: "Ward or municipal operational license",
-                        status: "pending",
-                      },
-                      {
-                        label: "Bank Account Details",
-                        desc: "Account statement or canceled cheque copy",
-                        status: "pending",
-                      },
-                    ].map((doc) => (
-                      <div
-                        className="rounded-xl border border-border p-4 bg-surface flex justify-between items-center gap-4"
-                        key={doc.label}
-                      >
-                        <div>
-                          <p className="font-bold text-sm text-primary">{doc.label}</p>
-                          <p className="text-muted-foreground mt-0.5">{doc.desc}</p>
-                          {doc.file && (
-                            <p className="text-[10px] text-brand-teal mt-1 font-semibold">
-                              &bull; {doc.file}
-                            </p>
-                          )}
-                        </div>
-                        <div className="shrink-0 flex items-center gap-3">
-                          {doc.status === "uploaded" ? (
-                            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-success">
-                              <Check className="size-3 mr-1" /> Uploaded
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => alert(`Upload triggered for ${doc.label}`)}
-                              className="rounded-lg border border-slate-300 px-3 py-1.5 font-bold hover:bg-slate-50 transition"
-                            >
-                              Upload File
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </SectionCard>
-              )}
-
-              {step === 6 && (
-                <SectionCard
-                  title="Step 6: Review & Submit"
-                  description="Verify all details are correct before sending for admin review."
-                >
-                  <div className="space-y-4 p-1 text-xs text-muted-foreground">
-                    <div className="divide-y divide-border border rounded-xl bg-surface">
-                      {[
-                        ["Hostel Name", hostelName || "Green View Hostel"],
-                        ["Warden Category", category.toUpperCase()],
-                        ["Owner Full Name", ownerName || "Aarav Shrestha"],
-                        ["Phone Number", phone || "9841002300"],
-                        ["Email", email || "owner@example.com"],
-                        ["Bed Capacity", `${capacity || "50"} Beds`],
-                      ].map(([lbl, val]) => (
-                        <div
-                          className="p-3.5 flex justify-between items-center"
-                          key={lbl}
+                  <div className="mt-5">
+                    <p className="mb-3 text-sm font-semibold text-primary">
+                      Hostel Facilities
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {facilityOptions.map((facility) => (
+                        <label
+                          className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface p-3 text-xs font-semibold"
+                          key={facility}
                         >
-                          <span className="font-semibold text-primary">{lbl}</span>
-                          <span className="font-medium text-slate-600">{val}</span>
-                        </div>
+                          <input
+                            checked={facilities.includes(facility)}
+                            className="size-4 rounded text-brand-teal"
+                            onChange={() => toggleFacility(facility)}
+                            type="checkbox"
+                          />
+                          <span>{facility}</span>
+                        </label>
                       ))}
                     </div>
-
-                    <div className="flex items-start gap-2.5 p-2">
-                      <input
-                        required
-                        className="size-4 rounded border-border mt-0.5 cursor-pointer"
-                        type="checkbox"
-                        id="reg-confirm"
-                      />
-                      <label
-                        htmlFor="reg-confirm"
-                        className="text-xs leading-relaxed text-muted-foreground cursor-pointer select-none"
-                      >
-                        I confirm that all the information provided is accurate and
-                        complete. I agree to HostelHub&apos;s Terms of Service and Privacy
-                        Policy.
-                      </label>
-                    </div>
                   </div>
+                  <label className="mt-5 grid gap-2 text-sm font-semibold text-primary">
+                    Rules
+                    <textarea
+                      className="min-h-24 rounded-lg border border-border bg-surface p-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                      onChange={(event) => setRules(event.target.value)}
+                      placeholder="One rule per line or comma separated"
+                      value={rules}
+                    />
+                  </label>
                 </SectionCard>
-              )}
+              ) : null}
 
-              {/* Back / Next buttons */}
-              <div className="flex justify-between items-center pt-2">
-                <button
-                  onClick={handlePrevStep}
-                  disabled={step === 1}
-                  className="rounded-lg border border-border px-5 py-2.5 text-xs font-semibold text-muted-foreground hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              {step === 4 ? (
+                <SectionCard
+                  description="Room configuration powers capacity, pricing, and public room cards."
+                  title="Step 4 of 6: Rooms, Pricing & Food"
                 >
-                  &larr; Back
-                </button>
-                <button
-                  onClick={handleNextStep}
-                  className="rounded-lg bg-brand-teal px-6 py-2.5 text-xs font-semibold text-white shadow hover:brightness-105 transition"
-                >
-                  {step === 6 ? "Submit for Approval" : "Continue"} &rarr;
-                </button>
-              </div>
-            </div>
-
-            {/* Right Summary Column */}
-            <div className="space-y-5">
-              <SectionCard title="Registration Summary">
-                <div className="space-y-4 text-xs text-muted-foreground p-1">
-                  <p className="rounded-lg bg-brand-teal-soft/40 p-4 text-brand-teal leading-relaxed">
-                    Hostel registrations require physical administrative review and verify
-                    checkouts. All listing details will remain offline until platform
-                    owner checks are complete.
-                  </p>
                   <div className="space-y-3">
-                    {[
-                      "Basic hostel profile details",
-                      "Facilities and map location",
-                      "Room inventory configuration",
-                      "PAN/VAT & municipal license verification",
-                      "Photos approval",
-                    ].map((item, idx) => (
-                      <div className="flex items-center gap-2" key={item}>
-                        <span
-                          className={cn(
-                            "size-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white",
-                            step > idx + 1 ? "bg-success" : "bg-slate-300",
-                          )}
+                    {rooms.map((room) => (
+                      <div
+                        className="grid gap-3 rounded-xl border border-border p-4 md:grid-cols-6"
+                        key={room.id}
+                      >
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm md:col-span-2"
+                          onChange={(event) =>
+                            updateRoom(room.id, { roomType: event.target.value })
+                          }
+                          placeholder="Room type"
+                          required
+                          value={room.roomType}
+                        />
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm"
+                          min={0}
+                          onChange={(event) =>
+                            updateRoom(room.id, { rooms: event.target.value })
+                          }
+                          placeholder="Rooms"
+                          required
+                          type="number"
+                          value={room.rooms}
+                        />
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm"
+                          min={0}
+                          onChange={(event) =>
+                            updateRoom(room.id, { bedsPerRoom: event.target.value })
+                          }
+                          placeholder="Beds"
+                          required
+                          type="number"
+                          value={room.bedsPerRoom}
+                        />
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm"
+                          min={0}
+                          onChange={(event) =>
+                            updateRoom(room.id, { monthlyRent: event.target.value })
+                          }
+                          placeholder="Rent"
+                          required
+                          type="number"
+                          value={room.monthlyRent}
+                        />
+                        <button
+                          className="inline-flex h-10 items-center justify-center rounded-md border border-border text-muted-foreground"
+                          disabled={rooms.length === 1}
+                          onClick={() =>
+                            setRooms((current) =>
+                              current.filter((item) => item.id !== room.id),
+                            )
+                          }
+                          type="button"
                         >
-                          {step > idx + 1 ? <Check className="size-3" /> : idx + 1}
-                        </span>
-                        <span>{item}</span>
+                          <Trash2 className="size-4" />
+                        </button>
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm"
+                          min={0}
+                          onChange={(event) =>
+                            updateRoom(room.id, { vacantBeds: event.target.value })
+                          }
+                          placeholder="Vacant beds"
+                          type="number"
+                          value={room.vacantBeds}
+                        />
+                        <select
+                          className="h-10 rounded-md border border-border px-3 text-sm md:col-span-2"
+                          onChange={(event) =>
+                            updateRoom(room.id, {
+                              mealInclusion: event.target
+                                .value as RoomConfig["mealInclusion"],
+                            })
+                          }
+                          value={room.mealInclusion}
+                        >
+                          <option>Included</option>
+                          <option>Optional</option>
+                          <option>Not Included</option>
+                        </select>
                       </div>
                     ))}
+                    <button
+                      className="inline-flex items-center gap-2 rounded-md border border-brand-teal px-3 py-2 text-sm font-semibold text-brand-teal"
+                      onClick={() => setRooms((current) => [...current, createRoom()])}
+                      type="button"
+                    >
+                      <Plus className="size-4" />
+                      Add Room Type
+                    </button>
+                  </div>
+                  <div className="mt-5 grid gap-4 md:grid-cols-3">
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Admission Fee
+                      <input
+                        className="h-11 rounded-md border border-border px-3 text-sm font-normal"
+                        min={0}
+                        onChange={(event) => setAdmissionFee(event.target.value)}
+                        type="number"
+                        value={admissionFee}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Meals Per Day
+                      <input
+                        className="h-11 rounded-md border border-border px-3 text-sm font-normal"
+                        min={0}
+                        onChange={(event) => setMealsPerDay(event.target.value)}
+                        type="number"
+                        value={mealsPerDay}
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-semibold text-primary">
+                      Food Notes
+                      <input
+                        className="h-11 rounded-md border border-border px-3 text-sm font-normal"
+                        onChange={(event) => setFoodNotes(event.target.value)}
+                        value={foodNotes}
+                      />
+                    </label>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                    <label className="flex items-center gap-2">
+                      <input
+                        checked={hasVeg}
+                        onChange={(event) => setHasVeg(event.target.checked)}
+                        type="checkbox"
+                      />
+                      Veg meals
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        checked={hasNonVeg}
+                        onChange={(event) => setHasNonVeg(event.target.checked)}
+                        type="checkbox"
+                      />
+                      Non-veg meals
+                    </label>
+                  </div>
+                </SectionCard>
+              ) : null}
+
+              {step === 5 ? (
+                <SectionCard
+                  description="Store public URLs for documents/photos until file upload is connected."
+                  title="Step 5 of 6: Documents & Media"
+                >
+                  <label className="grid gap-2 text-sm font-semibold text-primary">
+                    Photo URLs
+                    <textarea
+                      className="min-h-24 rounded-lg border border-border bg-surface p-3 text-sm font-normal outline-none transition focus:border-brand-teal"
+                      onChange={(event) => setPhotoUrls(event.target.value)}
+                      placeholder="One image URL per line"
+                      value={photoUrls}
+                    />
+                  </label>
+                  <div className="mt-5 space-y-3">
+                    {documents.map((document) => (
+                      <div
+                        className="grid gap-3 rounded-xl border border-border p-4 md:grid-cols-[220px_1fr_44px]"
+                        key={document.id}
+                      >
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm"
+                          onChange={(event) =>
+                            updateDocument(document.id, {
+                              documentType: event.target.value,
+                            })
+                          }
+                          placeholder="Document type"
+                          value={document.documentType}
+                        />
+                        <input
+                          className="h-10 rounded-md border border-border px-3 text-sm"
+                          onChange={(event) =>
+                            updateDocument(document.id, { fileUrl: event.target.value })
+                          }
+                          placeholder="https://..."
+                          type="url"
+                          value={document.fileUrl}
+                        />
+                        <button
+                          className="inline-flex h-10 items-center justify-center rounded-md border border-border text-muted-foreground"
+                          disabled={documents.length === 1}
+                          onClick={() =>
+                            setDocuments((current) =>
+                              current.filter((item) => item.id !== document.id),
+                            )
+                          }
+                          type="button"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      className="inline-flex items-center gap-2 rounded-md border border-brand-teal px-3 py-2 text-sm font-semibold text-brand-teal"
+                      onClick={() =>
+                        setDocuments((current) => [...current, createDocument()])
+                      }
+                      type="button"
+                    >
+                      <Upload className="size-4" />
+                      Add Document
+                    </button>
+                  </div>
+                </SectionCard>
+              ) : null}
+
+              {step === 6 ? (
+                <SectionCard
+                  description="Submit this application to create pending DB records."
+                  title="Step 6 of 6: Review"
+                >
+                  <div className="grid gap-3 text-sm text-primary md:grid-cols-2">
+                    <p>
+                      <span className="font-semibold">Hostel:</span> {hostelName || "-"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Owner:</span> {ownerName || "-"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Location:</span>{" "}
+                      {[area, city].filter(Boolean).join(", ") || "-"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Capacity:</span>{" "}
+                      {capacitySummary.totalBeds} beds / {capacitySummary.totalRooms}{" "}
+                      rooms
+                    </p>
+                    <p>
+                      <span className="font-semibold">Facilities:</span>{" "}
+                      {facilities.length}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Documents:</span>{" "}
+                      {
+                        documents.filter(
+                          (document) => document.documentType && document.fileUrl,
+                        ).length
+                      }
+                    </p>
+                  </div>
+                  <button
+                    className="mt-6 h-12 w-full rounded-lg bg-brand-teal text-sm font-semibold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60"
+                    disabled={isSubmitting}
+                    type="submit"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Application"}
+                  </button>
+                </SectionCard>
+              ) : null}
+            </div>
+
+            <aside className="space-y-5">
+              <SectionCard
+                description="Your application will stay pending until the platform approves it."
+                title="Application Summary"
+              >
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Selected Plan</span>
+                    <span className="font-semibold text-primary">
+                      {selectedPlanDetail.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Monthly Fee</span>
+                    <span className="font-semibold text-brand-teal">
+                      {formatMoney(selectedPlanDetail.price)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Beds</span>
+                    <span className="font-semibold text-primary">
+                      {capacitySummary.totalBeds}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Vacancy</span>
+                    <span className="font-semibold text-primary">
+                      {capacitySummary.vacantBeds}
+                    </span>
                   </div>
                 </div>
               </SectionCard>
-
-              {/* Selected package highlights */}
-              <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-                <p className="font-bold text-xs text-primary">Plan Highlights</p>
-                <ul className="text-xs text-muted-foreground space-y-2 border-t border-border/40 pt-3">
-                  <li className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-brand-teal" /> Verified badge on
-                    listing
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-brand-teal" /> Operations admin
-                    dashboard
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-brand-teal" /> Monthly fee receipt
-                    tracking
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-brand-teal" /> Integrated service
-                    provider search
-                  </li>
-                </ul>
-              </div>
-            </div>
+              <SectionCard title="Stored After Submit">
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  {[
+                    [Building2, "Hostel draft with public listing fields"],
+                    [FileCheck2, "Pending application and verification record"],
+                    [Upload, "Document URL records for platform review"],
+                  ].map(([Icon, label]) => (
+                    <div className="flex items-center gap-3" key={label as string}>
+                      <span className="rounded-lg bg-brand-teal-soft p-2 text-brand-teal">
+                        <Icon className="size-4" />
+                      </span>
+                      <span>{label as string}</span>
+                    </div>
+                  ))}
+                </div>
+              </SectionCard>
+            </aside>
           </div>
         )}
-      </section>
+
+        {!submitted ? (
+          <div className="mt-6 flex items-center justify-between">
+            <button
+              className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-primary disabled:opacity-40"
+              disabled={step === 1 || isSubmitting}
+              onClick={() => setStep((current) => Math.max(1, current - 1))}
+              type="button"
+            >
+              Back
+            </button>
+            {step < 6 ? (
+              <button
+                className="rounded-lg bg-brand-teal px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-105"
+                onClick={() => setStep((current) => Math.min(6, current + 1))}
+                type="button"
+              >
+                Continue
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </form>
     </PublicShell>
   );
 }

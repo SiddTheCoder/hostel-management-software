@@ -1,5 +1,5 @@
-import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
+import { PlatformUsersPageContent } from "@/app/_components/core-portal-pages";
 
 export default function PlatformUsersPage() {
-  return <PortalExperiencePage portal="platform" screen="users" />;
+  return <PlatformUsersPageContent />;
 }

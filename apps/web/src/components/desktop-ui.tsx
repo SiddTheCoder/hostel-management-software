@@ -9,4 +9,3 @@ export { PublicPricingPage } from "@/app/_components/public-pricing-page";
 export { PublicHostelRegistrationPage } from "@/app/_components/public-hostel-registration-page";
 export { ServiceProviderRegistrationPage } from "@/app/_components/service-provider-registration-page";
 export { AuthExperiencePage } from "@/app/_components/auth-experience-page";
-export { PortalExperiencePage } from "@/app/_components/portal-experience-page";

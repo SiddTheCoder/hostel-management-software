@@ -23,13 +23,12 @@ import { SignupScreen } from "../screens/SignupScreen";
 export type RootStackParamList = {
   Login: undefined;
   OtpVerification: {
-    channel: "email" | "phone";
+    channel: "email";
     challengeId: string;
-    email?: string;
+    email: string;
     identifier: string;
     name: string;
     password: string;
-    phone?: string;
   };
   PublicHome: {
     session: AuthSession;

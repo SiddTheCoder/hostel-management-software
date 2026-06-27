@@ -1,5 +1,5 @@
-import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
+import { PlatformHostelsPageContent } from "@/app/_components/core-portal-pages";
 
 export default function PlatformHostelsPage() {
-  return <PortalExperiencePage portal="platform" screen="hostels" />;
+  return <PlatformHostelsPageContent />;
 }

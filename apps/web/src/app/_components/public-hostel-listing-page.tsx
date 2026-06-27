@@ -10,11 +10,36 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
-import { hostelListings } from "@/lib/hostelhub-data";
 import { HostelCard, HostelListCard, NepalBannerGraphic, PublicShell } from "./shared";
+import {
+  hasFood,
+  mapPublicHostelToSummary,
+  type PublicHostel,
+} from "./public-hostel-data";
+
+type LoadState = "loading" | "ready" | "error";
+
+function hostelTypeQuery(value: string) {
+  if (value === "Boys") return "BOYS";
+  if (value === "Girls") return "GIRLS";
+  if (value === "Co-living") return "CO_LIVING";
+
+  return "";
+}
+
+function budgetQuery(value: string) {
+  if (value === "Under NPR 8,000") return { maxPrice: "7999" };
+  if (value === "NPR 8,000 - 10,000") {
+    return { maxPrice: "10000", minPrice: "8000" };
+  }
+  if (value === "Above NPR 10,000") return { minPrice: "10001" };
+
+  return {};
+}
 
 export function PublicHostelListingPage() {
   const searchParams = useSearchParams();
@@ -29,46 +54,88 @@ export function PublicHostelListingPage() {
   const [selectedFood, setSelectedFood] = useState<string>("Any");
   const [selectedFacilities, setSelectedFacilities] = useState<string>("All Facilities");
   const [sortBy, setSortBy] = useState<string>("Recommended");
+  const [hostels, setHostels] = useState<PublicHostel[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadHostels() {
+      setLoadState("loading");
+      setMessage("");
+
+      try {
+        const params = new URLSearchParams();
+        const budget = budgetQuery(selectedBudget);
+        const type = hostelTypeQuery(selectedType);
+
+        if (query.trim()) params.set("q", query.trim());
+        if (selectedArea !== "All Areas") params.set("area", selectedArea);
+        if (type) params.set("type", type);
+        if (selectedRoom !== "All Room Types") params.set("roomType", selectedRoom);
+        if (selectedFacilities !== "All Facilities") {
+          params.set("facility", selectedFacilities);
+        }
+        Object.entries(budget).forEach(([key, value]) => params.set(key, value));
+
+        const data = await browserApi<{ hostels: PublicHostel[] }>(
+          `/api/v1/public/hostels${params.size ? `?${params.toString()}` : ""}`,
+          { signal: controller.signal },
+        );
+
+        setHostels(data.hostels);
+        setLoadState("ready");
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setMessage(
+          error instanceof Error ? error.message : "Could not load published hostels.",
+        );
+        setLoadState("error");
+      }
+    }
+
+    const timer = window.setTimeout(() => {
+      void loadHostels();
+    }, 180);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [
+    query,
+    selectedArea,
+    selectedBudget,
+    selectedFacilities,
+    selectedRoom,
+    selectedType,
+  ]);
+
+  const hostelRows = useMemo(
+    () =>
+      hostels.map((hostel) => ({
+        raw: hostel,
+        summary: mapPublicHostelToSummary(hostel),
+      })),
+    [hostels],
+  );
 
   const filtered = useMemo(() => {
-    let result = hostelListings.filter((hostel) => {
-      const matchesQuery = [hostel.name, hostel.area, hostel.city, hostel.type].some(
-        (field) => field.toLowerCase().includes(query.toLowerCase()),
-      );
-      if (!matchesQuery) return false;
+    let result = hostelRows
+      .filter(({ raw }) => {
+        if (selectedFood !== "Any") {
+          const hostelHasFood = hasFood(raw);
+          if (selectedFood === "With Food" && !hostelHasFood) return false;
+          if (selectedFood === "Without Food" && hostelHasFood) return false;
+        }
 
-      if (
-        selectedArea !== "All Areas" &&
-        hostel.city !== selectedArea &&
-        hostel.area !== selectedArea
-      )
-        return false;
-      if (selectedType !== "All Types" && hostel.type !== selectedType.toLowerCase())
-        return false;
-      if (selectedRoom !== "All Room Types" && !hostel.roomTypes.includes(selectedRoom))
-        return false;
-      if (selectedFood !== "Any") {
-        const hasFood = hostel.facilities.includes("Food");
-        if (selectedFood === "With Food" && !hasFood) return false;
-        if (selectedFood === "Without Food" && hasFood) return false;
-      }
-      if (selectedBudget !== "Any Budget") {
-        if (selectedBudget === "Under NPR 8,000" && hostel.price >= 8000) return false;
-        if (
-          selectedBudget === "NPR 8,000 - 10,000" &&
-          (hostel.price < 8000 || hostel.price > 10000)
-        )
-          return false;
-        if (selectedBudget === "Above NPR 10,000" && hostel.price <= 10000) return false;
-      }
-      if (
-        selectedFacilities !== "All Facilities" &&
-        !hostel.facilities.includes(selectedFacilities)
-      )
-        return false;
-
-      return true;
-    });
+        return true;
+      })
+      .map(({ summary }) => summary);
 
     if (sortBy === "Price: Low to High") {
       result = [...result].sort((a, b) => a.price - b.price);
@@ -79,16 +146,18 @@ export function PublicHostelListingPage() {
     }
 
     return result;
-  }, [
-    query,
-    selectedArea,
-    selectedBudget,
-    selectedType,
-    selectedRoom,
-    selectedFood,
-    selectedFacilities,
-    sortBy,
-  ]);
+  }, [selectedFood, hostelRows, sortBy]);
+
+  const areaOptions = useMemo(() => {
+    const areas = new Set<string>(["All Areas"]);
+
+    hostels.forEach((hostel) => {
+      if (hostel.location.city) areas.add(hostel.location.city);
+      if (hostel.location.area) areas.add(hostel.location.area);
+    });
+
+    return [...areas];
+  }, [hostels]);
 
   return (
     <PublicShell active="browse">
@@ -168,15 +237,7 @@ export function PublicHostelListingPage() {
                   Area
                 </p>
                 <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-thin pr-1">
-                  {[
-                    "All Areas",
-                    "Lalitpur",
-                    "Kathmandu",
-                    "Pokhara",
-                    "Bagdol",
-                    "Koteshwor",
-                    "Lakeside",
-                  ].map((areaName) => {
+                  {areaOptions.map((areaName) => {
                     const active = selectedArea === areaName;
                     return (
                       <button
@@ -194,8 +255,9 @@ export function PublicHostelListingPage() {
                           <span className="text-[10px] font-normal text-muted-foreground">
                             (
                             {
-                              hostelListings.filter(
-                                (h) => h.area === areaName || h.city === areaName,
+                              hostelRows.filter(
+                                ({ summary }) =>
+                                  summary.area === areaName || summary.city === areaName,
                               ).length
                             }
                             )
@@ -366,8 +428,11 @@ export function PublicHostelListingPage() {
               <div className="space-y-0.5">
                 <h3 className="font-bold text-sm text-primary">Showing Hostels</h3>
                 <p className="text-[11px] text-muted-foreground font-semibold">
-                  {filtered.length} verified{" "}
-                  {filtered.length === 1 ? "result" : "results"} found in Nepal
+                  {loadState === "loading"
+                    ? "Loading published hostels..."
+                    : `${filtered.length} verified ${
+                        filtered.length === 1 ? "result" : "results"
+                      } found in Nepal`}
                 </p>
               </div>
 
@@ -424,7 +489,22 @@ export function PublicHostelListingPage() {
             </div>
 
             {/* Results Grid / List */}
-            {filtered.length === 0 ? (
+            {message ? (
+              <div className="rounded-xl border border-danger/20 bg-danger/5 p-4 text-sm font-semibold text-danger">
+                {message}
+              </div>
+            ) : null}
+
+            {loadState === "loading" ? (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    className="h-72 animate-pulse rounded-xl border border-border bg-muted"
+                    key={index}
+                  />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="text-center py-20 rounded-xl border border-dashed border-border bg-slate-50/50">
                 <AlertIcon className="mx-auto size-10 text-muted-foreground" />
                 <p className="mt-4 font-bold text-primary">

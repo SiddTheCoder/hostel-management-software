@@ -67,12 +67,8 @@ function normalizeEmail(email?: string | null) {
   return email?.trim().toLowerCase() || undefined;
 }
 
-function normalizePhone(phone?: string | null) {
-  return phone?.trim() || undefined;
-}
-
-function normalizeOtpIdentifier(channel: OtpRequestInput["channel"], identifier: string) {
-  return channel === "email" ? identifier.trim().toLowerCase() : identifier.trim();
+function normalizeOtpIdentifier(identifier: string) {
+  return identifier.trim().toLowerCase();
 }
 
 function otpTtlMs() {
@@ -104,16 +100,32 @@ function generateOtpCode() {
   return String(randomInt(100000, 1000000));
 }
 
-function otpDeliveryProvider(channel: OtpRequestInput["channel"]) {
-  if (channel === "email") {
-    return process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL ? "resend" : null;
-  }
+function otpDeliveryProvider() {
+  return process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL ? "resend" : null;
+}
 
-  return process.env.TWILIO_ACCOUNT_SID &&
-    process.env.TWILIO_AUTH_TOKEN &&
-    (process.env.TWILIO_MESSAGING_SERVICE_SID || process.env.TWILIO_FROM_PHONE)
-    ? "twilio"
-    : null;
+function renderOtpEmail(code: string) {
+  return `<!doctype html>
+<html>
+  <body style="margin:0;background:#f3faf8;padding:32px 16px;font-family:Inter,Arial,sans-serif;color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;margin:0 auto;background:#ffffff;border:1px solid #dbeee8;border-radius:14px;overflow:hidden;">
+      <tr>
+        <td style="padding:28px 32px;background:#0f766e;color:#ffffff;">
+          <h1 style="margin:0;font-size:22px;line-height:1.25;">HostelHub verification</h1>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:32px;">
+          <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#334155;">Use this one-time code to verify your email and finish creating your HostelHub account.</p>
+          <div style="margin:28px 0;text-align:center;">
+            <span style="display:inline-block;border:1px dashed #14b8a6;border-radius:12px;background:#f0fdfa;padding:14px 24px;font-size:30px;font-weight:800;letter-spacing:8px;color:#0f766e;">${code}</span>
+          </div>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#64748b;">This code expires soon. If you did not request it, you can ignore this email.</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 }
 
 async function sendResendOtp(input: { code: string; identifier: string }) {
@@ -132,6 +144,7 @@ async function sendResendOtp(input: { code: string; identifier: string }) {
     body: JSON.stringify({
       from,
       subject: "Your HostelHub verification code",
+      html: renderOtpEmail(input.code),
       text: `Your HostelHub verification code is ${input.code}. It expires soon.`,
       to: [input.identifier],
     }),
@@ -147,55 +160,12 @@ async function sendResendOtp(input: { code: string; identifier: string }) {
   }
 }
 
-async function sendTwilioSmsOtp(input: { code: string; identifier: string }) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-  const fromPhone = process.env.TWILIO_FROM_PHONE;
-
-  if (!accountSid || !authToken || (!messagingServiceSid && !fromPhone)) {
-    throw new AuthServiceError(
-      "Twilio SMS OTP is not configured.",
-      "OTP_DELIVERY_NOT_CONFIGURED",
-      503,
-    );
-  }
-
-  const body = new URLSearchParams({
-    Body: `Your HostelHub verification code is ${input.code}. It expires soon.`,
-    To: input.identifier,
-  });
-
-  if (messagingServiceSid) {
-    body.set("MessagingServiceSid", messagingServiceSid);
-  } else if (fromPhone) {
-    body.set("From", fromPhone);
-  }
-
-  const credentials = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
-  const response = await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-    {
-      body,
-      headers: {
-        Authorization: `Basic ${credentials}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      method: "POST",
-    },
-  );
-
-  if (!response.ok) {
-    throw new AuthServiceError("Could not send OTP SMS.", "OTP_DELIVERY_FAILED", 502);
-  }
-}
-
 async function dispatchOtpChallenge(input: {
   channel: OtpRequestInput["channel"];
   code: string;
   identifier: string;
 }) {
-  const provider = otpDeliveryProvider(input.channel);
+  const provider = otpDeliveryProvider();
 
   if (!provider) {
     if (process.env.NODE_ENV !== "production") {
@@ -215,10 +185,6 @@ async function dispatchOtpChallenge(input: {
 
   if (provider === "resend") {
     await sendResendOtp(input);
-  }
-
-  if (provider === "twilio") {
-    await sendTwilioSmsOtp(input);
   }
 
   return {
@@ -277,7 +243,7 @@ export async function requestOtpChallenge(
 ) {
   await connectToDatabase();
 
-  const identifier = normalizeOtpIdentifier(input.channel, input.identifier);
+  const identifier = normalizeOtpIdentifier(input.identifier);
   const rateLimitStartedAt = new Date(Date.now() - otpRateLimitWindowMs());
   const recentRequestCount = await OtpChallengeModel.countDocuments({
     channel: input.channel,
@@ -385,7 +351,6 @@ export async function verifyOtpChallenge(input: OtpVerifyInput) {
 
 async function findVerifiedRegistrationChallenge(input: RegisterInput) {
   const email = normalizeEmail(input.email);
-  const phone = normalizePhone(input.phone);
   const challenge = await OtpChallengeModel.findOne({
     _id: input.otpChallengeId,
     consumedAt: null,
@@ -404,10 +369,8 @@ async function findVerifiedRegistrationChallenge(input: RegisterInput) {
 
   const challengeMatchesEmail =
     challenge.channel === "email" && email === challenge.identifier;
-  const challengeMatchesPhone =
-    challenge.channel === "phone" && phone === challenge.identifier;
 
-  if (!challengeMatchesEmail && !challengeMatchesPhone) {
+  if (!challengeMatchesEmail) {
     throw new AuthServiceError(
       "Verified OTP does not match this registration.",
       "REGISTRATION_OTP_MISMATCH",
@@ -425,16 +388,18 @@ export async function registerPublicAccount(
   await connectToDatabase();
 
   const email = normalizeEmail(input.email);
-  const phone = normalizePhone(input.phone);
-  const duplicateFilters = [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])];
+  if (!email) {
+    throw new AuthServiceError("Email is required.", "EMAIL_REQUIRED", 400);
+  }
+
   const existingUser = await UserModel.findOne({
-    $or: duplicateFilters,
+    email,
     isDeleted: { $ne: true },
   });
 
   if (existingUser) {
     throw new AuthServiceError(
-      "An account already exists for this email or phone.",
+      "An account already exists for this email.",
       "ACCOUNT_ALREADY_EXISTS",
       409,
     );
@@ -443,7 +408,6 @@ export async function registerPublicAccount(
   const challenge = await findVerifiedRegistrationChallenge({
     ...input,
     email,
-    phone,
   });
   const now = new Date();
   const user = await UserModel.create({
@@ -451,8 +415,6 @@ export async function registerPublicAccount(
     emailVerifiedAt: challenge.channel === "email" ? now : undefined,
     name: input.name,
     passwordHash: await hashPassword(input.password),
-    phone,
-    phoneVerifiedAt: challenge.channel === "phone" ? now : undefined,
     role: Role.PUBLIC_USER,
     status: "ACTIVE",
   });
@@ -575,9 +537,9 @@ export async function authenticateWithGoogle(
 export async function login(input: LoginInput, context?: RequestContext) {
   await connectToDatabase();
 
-  const identifier = input.identifier.toLowerCase();
+  const identifier = input.identifier.trim().toLowerCase();
   const user = await UserModel.findOne({
-    $or: [{ email: identifier }, { phone: input.identifier }],
+    email: identifier,
     isDeleted: { $ne: true },
     status: "ACTIVE",
   }).select("+passwordHash");

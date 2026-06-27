@@ -1,5 +1,5 @@
-import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
+import { HostelAdminInquiriesPageContent } from "@/app/_components/core-portal-pages";
 
 export default function HostelAdminInquiriesPage() {
-  return <PortalExperiencePage portal="admin" screen="inquiries" />;
+  return <HostelAdminInquiriesPageContent />;
 }

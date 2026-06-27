@@ -1,11 +1,5 @@
-"use client";
-
-import { useParams } from "next/navigation";
-
-import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
+import { notFound } from "next/navigation";
 
 export default function PlatformScreenPage() {
-  const params = useParams<{ screen: string }>();
-
-  return <PortalExperiencePage portal="platform" screen={params.screen} />;
+  notFound();
 }

@@ -58,24 +58,10 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
-import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
 import {
   AnimatedPage,
   Breadcrumbs,
@@ -94,14 +80,44 @@ import {
   type AuthMode,
   type PortalKind,
 } from "./shared";
+import {
+  DEFAULT_HOSTEL_IMAGE,
+  mapPublicHostelToSummary,
+  type PublicHostel,
+} from "./public-hostel-data";
+
+const PUBLIC_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=80";
 
 export function PublicHomePage() {
   const [searchVal, setSearchVal] = useState("");
+  const [featuredHostels, setFeaturedHostels] = useState<
+    ReturnType<typeof mapPublicHostelToSummary>[]
+  >([]);
 
-  const featuredHostels = [...hostelListings]
-    .filter((hostel) => hostel.verified)
-    .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
-    .slice(0, 4);
+  useEffect(() => {
+    async function loadFeaturedHostels() {
+      try {
+        const data = await browserApi<{ hostels: PublicHostel[] }>(
+          "/api/v1/public/hostels",
+        );
+
+        setFeaturedHostels(
+          data.hostels
+            .map(mapPublicHostelToSummary)
+            .filter((hostel) => hostel.verified)
+            .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
+            .slice(0, 4),
+        );
+      } catch {
+        setFeaturedHostels([]);
+      }
+    }
+
+    void loadFeaturedHostels();
+  }, []);
+
+  const heroHostel = featuredHostels[0];
 
   const landingLinks = [
     {
@@ -164,7 +180,7 @@ export function PublicHomePage() {
         <div className="absolute right-0 top-0 hidden h-full w-[54%] lg:block">
           <div
             className="h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: `url("${imageSet.lobby}")` }}
+            style={{ backgroundImage: `url("${PUBLIC_HERO_IMAGE}")` }}
           />
           {/* Fading overlay from white to transparent (left-to-right) */}
           <div className="absolute inset-y-0 left-0 w-48 bg-gradient-to-r from-white via-white/80 to-transparent" />
@@ -227,20 +243,26 @@ export function PublicHomePage() {
             <div className="rounded-xl border border-border/80 bg-white/95 backdrop-blur-sm p-4 shadow-2xl flex gap-4 w-[320px] mt-36 transition hover:scale-[1.01]">
               <div
                 className="size-24 rounded-lg bg-cover bg-center shrink-0 shadow-sm"
-                style={{ backgroundImage: `url("${hostelListings[0].image}")` }}
+                style={{
+                  backgroundImage: `url("${heroHostel?.image ?? DEFAULT_HOSTEL_IMAGE}")`,
+                }}
               />
               <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                 <div>
                   <h4
                     className="font-bold text-sm text-primary truncate"
-                    title="Green View Hostel"
+                    title={heroHostel?.name ?? "Verified hostel"}
                   >
-                    Green View Hostel
+                    {heroHostel?.name ?? "Verified hostel"}
                   </h4>
                   <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px]">
                     <Star className="size-3 fill-warning text-warning" />
-                    <span className="font-bold text-primary">4.6</span>
-                    <span className="text-muted-foreground font-normal">(120)</span>
+                    <span className="font-bold text-primary">
+                      {heroHostel?.rating ? heroHostel.rating.toFixed(1) : "New"}
+                    </span>
+                    <span className="text-muted-foreground font-normal">
+                      ({heroHostel?.reviews ?? 0})
+                    </span>
                     <StatusPill
                       tone="success"
                       className="ml-auto text-[8px] py-0 px-1 rounded-sm font-bold"
@@ -249,11 +271,13 @@ export function PublicHomePage() {
                     </StatusPill>
                   </div>
                   <p className="mt-1 text-[10px] text-muted-foreground font-semibold truncate">
-                    Lalitpur, Kathmandu
+                    {heroHostel
+                      ? `${heroHostel.area}, ${heroHostel.city}`
+                      : "Published hostels appear here"}
                   </p>
                 </div>
                 <p className="mt-1 font-bold text-primary text-xs">
-                  NPR 9,600{" "}
+                  {heroHostel ? formatMoney(heroHostel.price) : "NPR --"}{" "}
                   <span className="font-normal text-[10px] text-muted-foreground">
                     / month
                   </span>
@@ -283,6 +307,11 @@ export function PublicHomePage() {
           </Link>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {featuredHostels.length === 0 ? (
+            <div className="col-span-full rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              Published and verified hostels from the database will appear here.
+            </div>
+          ) : null}
           {featuredHostels.map((hostel) => (
             <HostelCard hostel={hostel} key={hostel.id} />
           ))}
@@ -327,7 +356,7 @@ export function PublicHomePage() {
           <div className="relative min-h-[260px] bg-slate-900">
             <div
               className="absolute inset-0 bg-cover bg-center opacity-80 transition duration-500 group-hover:scale-105"
-              style={{ backgroundImage: `url("${imageSet.lobby}")` }}
+              style={{ backgroundImage: `url("${PUBLIC_HERO_IMAGE}")` }}
             />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/40 to-brand-teal/50" />
             <div className="relative flex h-full flex-col justify-between p-7 text-white">

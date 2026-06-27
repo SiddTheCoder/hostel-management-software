@@ -30,11 +30,13 @@ type LoadState = "idle" | "loading" | "ready" | "error";
 
 type Resident = {
   bedId: string;
+  demoDataLabel?: string;
   depositAmount: number;
   email?: string;
   firstName: string;
   fullName?: string;
   id: string;
+  isDemoData?: boolean;
   lastName: string;
   moveInDate: string;
   phone: string;
@@ -171,6 +173,17 @@ function StatusBadge({ children }: { children: string }) {
   );
 }
 
+function DemoDataBadge({ label }: { label?: string }) {
+  return (
+    <span
+      className="inline-flex w-fit items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-700"
+      title={label || "Seeded demo/test data"}
+    >
+      Mock/Test data
+    </span>
+  );
+}
+
 function PageHeader({
   action,
   description,
@@ -223,11 +236,13 @@ function Panel({
 }
 
 function Input({
+  defaultValue,
   label,
   name,
   required,
   type = "text",
 }: {
+  defaultValue?: string | number;
   label: string;
   name: string;
   required?: boolean;
@@ -238,6 +253,7 @@ function Input({
       {label}
       <input
         className="h-11 rounded-md border border-border bg-background px-3 text-sm font-normal outline-none focus:border-role-admin"
+        defaultValue={defaultValue}
         name={name}
         required={required}
         type={type}
@@ -248,11 +264,13 @@ function Input({
 
 function Select({
   children,
+  defaultValue,
   label,
   name,
   required,
 }: {
   children: ReactNode;
+  defaultValue?: string;
   label: string;
   name: string;
   required?: boolean;
@@ -262,6 +280,7 @@ function Select({
       {label}
       <select
         className="h-11 rounded-md border border-border bg-background px-3 text-sm font-normal outline-none focus:border-role-admin"
+        defaultValue={defaultValue}
         name={name}
         required={required}
       >
@@ -271,12 +290,21 @@ function Select({
   );
 }
 
-function TextArea({ label, name }: { label: string; name: string }) {
+function TextArea({
+  defaultValue,
+  label,
+  name,
+}: {
+  defaultValue?: string;
+  label: string;
+  name: string;
+}) {
   return (
     <label className="grid gap-2 text-sm font-semibold text-primary">
       {label}
       <textarea
         className="min-h-24 rounded-md border border-border bg-background px-3 py-2 text-sm font-normal outline-none focus:border-role-admin"
+        defaultValue={defaultValue}
         name={name}
       />
     </label>
@@ -523,7 +551,14 @@ export function HostelAdminResidentsPage() {
                       onClick={() => setSelectedResidentId(resident.id)}
                     >
                       <td className="py-3 font-semibold text-primary">
-                        {resident.firstName} {resident.lastName}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span>
+                            {resident.firstName} {resident.lastName}
+                          </span>
+                          {resident.isDemoData ? (
+                            <DemoDataBadge label={resident.demoDataLabel} />
+                          ) : null}
+                        </div>
                         <p className="text-xs font-normal text-muted-foreground">
                           Room {resident.roomId.slice(-4)} / Bed{" "}
                           {resident.bedId.slice(-4)}
@@ -581,6 +616,11 @@ export function HostelAdminResidentsPage() {
                   <p className="text-lg font-bold text-primary">
                     {selectedResident.firstName} {selectedResident.lastName}
                   </p>
+                  {selectedResident.isDemoData ? (
+                    <div className="mt-2">
+                      <DemoDataBadge label={selectedResident.demoDataLabel} />
+                    </div>
+                  ) : null}
                   <p className="text-sm text-muted-foreground">
                     {selectedResident.phone}
                   </p>

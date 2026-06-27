@@ -1,14 +1,12 @@
 "use client";
 
 import {
+  AlertCircle as AlertIcon,
   ArrowRight,
   BadgeCheck,
   BedDouble,
-  Building2,
   CheckCircle2,
   ChevronRight,
-  FileText,
-  Home,
   KeyRound,
   MapPin,
   PhoneCall,
@@ -18,31 +16,76 @@ import {
   Utensils,
   Wifi,
   Wrench,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
-import { hostelListings, imageSet } from "@/lib/hostelhub-data";
 
 import { Breadcrumbs, PublicShell, StatusPill, formatMoney, humanize } from "./shared";
+import {
+  DEFAULT_HOSTEL_IMAGE,
+  formatHostelAddress,
+  mapPublicHostelToSummary,
+  roomTypeLabel,
+  type PublicHostel,
+} from "./public-hostel-data";
+
+function iconForFacility(label: string): LucideIcon {
+  if (/wifi|wi-fi|internet/i.test(label)) return Wifi;
+  if (/food|meal|mess/i.test(label)) return Utensils;
+  if (/security|cctv|warden|safe/i.test(label)) return ShieldCheck;
+  if (/repair|backup|power|maintenance/i.test(label)) return Wrench;
+  if (/room|bed|study/i.test(label)) return BedDouble;
+
+  return CheckCircle2;
+}
 
 export function PublicHostelDetailPage() {
   const params = useParams<{ slug: string }>();
-  const hostel =
-    hostelListings.find((item) => item.slug === params.slug) ?? hostelListings[0];
-
+  const slug = params.slug;
+  const [hostel, setHostel] = useState<PublicHostel | null>(null);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [message, setMessage] = useState("");
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const images = [
-    hostel.image,
-    imageSet.room,
-    imageSet.lobby,
-    imageSet.exteriorA,
-    imageSet.foodA,
-  ];
+  useEffect(() => {
+    async function loadHostel() {
+      setState("loading");
+      setMessage("");
+
+      try {
+        const data = await browserApi<{ hostel: PublicHostel }>(
+          `/api/v1/public/hostels/${encodeURIComponent(slug)}`,
+        );
+
+        setHostel(data.hostel);
+        setCurrentImgIdx(0);
+        setState("ready");
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Could not load hostel.");
+        setState("error");
+      }
+    }
+
+    if (slug) {
+      void loadHostel();
+    }
+  }, [slug]);
+
+  const hostelSummary = hostel ? mapPublicHostelToSummary(hostel) : null;
+
+  const images = useMemo(() => {
+    const photoUrls = hostel?.photos
+      .map((photo) => photo.url)
+      .filter((url): url is string => Boolean(url));
+
+    return photoUrls?.length ? photoUrls : [DEFAULT_HOSTEL_IMAGE];
+  }, [hostel]);
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -50,116 +93,139 @@ export function PublicHostelDetailPage() {
     { id: "facilities", label: "Facilities" },
     { id: "food", label: "Food" },
     { id: "rules", label: "Rules" },
-    { id: "reviews", label: `Reviews (${hostel.reviews})` },
+    { id: "reviews", label: `Reviews (${hostelSummary?.reviews ?? 0})` },
     { id: "location", label: "Location" },
   ];
+
+  if (state === "loading") {
+    return (
+      <PublicShell active="browse">
+        <div className="mx-auto max-w-[1440px] space-y-5 px-4 py-8 md:px-8">
+          <div className="h-96 animate-pulse rounded-lg border border-border bg-muted" />
+          <div className="grid gap-4 md:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div className="h-28 animate-pulse rounded-lg bg-muted" key={index} />
+            ))}
+          </div>
+        </div>
+      </PublicShell>
+    );
+  }
+
+  if (!hostel || !hostelSummary) {
+    return (
+      <PublicShell active="browse">
+        <div className="mx-auto max-w-[900px] px-6 py-16 text-center">
+          <AlertIcon className="mx-auto size-10 text-muted-foreground" />
+          <h1 className="mt-4 text-2xl font-bold text-primary">Hostel unavailable</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {message || "This hostel is not published or verified yet."}
+          </p>
+          <Link
+            className="mt-6 inline-flex rounded-lg bg-brand-teal px-5 py-3 text-sm font-bold text-white"
+            href="/hostels"
+          >
+            Browse hostels
+          </Link>
+        </div>
+      </PublicShell>
+    );
+  }
+
+  const address = formatHostelAddress(hostel);
+  const contactPhone = hostel.contact?.phone || "015971234";
+  const contactEmail = hostel.contact?.email;
 
   const quickStats = [
     {
       detail: "/ month",
       icon: KeyRound,
       label: "Starting from",
-      value: formatMoney(hostel.price),
+      value: formatMoney(hostelSummary.price),
     },
     {
-      detail: "Rooms",
+      detail: "Beds",
       icon: BedDouble,
       label: "Vacancy",
-      value: hostel.vacancy.toString(),
+      value: hostelSummary.vacancy.toString(),
     },
     {
-      detail: `${hostel.reviews} reviews`,
+      detail: `${hostelSummary.reviews} reviews`,
       icon: ShieldCheck,
       label: "Rating",
-      value: hostel.rating.toString(),
+      value: hostelSummary.rating ? hostelSummary.rating.toFixed(1) : "New",
     },
   ];
 
-  const highlights = [
-    { detail: "24/7 CCTV & Security", icon: ShieldCheck, label: "Safe & Secure" },
-    { detail: "100 Mbps Internet", icon: Wifi, label: "High-Speed Wi-Fi" },
-    { detail: "Quiet Study Areas", icon: FileText, label: "Study Friendly" },
-    { detail: "Nutritious & Tasty", icon: Utensils, label: "Hygienic Food" },
-    { detail: "24/7 Electricity", icon: Wrench, label: "Power Backup" },
-    { detail: "Daily Cleaning", icon: Home, label: "Housekeeping" },
-  ];
+  const highlights = (
+    hostel.facilities.length > 0 ? hostel.facilities : ["Verified profile"]
+  )
+    .slice(0, 6)
+    .map((facility) => ({
+      detail: "Published by hostel",
+      icon: iconForFacility(facility),
+      label: facility,
+    }));
 
-  const rooms = [
-    {
-      features: ["Attached Bathroom", "Study Table, Wardrobe"],
-      image: imageSet.room,
-      rent: hostel.price + 8000,
-      seats: 12,
-      type: "Single Room",
-    },
-    {
-      features: ["Separate Beds", "Study Table, Wardrobe"],
-      image: imageSet.lobby,
-      rent: hostel.price + 5300,
-      seats: 18,
-      type: "Double Sharing",
-    },
-    {
-      features: ["Single Beds", "Study Table, Wardrobe"],
-      image: imageSet.exteriorA,
-      rent: hostel.price + 3000,
-      seats: 20,
-      type: "Triple Sharing",
-    },
-    {
-      features: ["Bunk Beds", "Locker, Study Table"],
-      image: imageSet.exteriorB,
-      rent: Math.max(6500, hostel.price + 500),
-      seats: 8,
-      type: "Dormitory (4 Sharing)",
-    },
-  ];
+  const baseRent = hostel.pricing?.monthlyRentMin ?? hostelSummary.price;
+  const maxRent = hostel.pricing?.monthlyRentMax ?? baseRent;
+  const roomTypes = hostel.roomTypes.length > 0 ? hostel.roomTypes : ["Room"];
 
-  const facilities = [
-    { detail: "High Speed", icon: Wifi, label: "Wi-Fi" },
-    { detail: "CCTV & Guards", icon: ShieldCheck, label: "24/7 Security" },
-    { detail: "24/7 Electricity", icon: Wrench, label: "Power Backup" },
-    { detail: "Solar & Geyser", icon: CheckCircle2, label: "Hot Water" },
-    { detail: "Washing Machine", icon: FileText, label: "Laundry" },
-    { detail: "Quiet Area", icon: FileText, label: "Study Room" },
-    { detail: "TV & Games", icon: Users, label: "Common Room" },
-    { detail: "Bike Parking", icon: Building2, label: "Parking" },
-  ];
+  const rooms = roomTypes.map((roomType, index) => {
+    const rent =
+      roomTypes.length <= 1
+        ? baseRent
+        : Math.round(baseRent + ((maxRent - baseRent) / (roomTypes.length - 1)) * index);
+
+    return {
+      features: hostel.facilities.slice(0, 2),
+      image: images[index % images.length],
+      rent,
+      seats: hostel.capacitySummary?.vacantBeds ?? hostelSummary.vacancy,
+      type: roomTypeLabel(roomType),
+    };
+  });
+
+  const facilities = (
+    hostel.facilities.length > 0 ? hostel.facilities : ["Published profile"]
+  ).map((facility) => ({
+    detail: "Available",
+    icon: iconForFacility(facility),
+    label: facility,
+  }));
 
   const foodDetails = [
-    "3 Times Meal (Breakfast, Lunch, Dinner)",
-    "Hygienic & Nutritious Meals",
-    "Weekly Menu Plan",
-  ];
+    hostel.food?.mealsPerDay ? `${hostel.food.mealsPerDay} meals per day` : null,
+    hostel.food?.hasVeg ? "Vegetarian meals available" : null,
+    hostel.food?.hasNonVeg ? "Non-vegetarian meals available" : null,
+    hostel.food?.notes,
+  ].filter((detail): detail is string => Boolean(detail));
 
-  const hostelRules = [
-    "Visitors not allowed in rooms",
-    "No smoking or alcohol",
-    "Maintain silence after 10 PM",
-    "Respect hostel property & others",
-  ];
+  const hostelRules =
+    hostel.rules.length > 0 ? hostel.rules : ["Rules are shared by the hostel team."];
 
   const reviewCounts = [
-    { count: Math.round(hostel.reviews * 0.72), stars: 5 },
-    { count: Math.round(hostel.reviews * 0.2), stars: 4 },
-    { count: Math.round(hostel.reviews * 0.05), stars: 3 },
-    { count: Math.max(1, Math.round(hostel.reviews * 0.02)), stars: 2 },
-    { count: Math.max(1, Math.round(hostel.reviews * 0.01)), stars: 1 },
+    { count: Math.round(hostelSummary.reviews * 0.72), stars: 5 },
+    { count: Math.round(hostelSummary.reviews * 0.2), stars: 4 },
+    { count: Math.round(hostelSummary.reviews * 0.05), stars: 3 },
+    { count: Math.round(hostelSummary.reviews * 0.02), stars: 2 },
+    { count: Math.round(hostelSummary.reviews * 0.01), stars: 1 },
   ];
+  const reviewTotal = Math.max(1, hostelSummary.reviews);
 
   const hostelFacts = [
-    ["Hostel Type", humanize(hostel.type)],
-    ["Total Rooms", "58"],
-    ["Established", "2019"],
-    ["Language", "Nepali, English, Hindi"],
-    ["Manager", hostel.owner],
-    ["Check-in / Check-out", "12:00 PM / 11:00 AM"],
-  ];
+    ["Hostel Type", humanize(hostelSummary.type)],
+    ["Total Rooms", String(hostel.capacitySummary?.totalRooms ?? "-")],
+    ["Total Beds", String(hostel.capacitySummary?.totalBeds ?? "-")],
+    ["Vacant Beds", String(hostel.capacitySummary?.vacantBeds ?? 0)],
+    ["Area", hostel.location.area],
+    ["City", hostel.location.city ?? "Kathmandu"],
+  ].filter(([, value]) => value !== "-");
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: "Hostels", href: "/hostels" },
-    { label: hostel.name },
+    { label: hostelSummary.name },
   ];
 
   const handleTabClick = (tabId: string) => {
@@ -226,7 +292,7 @@ export function PublicHostelDetailPage() {
                 />
                 {idx === images.length - 1 ? (
                   <span className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/65 text-xs font-bold text-white">
-                    +18
+                    +{Math.max(0, images.length - 1)}
                     <span className="font-medium">Photos</span>
                   </span>
                 ) : null}
@@ -239,21 +305,22 @@ export function PublicHostelDetailPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="font-heading text-3xl font-extrabold leading-tight text-primary md:text-4xl">
-                {hostel.name}
+                {hostelSummary.name}
               </h1>
               <div className="mt-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <MapPin className="size-4 text-brand-teal" />
-                <span>{hostel.address}</span>
+                <span>{address}</span>
               </div>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-                {hostel.description}
+                {hostelSummary.description ||
+                  "This verified hostel is published on HostelHub."}
               </p>
             </div>
             <div className="flex items-center gap-2 text-lg font-bold text-warning">
               <Star className="size-5 fill-warning text-warning" />
-              {hostel.rating}
+              {hostelSummary.rating ? hostelSummary.rating.toFixed(1) : "New"}
               <span className="text-sm font-semibold text-muted-foreground">
-                ({hostel.reviews})
+                ({hostelSummary.reviews})
               </span>
             </div>
           </div>
@@ -313,7 +380,7 @@ export function PublicHostelDetailPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <a
               className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-brand-teal bg-surface text-sm font-bold text-brand-teal transition hover:bg-brand-teal/5"
-              href="tel:9841002300"
+              href={`tel:${contactPhone}`}
             >
               <PhoneCall className="size-4" /> Contact Hostel
             </a>
@@ -441,7 +508,10 @@ export function PublicHostelDetailPage() {
             >
               <h2 className="text-lg font-extrabold text-primary">Food Details</h2>
               <div className="mt-4 space-y-3 text-sm font-medium text-muted-foreground">
-                {foodDetails.map((detail) => (
+                {(foodDetails.length > 0
+                  ? foodDetails
+                  : ["Food details are not published yet."]
+                ).map((detail) => (
                   <p className="flex items-start gap-2" key={detail}>
                     <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-teal" />
                     {detail}
@@ -472,14 +542,16 @@ export function PublicHostelDetailPage() {
               <h2 className="text-lg font-extrabold text-primary">What Students Say</h2>
               <div className="mt-4 grid gap-5 sm:grid-cols-[120px_1fr] lg:grid-cols-1 xl:grid-cols-[120px_1fr]">
                 <div>
-                  <p className="text-5xl font-extrabold text-primary">{hostel.rating}</p>
+                  <p className="text-5xl font-extrabold text-primary">
+                    {hostelSummary.rating ? hostelSummary.rating.toFixed(1) : "New"}
+                  </p>
                   <div className="mt-2 flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star className="size-3.5 fill-warning text-warning" key={star} />
                     ))}
                   </div>
                   <p className="mt-2 text-xs font-medium text-muted-foreground">
-                    Based on {hostel.reviews} reviews
+                    Based on {hostelSummary.reviews} reviews
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -493,10 +565,7 @@ export function PublicHostelDetailPage() {
                         <span
                           className="block h-full rounded-full bg-brand-teal"
                           style={{
-                            width: `${Math.min(
-                              100,
-                              (row.count / hostel.reviews) * 100,
-                            )}%`,
+                            width: `${Math.min(100, (row.count / reviewTotal) * 100)}%`,
                           }}
                         />
                       </span>
@@ -519,9 +588,7 @@ export function PublicHostelDetailPage() {
               <div className="flex min-h-44 items-center justify-center rounded-lg border border-dashed border-brand-teal/40 bg-brand-teal-soft/20 text-center">
                 <div>
                   <MapPin className="mx-auto size-8 text-brand-teal" />
-                  <p className="mt-3 text-sm font-extrabold text-primary">
-                    {hostel.address}
-                  </p>
+                  <p className="mt-3 text-sm font-extrabold text-primary">{address}</p>
                   <p className="mt-1 text-xs font-medium text-muted-foreground">
                     Near campus, transit, and daily essentials.
                   </p>
@@ -577,7 +644,7 @@ export function PublicHostelDetailPage() {
             </p>
             <a
               className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-brand-teal text-sm font-bold text-brand-teal transition hover:bg-brand-teal/5"
-              href="tel:015971234"
+              href={`tel:${contactPhone}`}
             >
               <PhoneCall className="size-4" /> Talk to Support
             </a>
@@ -586,10 +653,18 @@ export function PublicHostelDetailPage() {
             </p>
             <a
               className="mt-2 inline-flex items-center gap-2 text-lg font-extrabold text-primary"
-              href="tel:015971234"
+              href={`tel:${contactPhone}`}
             >
-              <PhoneCall className="size-5 text-brand-teal" /> 01-5971234
+              <PhoneCall className="size-5 text-brand-teal" /> {contactPhone}
             </a>
+            {contactEmail ? (
+              <a
+                className="mt-2 block text-sm font-semibold text-brand-teal"
+                href={`mailto:${contactEmail}`}
+              >
+                {contactEmail}
+              </a>
+            ) : null}
           </section>
         </aside>
       </section>

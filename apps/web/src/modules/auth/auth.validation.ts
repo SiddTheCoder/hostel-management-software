@@ -1,47 +1,33 @@
 import { z } from "zod";
 
-import { objectIdSchema, phoneSchema } from "@/lib/validators";
+import { objectIdSchema } from "@/lib/validators";
 
 export const loginSchema = z.object({
-  identifier: z.string().trim().min(3, "Email or phone is required."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  identifier: z.string().trim().email("Expected a valid email address."),
+  password: z.string().min(1, "Password is required."),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-export const otpChannelSchema = z.enum(["email", "phone"]);
+export const otpChannelSchema = z.enum(["email"]);
 
 export const otpPurposeSchema = z.enum(["registration"]);
 
 export const otpRequestSchema = z
   .object({
     channel: otpChannelSchema,
-    identifier: z.string().trim().min(3, "Email or phone is required."),
+    identifier: z.string().trim().email("Expected a valid email address."),
     purpose: otpPurposeSchema.default("registration"),
   })
   .superRefine((input, context) => {
-    if (input.channel === "email") {
-      const result = z.string().email().safeParse(input.identifier);
+    const result = z.string().email().safeParse(input.identifier);
 
-      if (!result.success) {
-        context.addIssue({
-          code: "custom",
-          message: "Expected a valid email address.",
-          path: ["identifier"],
-        });
-      }
-    }
-
-    if (input.channel === "phone") {
-      const result = phoneSchema.safeParse(input.identifier);
-
-      if (!result.success) {
-        context.addIssue({
-          code: "custom",
-          message: "Expected a valid phone number.",
-          path: ["identifier"],
-        });
-      }
+    if (!result.success) {
+      context.addIssue({
+        code: "custom",
+        message: "Expected a valid email address.",
+        path: ["identifier"],
+      });
     }
   });
 
@@ -55,14 +41,13 @@ export const otpVerifySchema = z.object({
 
 export const registerSchema = z
   .object({
-    email: z.string().trim().email().optional(),
+    email: z.string().trim().email(),
     name: z.string().trim().min(2, "Name is required.").max(120),
     otpChallengeId: objectIdSchema,
     password: z.string().min(8, "Password must be at least 8 characters."),
-    phone: phoneSchema.optional(),
   })
-  .refine((input) => input.email || input.phone, {
-    message: "Email or phone is required.",
+  .refine((input) => Boolean(input.email), {
+    message: "Email is required.",
     path: ["email"],
   });
 

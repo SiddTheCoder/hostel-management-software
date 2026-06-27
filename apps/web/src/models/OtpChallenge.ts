@@ -3,7 +3,7 @@ import { Schema, model, models } from "mongoose";
 const otpChallengeSchema = new Schema(
   {
     attempts: { default: 0, type: Number },
-    channel: { enum: ["email", "phone"], required: true, type: String },
+    channel: { enum: ["email"], required: true, type: String },
     codeHash: { required: true, select: false, type: String },
     codeLastSentAt: { required: true, type: Date },
     consumedAt: { default: null, type: Date },

@@ -6,7 +6,10 @@ const inquirySchema = new Schema(
     name: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
     email: { type: String, trim: true },
+    budgetRange: { type: String, trim: true },
+    gender: { type: String, trim: true },
     message: { type: String, trim: true },
+    preferredRoomType: { type: String, trim: true },
     preferredVisitDate: Date,
     source: {
       type: String,
@@ -30,5 +33,6 @@ const inquirySchema = new Schema(
 inquirySchema.index({ hostelId: 1, status: 1, createdAt: -1 });
 inquirySchema.index({ phone: 1, hostelId: 1 });
 inquirySchema.index({ email: 1, hostelId: 1 });
+inquirySchema.index({ hostelId: 1, preferredRoomType: 1, budgetRange: 1 });
 
 export const InquiryModel = models.Inquiry || model("Inquiry", inquirySchema);

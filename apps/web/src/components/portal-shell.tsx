@@ -33,6 +33,15 @@ import type { ReactNode } from "react";
 
 import { PortalAccount } from "@/components/portal-account";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 type IconName =
@@ -154,9 +163,9 @@ export function PortalShell({
     ) ?? navItems[0];
 
   return (
-    <div className="min-h-screen bg-background text-foreground md:grid md:grid-cols-[248px_1fr]">
-      <aside className="hidden border-r border-border bg-surface dark:bg-card md:flex md:min-h-screen md:flex-col">
-        <div className="border-b border-border p-5">
+    <div className="h-screen overflow-hidden bg-background text-foreground md:grid md:grid-cols-[248px_1fr]">
+      <Sidebar>
+        <SidebarHeader>
           <Link href="/" className="flex items-center gap-3">
             <Building2 className={cn("size-8", styles.icon)} />
             <div>
@@ -164,55 +173,56 @@ export function PortalShell({
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             </div>
           </Link>
-        </div>
+        </SidebarHeader>
 
-        <nav className="flex-1 space-y-1 p-4">
-          {navItems.map((item) => {
-            const Icon = iconMap[item.icon ?? "dashboard"];
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+        <SidebarContent>
+          <SidebarMenu>
+            {navItems.map((item) => {
+              const Icon = iconMap[item.icon ?? "dashboard"];
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-muted-foreground transition",
-                  styles.hover,
-                  isActive && styles.active,
-                )}
-              >
-                <Icon className="size-5" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+              return (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(styles.hover, isActive && styles.active)}
+                  >
+                    <Link href={item.href}>
+                      <Icon className="size-5 shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
 
-        <div className="space-y-3 border-t border-border p-4">
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
-            <p className="text-sm font-bold text-primary">Need Help?</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Contact support or open the help center.
-            </p>
-            <button className="mt-3 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm font-semibold text-primary">
-              Help Center
-            </button>
-          </div>
-          <Link
-            href="/help"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition",
-              styles.hover,
-            )}
-          >
-            <HelpCircle className="size-5" />
-            Help
-          </Link>
-        </div>
-      </aside>
+          <SidebarFooter>
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <p className="text-sm font-bold text-primary">Need Help?</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Contact support or open the help center.
+              </p>
+              <button className="mt-3 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm font-semibold text-primary">
+                Help Center
+              </button>
+            </div>
+            <Link
+              href="/help"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition",
+                styles.hover,
+              )}
+            >
+              <HelpCircle className="size-5" />
+              Help
+            </Link>
+          </SidebarFooter>
+        </SidebarContent>
+      </Sidebar>
 
-      <div className="min-w-0">
+      <div className="h-screen min-w-0 overflow-y-auto">
         <header className="sticky top-0 z-20 border-b border-border bg-surface/90 backdrop-blur dark:bg-card/90">
           <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-8">
             <div className="flex min-w-0 items-center gap-3">

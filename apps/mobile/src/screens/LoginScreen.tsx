@@ -52,13 +52,13 @@ export function LoginScreen({ navigation }: Props) {
       <View>
         <Text style={screenStyles.title}>Welcome back</Text>
         <Text style={screenStyles.body}>
-          Login with email or phone. Mobile requests include the HostelHub mobile
-          client header so refresh tokens can be stored securely on device.
+          Login with your email and password. Mobile requests include the HostelHub
+          mobile client header so refresh tokens can be stored securely on device.
         </Text>
       </View>
 
       <View style={screenStyles.field}>
-        <Text style={screenStyles.label}>Email or phone</Text>
+        <Text style={screenStyles.label}>Email</Text>
         <TextInput
           autoCapitalize="none"
           keyboardType="email-address"

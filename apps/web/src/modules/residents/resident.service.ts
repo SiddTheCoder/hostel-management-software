@@ -32,10 +32,12 @@ type ResidentRecord = {
   _id: Types.ObjectId;
   bedId: Types.ObjectId;
   createdAt?: Date;
+  demoDataLabel?: string;
   depositAmount: number;
   email?: string;
   firstName: string;
   hostelId: Types.ObjectId;
+  isDemoData?: boolean;
   lastName: string;
   moveInDate: Date;
   phone: string;
@@ -148,11 +150,13 @@ function serializeResident(resident: ResidentRecord) {
   return {
     bedId: resident.bedId.toString(),
     createdAt: resident.createdAt?.toISOString(),
+    demoDataLabel: resident.demoDataLabel ?? "",
     depositAmount: resident.depositAmount,
     email: resident.email ?? "",
     firstName: resident.firstName,
     hostelId: resident.hostelId.toString(),
     id: resident._id.toString(),
+    isDemoData: Boolean(resident.isDemoData),
     lastName: resident.lastName,
     moveInDate: resident.moveInDate.toISOString(),
     phone: resident.phone,

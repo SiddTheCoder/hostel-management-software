@@ -17,9 +17,8 @@ import { screenStyles } from "./styles";
 type Props = NativeStackScreenProps<RootStackParamList, "Signup">;
 
 export function SignupScreen({ navigation }: Props) {
-  const [channel, setChannel] = useState<"email" | "phone">("phone");
   const [googleIdToken, setGoogleIdToken] = useState("");
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -28,16 +27,16 @@ export function SignupScreen({ navigation }: Props) {
     setIsSubmitting(true);
 
     try {
-      const challenge = await requestOtp(channel, identifier);
+      const normalizedEmail = email.trim().toLowerCase();
+      const challenge = await requestOtp(normalizedEmail);
 
       navigation.navigate("OtpVerification", {
         challengeId: challenge.challengeId,
-        channel,
-        email: channel === "email" ? identifier : undefined,
-        identifier,
+        channel: "email",
+        email: normalizedEmail,
+        identifier: normalizedEmail,
         name,
         password,
-        phone: channel === "phone" ? identifier : undefined,
       });
     } catch (error) {
       Alert.alert(
@@ -80,32 +79,9 @@ export function SignupScreen({ navigation }: Props) {
       <View>
         <Text style={screenStyles.title}>Create account</Text>
         <Text style={screenStyles.body}>
-          Public registrations start as browsing accounts. Resident access still
-          requires later QR activation against an admin-created resident record.
+          Public registrations use email OTP and password. Resident access still
+          requires QR activation against an admin-created resident record.
         </Text>
-      </View>
-
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        {(["phone", "email"] as const).map((option) => (
-          <TouchableOpacity
-            key={option}
-            onPress={() => setChannel(option)}
-            style={[
-              screenStyles.button,
-              channel === option ? undefined : screenStyles.buttonSecondary,
-              { flex: 1 },
-            ]}
-          >
-            <Text
-              style={[
-                screenStyles.buttonText,
-                channel === option ? undefined : screenStyles.buttonTextSecondary,
-              ]}
-            >
-              {option === "phone" ? "Phone OTP" : "Email OTP"}
-            </Text>
-          </TouchableOpacity>
-        ))}
       </View>
 
       <View style={screenStyles.field}>
@@ -119,16 +95,14 @@ export function SignupScreen({ navigation }: Props) {
       </View>
 
       <View style={screenStyles.field}>
-        <Text style={screenStyles.label}>
-          {channel === "phone" ? "Phone number" : "Email address"}
-        </Text>
+        <Text style={screenStyles.label}>Email address</Text>
         <TextInput
           autoCapitalize="none"
-          keyboardType={channel === "phone" ? "phone-pad" : "email-address"}
-          onChangeText={setIdentifier}
-          placeholder={channel === "phone" ? "+977 9800000000" : "you@example.com"}
+          keyboardType="email-address"
+          onChangeText={setEmail}
+          placeholder="you@example.com"
           style={screenStyles.input}
-          value={identifier}
+          value={email}
         />
       </View>
 

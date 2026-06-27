@@ -23,9 +23,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return rateLimited;
     }
 
-    const { slug: hostelId } = await context.params;
+    const { slug: hostelRef } = await context.params;
     const input = publicInquiryCreateSchema.parse(await request.json());
-    const result = await createPublicHostelInquiry(hostelId, input);
+    const result = await createPublicHostelInquiry(hostelRef, input);
 
     return successResponse(result, "Inquiry submitted", { status: 201 });
   } catch (error) {

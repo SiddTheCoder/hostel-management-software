@@ -224,13 +224,13 @@ export function login(identifier: string, password: string) {
   });
 }
 
-export function requestOtp(channel: "email" | "phone", identifier: string) {
+export function requestOtp(identifier: string) {
   return apiRequest<{
     challengeId: string;
     devCode?: string;
     expiresAt: string;
   }>("/api/v1/auth/otp/request", {
-    body: { channel, identifier, purpose: "registration" },
+    body: { channel: "email", identifier, purpose: "registration" },
     method: "POST",
   });
 }
@@ -246,11 +246,10 @@ export function verifyOtp(challengeId: string, code: string) {
 }
 
 export function register(input: {
-  email?: string;
+  email: string;
   name: string;
   otpChallengeId: string;
   password: string;
-  phone?: string;
 }) {
   return apiRequest<AuthSession>("/api/v1/auth/register", {
     body: input,

@@ -13,10 +13,10 @@ import {
   Utensils,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
-import { hostelListings } from "@/lib/hostelhub-data";
 import {
   Breadcrumbs,
   FormField,
@@ -25,6 +25,20 @@ import {
   StatusPill,
   formatMoney,
 } from "./shared";
+import {
+  DEFAULT_HOSTEL_IMAGE,
+  hasFood,
+  mapPublicHostelToSummary,
+  roomTypeLabel,
+  type PublicHostel,
+} from "./public-hostel-data";
+
+function slugifyRoom(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export function PublicInquiryPage() {
   const searchParams = useSearchParams();
@@ -33,15 +47,79 @@ export function PublicInquiryPage() {
     : "green-view-hostel";
   const preselectedRoom = searchParams ? searchParams.get("room") || "" : "";
 
-  const hostel = hostelListings.find((h) => h.slug === hostelSlug) ?? hostelListings[0];
-
-  // Room type selection state
-  const [selectedRoomType, setSelectedRoomType] = useState(
-    preselectedRoom || "single-room",
-  );
-
-  // Submitted success state
+  const [hostel, setHostel] = useState<PublicHostel | null>(null);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [selectedRoomType, setSelectedRoomType] = useState(preselectedRoom);
+  const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    async function loadHostel() {
+      setState("loading");
+      setMessage("");
+
+      try {
+        const data = await browserApi<{ hostel: PublicHostel }>(
+          `/api/v1/public/hostels/${encodeURIComponent(hostelSlug)}`,
+        );
+        const firstRoom = data.hostel.roomTypes[0] ?? "";
+        const matchedRoom =
+          data.hostel.roomTypes.find(
+            (roomType) =>
+              slugifyRoom(roomTypeLabel(roomType)) === preselectedRoom ||
+              slugifyRoom(roomType) === preselectedRoom,
+          ) ?? firstRoom;
+
+        setHostel(data.hostel);
+        setSelectedRoomType(matchedRoom);
+        setState("ready");
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Could not load hostel.");
+        setState("error");
+      }
+    }
+
+    void loadHostel();
+  }, [hostelSlug, preselectedRoom]);
+
+  const hostelSummary = hostel ? mapPublicHostelToSummary(hostel) : null;
+  const roomOptions = useMemo(() => {
+    const roomTypes = hostel?.roomTypes.length ? hostel.roomTypes : ["Room"];
+    const minRent = hostel?.pricing?.monthlyRentMin ?? hostelSummary?.price ?? 0;
+    const maxRent = hostel?.pricing?.monthlyRentMax ?? minRent;
+
+    return roomTypes.map((roomType, index) => ({
+      id: roomType,
+      name: roomTypeLabel(roomType),
+      rent:
+        roomTypes.length <= 1
+          ? minRent
+          : Math.round(minRent + ((maxRent - minRent) / (roomTypes.length - 1)) * index),
+    }));
+  }, [hostel, hostelSummary?.price]);
+
+  if (state === "loading") {
+    return (
+      <PublicShell active="browse">
+        <div className="mx-auto max-w-[1360px] px-6 py-10">
+          <div className="h-96 animate-pulse rounded-xl border border-border bg-muted" />
+        </div>
+      </PublicShell>
+    );
+  }
+
+  if (!hostel || !hostelSummary) {
+    return (
+      <PublicShell active="browse">
+        <div className="mx-auto max-w-[900px] px-6 py-16 text-center">
+          <h1 className="text-2xl font-bold text-primary">Hostel unavailable</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {message || "This hostel is not accepting public inquiries right now."}
+          </p>
+        </div>
+      </PublicShell>
+    );
+  }
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -50,9 +128,36 @@ export function PublicInquiryPage() {
     { label: "Inquiry" },
   ];
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setMessage("");
+
+    const form = new FormData(e.currentTarget);
+    const value = (name: string) => {
+      const field = form.get(name);
+
+      return typeof field === "string" ? field.trim() : "";
+    };
+
+    try {
+      await browserApi(`/api/v1/public/hostels/${hostel.id}/inquiries`, {
+        body: JSON.stringify({
+          budgetRange: value("budgetRange") || undefined,
+          email: value("email") || undefined,
+          gender: value("gender") || undefined,
+          message: value("message") || undefined,
+          name: value("name"),
+          phone: value("phone"),
+          preferredRoomType: value("preferredRoomType") || undefined,
+          preferredVisitDate: value("preferredVisitDate") || undefined,
+        }),
+        method: "POST",
+      });
+      setSubmitted(true);
+      e.currentTarget.reset();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not submit inquiry.");
+    }
   };
 
   return (
@@ -66,7 +171,9 @@ export function PublicInquiryPage() {
             <div className="p-4 space-y-4">
               <div
                 className="h-48 rounded-lg bg-cover bg-center relative"
-                style={{ backgroundImage: `url("${hostel.image}")` }}
+                style={{
+                  backgroundImage: `url("${hostelSummary.image || DEFAULT_HOSTEL_IMAGE}")`,
+                }}
               >
                 <div className="absolute right-3 top-3">
                   <StatusPill tone="success">Verified</StatusPill>
@@ -75,20 +182,22 @@ export function PublicInquiryPage() {
               <div>
                 <h1 className="text-xl font-bold text-primary">{hostel.name}</h1>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <MapPin className="size-3 text-brand-teal" /> {hostel.address}
+                  <MapPin className="size-3 text-brand-teal" /> {hostelSummary.address}
                 </p>
                 <div className="mt-2.5 flex items-center gap-1 text-xs text-warning">
                   <Star className="size-3.5 fill-warning text-warning" />
-                  <span className="font-semibold">{hostel.rating}</span>
+                  <span className="font-semibold">
+                    {hostelSummary.rating ? hostelSummary.rating.toFixed(1) : "New"}
+                  </span>
                   <span className="text-muted-foreground font-normal">
-                    ({hostel.reviews} reviews)
+                    ({hostelSummary.reviews} reviews)
                   </span>
                 </div>
               </div>
 
               <div className="border-t border-border/50 pt-3 flex justify-between items-center">
                 <p className="text-sm font-bold text-primary">
-                  {formatMoney(hostel.price)}{" "}
+                  {formatMoney(hostelSummary.price)}{" "}
                   <span className="text-xs font-normal text-muted-foreground">
                     / month
                   </span>
@@ -104,11 +213,7 @@ export function PublicInquiryPage() {
               {/* Room select radio cards */}
               <div className="border-t border-border/50 pt-4 space-y-2">
                 <p className="text-xs font-bold text-primary">Select Room Type</p>
-                {[
-                  { id: "single-room", name: "Single Room", rent: 9600 },
-                  { id: "double-room", name: "Double Room", rent: 7500 },
-                  { id: "triple-room", name: "Triple Room", rent: 6000 },
-                ].map((room) => (
+                {roomOptions.map((room) => (
                   <button
                     key={room.id}
                     onClick={() => setSelectedRoomType(room.id)}
@@ -143,16 +248,22 @@ export function PublicInquiryPage() {
 
               <div className="border-t border-border/50 pt-3 grid grid-cols-2 gap-2.5 text-[10px] text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <ShieldCheck className="size-3.5 text-brand-teal" /> Wi-Fi (100 Mbps)
+                  <ShieldCheck className="size-3.5 text-brand-teal" />{" "}
+                  {hostel.facilities[0] ?? "Verified listing"}
                 </div>
                 <div className="flex items-center gap-1">
-                  <Utensils className="size-3.5 text-brand-teal" /> Meals (3 Times)
+                  <Utensils className="size-3.5 text-brand-teal" />{" "}
+                  {hasFood(hostel) ? "Meals available" : "Food details on request"}
                 </div>
                 <div className="flex items-center gap-1">
-                  <ShieldCheck className="size-3.5 text-brand-teal" /> Laundry Included
+                  <ShieldCheck className="size-3.5 text-brand-teal" />{" "}
+                  {hostel.facilities[1] ?? "Verified profile"}
                 </div>
                 <div className="flex items-center gap-1">
-                  <BadgeCheck className="size-3.5 text-brand-teal" /> 24/7 CCTV & Guards
+                  <BadgeCheck className="size-3.5 text-brand-teal" />{" "}
+                  {hostel.verificationStatus === "VERIFIED"
+                    ? "Platform verified"
+                    : "Published"}
                 </div>
               </div>
 
@@ -160,8 +271,8 @@ export function PublicInquiryPage() {
                 <p className="font-semibold text-primary">About This Hostel</p>
                 <p className="leading-relaxed">
                   Clean, safe and student-friendly environment. Fully furnished rooms with
-                  study tables and wardrobes. 24/7 warden support and secure premises.
-                  Close to colleges, markets and public transport.
+                  published facilities, transparent pricing, and hostel-managed follow-up.
+                  {hostel.description ? ` ${hostel.description}` : ""}
                 </p>
               </div>
 
@@ -211,11 +322,18 @@ export function PublicInquiryPage() {
               </div>
             ) : (
               <form onSubmit={handleFormSubmit} className="space-y-4 p-1">
+                {message ? (
+                  <div className="rounded-lg border border-danger/20 bg-danger/5 p-3 text-sm font-semibold text-danger">
+                    {message}
+                  </div>
+                ) : null}
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     icon={UserRound}
                     label="Full Name *"
+                    name="name"
                     placeholder="Enter your full name"
+                    required
                   />
                   <div>
                     <label className="block text-sm font-semibold text-primary">
@@ -228,6 +346,7 @@ export function PublicInquiryPage() {
                         <span className="text-muted-foreground/30">|</span>
                         <input
                           className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+                          name="phone"
                           placeholder="98XXXXXXXX"
                           required
                           type="tel"
@@ -238,13 +357,19 @@ export function PublicInquiryPage() {
                   <FormField
                     icon={Mail}
                     label="Email Address *"
+                    name="email"
                     placeholder="Enter your email address"
+                    required
                     type="email"
                   />
                   <div>
                     <label className="block text-sm font-semibold text-primary">
                       Gender *
-                      <select className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary">
+                      <select
+                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
+                        name="gender"
+                        required
+                      >
                         <option value="">Select gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
@@ -256,13 +381,16 @@ export function PublicInquiryPage() {
                     <label className="block text-sm font-semibold text-primary">
                       Preferred Room Type *
                       <select
+                        name="preferredRoomType"
                         value={selectedRoomType}
                         onChange={(e) => setSelectedRoomType(e.target.value)}
                         className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
                       >
-                        <option value="single-room">Single Room</option>
-                        <option value="double-room">Double Room</option>
-                        <option value="triple-room">Triple Room</option>
+                        {roomOptions.map((room) => (
+                          <option key={room.id} value={room.id}>
+                            {room.name}
+                          </option>
+                        ))}
                       </select>
                     </label>
                   </div>
@@ -273,6 +401,7 @@ export function PublicInquiryPage() {
                         <Calendar className="size-4 text-muted-foreground" />
                         <input
                           className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground cursor-pointer"
+                          name="preferredVisitDate"
                           required
                           type="date"
                         />
@@ -282,7 +411,11 @@ export function PublicInquiryPage() {
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-primary">
                       Your Budget (Monthly) *
-                      <select className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary">
+                      <select
+                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
+                        name="budgetRange"
+                        required
+                      >
                         <option value="">Select your budget range</option>
                         <option value="under-8k">Under NPR 8,000</option>
                         <option value="8k-10k">NPR 8,000 - 10,000</option>
@@ -296,6 +429,7 @@ export function PublicInquiryPage() {
                   Additional Notes (Optional)
                   <textarea
                     maxLength={300}
+                    name="message"
                     className="mt-2 min-h-24 w-full rounded-lg border border-border bg-surface p-3 text-sm font-normal outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/15 transition placeholder:text-muted-foreground"
                     placeholder="Tell the hostel about your study location, dietary constraints, or schedule preferences."
                   />

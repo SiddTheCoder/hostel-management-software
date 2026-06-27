@@ -50,22 +50,8 @@ import { useParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { PublicHeader } from "@/components/public-header";
+import type { HostelSummary, Tone } from "@/app/_components/public-hostel-types";
 import { cn } from "@/lib/utils";
-import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
 
 export type PortalKind = "admin" | "guardian" | "platform" | "resident";
 export type AuthMode = "activation" | "login" | "otp" | "reset" | "signup";
@@ -378,12 +364,16 @@ export function TableView({
 export function FormField({
   icon: Icon,
   label,
+  name,
   placeholder,
+  required,
   type = "text",
 }: {
   icon?: LucideIcon;
   label: string;
+  name?: string;
   placeholder: string;
+  required?: boolean;
   type?: string;
 }) {
   return (
@@ -393,7 +383,9 @@ export function FormField({
         {Icon ? <Icon className="size-4 text-muted-foreground" /> : null}
         <input
           className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+          name={name}
           placeholder={placeholder}
+          required={required}
           type={type}
         />
       </span>

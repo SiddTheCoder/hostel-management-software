@@ -62,21 +62,6 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
-import {
   AnimatedPage,
   Breadcrumbs,
   FormField,

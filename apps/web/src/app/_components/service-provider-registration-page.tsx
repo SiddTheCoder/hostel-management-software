@@ -63,21 +63,6 @@ import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
 import {
-  adminMetrics,
-  auditActivity,
-  complaints,
-  imageSet,
-  notices,
-  payments,
-  platformMetrics,
-  providers,
-  hostelListings,
-  residents,
-  weeklyMenu,
-  type HostelSummary,
-  type Tone,
-} from "@/lib/hostelhub-data";
-import {
   AnimatedPage,
   Breadcrumbs,
   FormField,
