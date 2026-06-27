@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "scheme": "hostelhub",
     "userInterfaceStyle": "light",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "extra": {
       "apiBaseUrl": "http://localhost:3000"
     },
@@ -16,7 +18,8 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0f172a"
-      }
+      },
+      "package": "com.siddthecoder.hostelhubmobile"
     }
   }
 }

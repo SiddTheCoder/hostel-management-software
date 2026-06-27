@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
+import { logger } from "@/lib/logger";
+
 export type ApiSuccess<T> = {
   success: true;
   message: string;
@@ -61,6 +63,6 @@ export function handleRouteError(error: unknown) {
     return errorResponse(error.message, error.errorCode, error.status);
   }
 
-  console.error(error);
+  logger.error("Unhandled API route error", { error });
   return errorResponse("Internal server error", "INTERNAL_SERVER_ERROR", 500);
 }

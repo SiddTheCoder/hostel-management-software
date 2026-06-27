@@ -12,6 +12,7 @@ const navItems = [
   { href: "/resident/night-status", icon: "moon" as const, label: "Night Status" },
   { href: "/resident/sos", icon: "siren" as const, label: "SOS" },
   { href: "/resident/reviews", icon: "star" as const, label: "Reviews" },
+  { href: "/resident/notifications", icon: "bell" as const, label: "Notifications" },
   { href: "/resident/referral", icon: "message" as const, label: "Referral" },
   { href: "/resident/documents", icon: "file" as const, label: "Documents" },
   { href: "/resident/settings", icon: "settings" as const, label: "Settings" },

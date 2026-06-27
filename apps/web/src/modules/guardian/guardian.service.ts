@@ -1,0 +1,520 @@
+import { Types } from "mongoose";
+import type { z } from "zod";
+
+import type { ApiPrincipal } from "@/lib/api-auth";
+import { Role } from "@/lib/roles";
+import { connectToDatabase } from "@/lib/db";
+import { assertHostelAccess } from "@/lib/tenant";
+import { AuditLogModel } from "@/models/AuditLog";
+import { ComplaintModel } from "@/models/Complaint";
+import { FoodMenuModel } from "@/models/FoodMenu";
+import { GuardianAccessModel } from "@/models/GuardianAccess";
+import { GuardianModel } from "@/models/Guardian";
+import { GuardianPermissionModel } from "@/models/GuardianPermission";
+import { HostelModel } from "@/models/Hostel";
+import { NightStatusModel } from "@/models/NightStatus";
+import { NoticeModel } from "@/models/Notice";
+import { PaymentModel } from "@/models/Payment";
+import { ResidentModel } from "@/models/Resident";
+import { UserModel } from "@/models/User";
+import { issueSessionForUser } from "@/modules/auth/auth.service";
+import {
+  normalizeObjectId,
+  serializeResidentSummary,
+} from "@/modules/residents/resident-access";
+import type {
+  guardianAccessCreateSchema,
+  guardianLoginSchema,
+} from "@/modules/guardian/guardian.validation";
+
+type GuardianAccessCreateInput = z.infer<typeof guardianAccessCreateSchema>;
+type GuardianLoginInput = z.infer<typeof guardianLoginSchema>;
+
+type GuardianRecord = {
+  _id: Types.ObjectId;
+  email?: string;
+  firstName: string;
+  hostelId: Types.ObjectId;
+  lastName: string;
+  phone: string;
+  relation: string;
+  residentId: Types.ObjectId;
+};
+
+type GuardianAccessRecord = {
+  _id: Types.ObjectId;
+  accessCode: string;
+  allowComplaintStatus: boolean;
+  expiresAt: Date;
+  guardianId: Types.ObjectId;
+  hostelId: Types.ObjectId;
+  phone: string;
+  residentId: Types.ObjectId;
+  status: "ACTIVE" | "USED" | "REVOKED" | "EXPIRED";
+  userId?: Types.ObjectId;
+};
+
+type GuardianPermissionRecord = {
+  canViewComplaintStatus: boolean;
+  canViewFood: boolean;
+  canViewNotices: boolean;
+  canViewPayments: boolean;
+  canViewSafety: boolean;
+};
+
+type ResidentRecord = {
+  _id: Types.ObjectId;
+  bedId: Types.ObjectId;
+  depositAmount: number;
+  email?: string;
+  firstName: string;
+  hostelId: Types.ObjectId;
+  lastName: string;
+  moveInDate: Date;
+  phone: string;
+  roomId: Types.ObjectId;
+  status: "PENDING" | "ACTIVE" | "SUSPENDED" | "MOVED_OUT";
+  userId?: Types.ObjectId;
+};
+
+type UserRecord = {
+  _id: Types.ObjectId;
+  email?: string | null;
+  hostelIds?: Types.ObjectId[];
+  name: string;
+  phone?: string | null;
+  role: Role;
+  status: string;
+};
+
+export class GuardianServiceError extends Error {
+  constructor(
+    message: string,
+    public errorCode = "GUARDIAN_ERROR",
+    public status = 400,
+  ) {
+    super(message);
+  }
+}
+
+function randomAccessCode() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function expiresInDays(days: number) {
+  const date = new Date();
+
+  date.setDate(date.getDate() + days);
+
+  return date;
+}
+
+function resolveAdminHostelId(principal: ApiPrincipal, requestedHostelId?: string) {
+  if (requestedHostelId) {
+    assertHostelAccess(principal, requestedHostelId);
+    return normalizeObjectId(requestedHostelId, "hostel id");
+  }
+
+  if (principal.hostelIds.length === 1) {
+    return normalizeObjectId(principal.hostelIds[0], "hostel id");
+  }
+
+  throw new GuardianServiceError(
+    "A hostelId is required for this hostel admin action.",
+    "HOSTEL_SCOPE_REQUIRED",
+    422,
+  );
+}
+
+async function auditGuardianAction(
+  principal: ApiPrincipal,
+  hostelId: Types.ObjectId,
+  entityId: Types.ObjectId,
+  action: string,
+  metadata: Record<string, unknown> = {},
+) {
+  await AuditLogModel.create({
+    action,
+    actorId: principal.userId,
+    entityId: entityId.toString(),
+    entityType: "GuardianAccess",
+    hostelId,
+    metadata,
+  });
+}
+
+async function findAdminResident(
+  residentId: string,
+  principal: ApiPrincipal,
+  requestedHostelId?: string,
+) {
+  const hostelId = resolveAdminHostelId(principal, requestedHostelId);
+  const resident = await ResidentModel.findOne({
+    _id: normalizeObjectId(residentId, "resident id"),
+    hostelId,
+    isDeleted: false,
+  }).lean<ResidentRecord | null>();
+
+  if (!resident) {
+    throw new GuardianServiceError("Resident was not found.", "RESIDENT_NOT_FOUND", 404);
+  }
+
+  return resident;
+}
+
+function serializeGuardianAccess(access: GuardianAccessRecord) {
+  return {
+    accessCode: access.accessCode,
+    expiresAt: access.expiresAt.toISOString(),
+    guardianId: access.guardianId.toString(),
+    hostelId: access.hostelId.toString(),
+    id: access._id.toString(),
+    phone: access.phone,
+    residentId: access.residentId.toString(),
+    status: access.status,
+    userId: access.userId?.toString(),
+  };
+}
+
+async function loadGuardianAccess(principal: ApiPrincipal) {
+  const access = await GuardianAccessModel.findOne({
+    status: { $in: ["ACTIVE", "USED"] },
+    userId: normalizeObjectId(principal.userId, "user id"),
+  }).lean<GuardianAccessRecord | null>();
+
+  if (!access) {
+    throw new GuardianServiceError(
+      "Guardian access was not found for this account.",
+      "GUARDIAN_ACCESS_NOT_FOUND",
+      404,
+    );
+  }
+
+  if (!principal.hostelIds.includes(access.hostelId.toString())) {
+    throw new GuardianServiceError(
+      "This guardian profile is outside the current session hostel scope.",
+      "TENANT_ACCESS_DENIED",
+      403,
+    );
+  }
+
+  const [resident, guardian, permission] = await Promise.all([
+    ResidentModel.findOne({
+      _id: access.residentId,
+      hostelId: access.hostelId,
+      isDeleted: false,
+    }).lean<ResidentRecord | null>(),
+    GuardianModel.findOne({
+      _id: access.guardianId,
+      hostelId: access.hostelId,
+      residentId: access.residentId,
+    }).lean<GuardianRecord | null>(),
+    GuardianPermissionModel.findOne({
+      guardianAccessId: access._id,
+    }).lean<GuardianPermissionRecord | null>(),
+  ]);
+
+  if (!resident || !guardian) {
+    throw new GuardianServiceError(
+      "Guardian resident link was not found.",
+      "GUARDIAN_LINK_NOT_FOUND",
+      404,
+    );
+  }
+
+  return {
+    access,
+    guardian,
+    permission: permission ?? {
+      canViewComplaintStatus: access.allowComplaintStatus,
+      canViewFood: true,
+      canViewNotices: true,
+      canViewPayments: true,
+      canViewSafety: true,
+    },
+    resident,
+  };
+}
+
+function serializePayment(payment: {
+  _id: Types.ObjectId;
+  dueAmount: number;
+  dueDate: Date;
+  month: string;
+  paidAmount: number;
+  status: string;
+}) {
+  return {
+    dueAmount: payment.dueAmount,
+    dueDate: payment.dueDate.toISOString(),
+    id: payment._id.toString(),
+    month: payment.month,
+    paidAmount: payment.paidAmount,
+    status: payment.status,
+  };
+}
+
+export async function createGuardianAccess(
+  residentId: string,
+  input: GuardianAccessCreateInput,
+  principal: ApiPrincipal,
+) {
+  await connectToDatabase();
+
+  const resident = await findAdminResident(residentId, principal, input.hostelId);
+  const guardian = await GuardianModel.findOne({
+    _id: normalizeObjectId(input.guardianId, "guardian id"),
+    hostelId: resident.hostelId,
+    residentId: resident._id,
+  }).lean<GuardianRecord | null>();
+
+  if (!guardian) {
+    throw new GuardianServiceError("Guardian was not found.", "GUARDIAN_NOT_FOUND", 404);
+  }
+
+  await GuardianAccessModel.updateMany(
+    { guardianId: guardian._id, status: "ACTIVE" },
+    { $set: { status: "REVOKED" } },
+  );
+
+  const access = (await GuardianAccessModel.create({
+    accessCode: randomAccessCode(),
+    allowComplaintStatus: input.allowComplaintStatus,
+    createdBy: principal.userId,
+    expiresAt: expiresInDays(input.expiresInDays),
+    guardianId: guardian._id,
+    hostelId: resident.hostelId,
+    phone: guardian.phone,
+    residentId: resident._id,
+    status: "ACTIVE",
+  })) as GuardianAccessRecord;
+
+  await GuardianPermissionModel.create({
+    canViewComplaintStatus: input.allowComplaintStatus,
+    guardianAccessId: access._id,
+    hostelId: resident.hostelId,
+    residentId: resident._id,
+  });
+  await auditGuardianAction(
+    principal,
+    resident.hostelId,
+    access._id,
+    "GUARDIAN_ACCESS_CREATED",
+    { guardianId: guardian._id.toString(), residentId: resident._id.toString() },
+  );
+
+  return {
+    access: serializeGuardianAccess(access),
+    resident: serializeResidentSummary(resident),
+  };
+}
+
+export async function loginGuardian(input: GuardianLoginInput) {
+  await connectToDatabase();
+
+  const access = await GuardianAccessModel.findOne({
+    accessCode: input.accessCode.toUpperCase(),
+    phone: input.phone,
+    status: "ACTIVE",
+  }).lean<GuardianAccessRecord | null>();
+
+  if (!access) {
+    throw new GuardianServiceError(
+      "Invalid guardian access.",
+      "INVALID_GUARDIAN_LOGIN",
+      401,
+    );
+  }
+
+  if (access.expiresAt.getTime() < Date.now()) {
+    await GuardianAccessModel.updateOne(
+      { _id: access._id },
+      { $set: { status: "EXPIRED" } },
+    );
+    throw new GuardianServiceError(
+      "Guardian access expired.",
+      "GUARDIAN_ACCESS_EXPIRED",
+      410,
+    );
+  }
+
+  const guardian = await GuardianModel.findById(
+    access.guardianId,
+  ).lean<GuardianRecord | null>();
+
+  if (!guardian) {
+    throw new GuardianServiceError("Guardian was not found.", "GUARDIAN_NOT_FOUND", 404);
+  }
+
+  const user = (await UserModel.findOneAndUpdate(
+    { phone: input.phone },
+    {
+      $addToSet: { hostelIds: access.hostelId },
+      $set: {
+        name: `${guardian.firstName} ${guardian.lastName}`.trim(),
+        phone: input.phone,
+        role: Role.GUARDIAN,
+        status: "ACTIVE",
+      },
+    },
+    { new: true, upsert: true },
+  ).lean<UserRecord>()) as UserRecord;
+
+  await GuardianAccessModel.updateOne(
+    { _id: access._id },
+    { $set: { status: "USED", usedAt: new Date(), userId: user._id } },
+  );
+
+  return issueSessionForUser(user);
+}
+
+export async function getGuardianDashboard(principal: ApiPrincipal) {
+  await connectToDatabase();
+
+  const { access, guardian, permission, resident } = await loadGuardianAccess(principal);
+  const [hostel, payments, notices, food, nightStatus, complaints] = await Promise.all([
+    HostelModel.findOne({ _id: access.hostelId, isDeleted: false }).lean<{
+      _id: Types.ObjectId;
+      name: string;
+      location?: Record<string, unknown>;
+    } | null>(),
+    PaymentModel.find({ hostelId: access.hostelId, residentId: access.residentId })
+      .sort({ dueDate: -1 })
+      .limit(6)
+      .lean<
+        Array<{
+          _id: Types.ObjectId;
+          dueAmount: number;
+          dueDate: Date;
+          month: string;
+          paidAmount: number;
+          status: string;
+        }>
+      >(),
+    NoticeModel.find({ hostelId: access.hostelId })
+      .sort({ isUrgent: -1, publishedAt: -1 })
+      .limit(5)
+      .lean<
+        Array<{
+          _id: Types.ObjectId;
+          title: string;
+          content: string;
+          category: string;
+          isUrgent: boolean;
+        }>
+      >(),
+    FoodMenuModel.find({ hostelId: access.hostelId })
+      .sort({ date: -1, mealType: 1 })
+      .limit(8)
+      .lean<
+        Array<{
+          _id: Types.ObjectId;
+          date: Date;
+          items: string[];
+          mealType: string;
+          timing: string;
+        }>
+      >(),
+    NightStatusModel.findOne({ residentId: resident._id }).lean<{
+      checkedAt: Date;
+      status: string;
+    } | null>(),
+    permission.canViewComplaintStatus
+      ? ComplaintModel.find({ hostelId: access.hostelId, residentId: access.residentId })
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .lean<Array<{ _id: Types.ObjectId; status: string; title: string }>>()
+      : Promise.resolve([]),
+  ]);
+  const dueAmount = payments.reduce(
+    (sum, payment) =>
+      ["UNPAID", "PARTIAL", "OVERDUE", "PENDING_PROOF"].includes(payment.status)
+        ? sum + Math.max(payment.dueAmount - payment.paidAmount, 0)
+        : sum,
+    0,
+  );
+
+  return {
+    dashboard: {
+      access: serializeGuardianAccess(access),
+      complaints: complaints.map((complaint) => ({
+        id: complaint._id.toString(),
+        status: complaint.status,
+        title: complaint.title,
+      })),
+      food: permission.canViewFood
+        ? food.map((menu) => ({
+            date: menu.date.toISOString(),
+            id: menu._id.toString(),
+            items: menu.items,
+            mealType: menu.mealType,
+            timing: menu.timing,
+          }))
+        : [],
+      guardian: {
+        id: guardian._id.toString(),
+        name: `${guardian.firstName} ${guardian.lastName}`.trim(),
+        phone: guardian.phone,
+        relation: guardian.relation,
+      },
+      hostel: hostel
+        ? {
+            id: hostel._id.toString(),
+            location: hostel.location ?? {},
+            name: hostel.name,
+          }
+        : null,
+      notices: permission.canViewNotices
+        ? notices.map((notice) => ({
+            category: notice.category,
+            content: notice.content,
+            id: notice._id.toString(),
+            isUrgent: notice.isUrgent,
+            title: notice.title,
+          }))
+        : [],
+      payments: permission.canViewPayments ? payments.map(serializePayment) : [],
+      permissions: permission,
+      resident: serializeResidentSummary(resident),
+      safety: permission.canViewSafety
+        ? {
+            checkedAt: nightStatus?.checkedAt.toISOString() ?? null,
+            status: nightStatus?.status ?? "NOT_VERIFIED",
+          }
+        : null,
+      summary: {
+        dueAmount,
+        unpaidCount: payments.filter((payment) =>
+          ["UNPAID", "PARTIAL", "OVERDUE", "PENDING_PROOF"].includes(payment.status),
+        ).length,
+      },
+    },
+  };
+}
+
+export async function listGuardianPayments(principal: ApiPrincipal) {
+  const result = await getGuardianDashboard(principal);
+
+  return { payments: result.dashboard.payments, summary: result.dashboard.summary };
+}
+
+export async function listGuardianNotices(principal: ApiPrincipal) {
+  const result = await getGuardianDashboard(principal);
+
+  return { notices: result.dashboard.notices };
+}
+
+export async function listGuardianFood(principal: ApiPrincipal) {
+  const result = await getGuardianDashboard(principal);
+
+  return { food: result.dashboard.food };
+}
+
+export async function getGuardianSafetySummary(principal: ApiPrincipal) {
+  const result = await getGuardianDashboard(principal);
+
+  return {
+    complaints: result.dashboard.complaints,
+    safety: result.dashboard.safety,
+  };
+}

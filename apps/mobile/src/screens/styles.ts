@@ -53,6 +53,7 @@ export const screenStyles = StyleSheet.create({
   },
   filterRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   input: {

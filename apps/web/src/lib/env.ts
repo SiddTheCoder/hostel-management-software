@@ -29,6 +29,14 @@ export const serverEnvSchema = z.object({
     .optional()
     .transform((value) => value === "true"),
   LOG_LEVEL: z.string().default("info"),
+  PUBLIC_FORM_RATE_LIMIT_MAX: z.string().default("10"),
+  PUBLIC_FORM_RATE_LIMIT_WINDOW_SECONDS: z.string().default("60"),
+  UPLOAD_MAX_IMAGE_BYTES: z.string().default("5242880"),
+  UPLOAD_MAX_DOCUMENT_BYTES: z.string().default("10485760"),
+  ALLOWED_IMAGE_MIME_TYPES: z.string().default("image/jpeg,image/png,image/webp"),
+  ALLOWED_DOCUMENT_MIME_TYPES: z
+    .string()
+    .default("application/pdf,image/jpeg,image/png,image/webp"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

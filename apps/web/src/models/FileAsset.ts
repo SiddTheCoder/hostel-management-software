@@ -1,5 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
+import { validateFileAssetMetadata } from "@/lib/file-assets";
+
 const fileAssetSchema = new Schema(
   {
     hostelId: { ref: "Hostel", type: Schema.Types.ObjectId },
@@ -25,6 +27,22 @@ const fileAssetSchema = new Schema(
   },
   { timestamps: true },
 );
+
+fileAssetSchema.pre("validate", function validateUploadPolicy() {
+  const asset = this as {
+    invalidate(path: string, message: string): void;
+    mimeType?: string;
+    sizeBytes?: number;
+  };
+  const violation = validateFileAssetMetadata({
+    mimeType: asset.mimeType,
+    sizeBytes: asset.sizeBytes,
+  });
+
+  if (violation) {
+    asset.invalidate("mimeType", violation);
+  }
+});
 
 fileAssetSchema.index({ hostelId: 1, status: 1 });
 fileAssetSchema.index({ ownerId: 1, status: 1 });

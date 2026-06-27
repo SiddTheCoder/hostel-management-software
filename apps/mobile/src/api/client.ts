@@ -133,6 +133,43 @@ export type ResidentNotice = {
   title: string;
 };
 
+export type ResidentComplaint = {
+  adminResponse?: string;
+  category: string;
+  confirmedAt?: string;
+  description: string;
+  id: string;
+  isAnonymous: boolean;
+  status: string;
+  title: string;
+};
+
+export type ResidentNightStatus = {
+  checkedAt: string | null;
+  status: string;
+};
+
+export type NotificationItem = {
+  body: string;
+  id: string;
+  isRead: boolean;
+  title: string;
+};
+
+export type ResidentReferral = {
+  id: string;
+  name: string;
+  phone: string;
+  status: string;
+};
+
+export type ResidentReferralCode = {
+  code: string;
+  joinedCount: number;
+  link: string;
+  rewardCount: number;
+};
+
 type ApiSuccess<T> = {
   data: T;
   message: string;
@@ -242,16 +279,18 @@ export function logout(refreshToken: string) {
   });
 }
 
-export function listPublicHostels(query: {
-  area?: string;
-  facility?: string;
-  food?: "veg" | "non-veg";
-  maxPrice?: string;
-  minPrice?: string;
-  q?: string;
-  roomType?: string;
-  type?: "BOYS" | "GIRLS" | "CO_LIVING";
-} = {}) {
+export function listPublicHostels(
+  query: {
+    area?: string;
+    facility?: string;
+    food?: "veg" | "non-veg";
+    maxPrice?: string;
+    minPrice?: string;
+    q?: string;
+    roomType?: string;
+    type?: "BOYS" | "GIRLS" | "CO_LIVING";
+  } = {},
+) {
   const params = new URLSearchParams();
 
   Object.entries(query).forEach(([key, value]) => {
@@ -321,9 +360,12 @@ export function activateResident(
 }
 
 export function getResidentDashboard(accessToken: string) {
-  return apiRequest<{ dashboard: ResidentDashboard }>("/api/v1/resident/dashboard", {
-    accessToken,
-  });
+  return apiRequest<{ dashboard: ResidentDashboard }>(
+    "/api/v1/resident/dashboard",
+    {
+      accessToken,
+    },
+  );
 }
 
 export function getResidentProfile(accessToken: string) {
@@ -434,5 +476,142 @@ export function markNoticeAsRead(accessToken: string, noticeId: string) {
     accessToken,
     body: {},
     method: "PATCH",
+  });
+}
+
+export function listResidentComplaints(accessToken: string) {
+  return apiRequest<{
+    complaints: ResidentComplaint[];
+  }>("/api/v1/resident/complaints", {
+    accessToken,
+  });
+}
+
+export function createResidentComplaint(
+  accessToken: string,
+  input: {
+    attachmentAssetIds?: string[];
+    category: string;
+    description: string;
+    isAnonymous: boolean;
+    title: string;
+  },
+) {
+  return apiRequest<{ complaint: ResidentComplaint }>(
+    "/api/v1/resident/complaints",
+    {
+      accessToken,
+      body: input,
+      method: "POST",
+    },
+  );
+}
+
+export function confirmComplaintResolution(
+  accessToken: string,
+  complaintId: string,
+) {
+  return apiRequest<{ complaint: ResidentComplaint }>(
+    `/api/v1/resident/complaints/${complaintId}/confirm-resolution`,
+    {
+      accessToken,
+      body: {},
+      method: "PATCH",
+    },
+  );
+}
+
+export function getResidentNightStatus(accessToken: string) {
+  return apiRequest<{ status: ResidentNightStatus }>(
+    "/api/v1/resident/night-status",
+    {
+      accessToken,
+    },
+  );
+}
+
+export function updateResidentNightStatus(accessToken: string, status: string) {
+  return apiRequest<{ status: ResidentNightStatus }>(
+    "/api/v1/resident/night-status",
+    {
+      accessToken,
+      body: { status },
+      method: "POST",
+    },
+  );
+}
+
+export function triggerSOS(
+  accessToken: string,
+  input: { guardianAlertEnabled: boolean; message?: string },
+) {
+  return apiRequest<unknown>("/api/v1/resident/sos", {
+    accessToken,
+    body: input,
+    method: "POST",
+  });
+}
+
+export function submitResidentReview(
+  accessToken: string,
+  input: {
+    cleanlinessRating?: number;
+    comment?: string;
+    foodRating?: number;
+    overallRating: number;
+    safetyRating?: number;
+  },
+) {
+  return apiRequest<unknown>("/api/v1/resident/reviews", {
+    accessToken,
+    body: input,
+    method: "POST",
+  });
+}
+
+export function listNotifications(accessToken: string) {
+  return apiRequest<{ notifications: NotificationItem[] }>(
+    "/api/v1/notifications",
+    {
+      accessToken,
+    },
+  );
+}
+
+export function markNotificationRead(
+  accessToken: string,
+  notificationId: string,
+) {
+  return apiRequest<{ notification: NotificationItem }>(
+    `/api/v1/notifications/${notificationId}/read`,
+    {
+      accessToken,
+      body: {},
+      method: "PATCH",
+    },
+  );
+}
+
+export function saveDeviceToken(
+  accessToken: string,
+  input: {
+    deviceId?: string;
+    platform: "IOS" | "ANDROID" | "WEB";
+    token: string;
+  },
+) {
+  return apiRequest<unknown>("/api/v1/mobile/device-token", {
+    accessToken,
+    body: input,
+    method: "POST",
+  });
+}
+
+export function getResidentReferral(accessToken: string) {
+  return apiRequest<{
+    referralCode: ResidentReferralCode;
+    referrals: ResidentReferral[];
+  }>("/api/v1/resident/referral", {
+    accessToken,
   });
 }

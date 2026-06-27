@@ -1,5 +1,5 @@
-import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
+import { PlatformServiceProvidersPageContent } from "@/app/_components/phase5-pages";
 
 export default function PlatformServiceProvidersPage() {
-  return <PortalExperiencePage portal="platform" screen="service-providers" />;
+  return <PlatformServiceProvidersPageContent />;
 }

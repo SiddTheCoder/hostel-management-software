@@ -7,11 +7,17 @@ import { OtpVerificationScreen } from "../screens/OtpVerificationScreen";
 import { PublicHostelDetailScreen } from "../screens/PublicHostelDetailScreen";
 import { PublicHomeScreen } from "../screens/PublicHomeScreen";
 import { ResidentActivationScreen } from "../screens/ResidentActivationScreen";
+import { ResidentComplaintsScreen } from "../screens/ResidentComplaintsScreen";
 import { ResidentFoodScreen } from "../screens/ResidentFoodScreen";
 import { ResidentHomeScreen } from "../screens/ResidentHomeScreen";
+import { ResidentNightStatusScreen } from "../screens/ResidentNightStatusScreen";
 import { ResidentNoticesScreen } from "../screens/ResidentNoticesScreen";
+import { ResidentNotificationsScreen } from "../screens/ResidentNotificationsScreen";
 import { ResidentPaymentsScreen } from "../screens/ResidentPaymentsScreen";
 import { ResidentProfileScreen } from "../screens/ResidentProfileScreen";
+import { ResidentReferralScreen } from "../screens/ResidentReferralScreen";
+import { ResidentReviewsScreen } from "../screens/ResidentReviewsScreen";
+import { ResidentSOSScreen } from "../screens/ResidentSOSScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 
 export type RootStackParamList = {
@@ -41,13 +47,31 @@ export type RootStackParamList = {
   ResidentFood: {
     session: AuthSession;
   };
+  ResidentComplaints: {
+    session: AuthSession;
+  };
+  ResidentNightStatus: {
+    session: AuthSession;
+  };
   ResidentNotices: {
+    session: AuthSession;
+  };
+  ResidentNotifications: {
     session: AuthSession;
   };
   ResidentPayments: {
     session: AuthSession;
   };
   ResidentProfile: {
+    session: AuthSession;
+  };
+  ResidentReferral: {
+    session: AuthSession;
+  };
+  ResidentReviews: {
+    session: AuthSession;
+  };
+  ResidentSOS: {
     session: AuthSession;
   };
   Signup: undefined;
@@ -110,9 +134,39 @@ export function AppNavigator() {
           options={{ title: "Food" }}
         />
         <Stack.Screen
+          component={ResidentComplaintsScreen}
+          name="ResidentComplaints"
+          options={{ title: "Complaints" }}
+        />
+        <Stack.Screen
+          component={ResidentNightStatusScreen}
+          name="ResidentNightStatus"
+          options={{ title: "Night Status" }}
+        />
+        <Stack.Screen
           component={ResidentNoticesScreen}
           name="ResidentNotices"
           options={{ title: "Notices" }}
+        />
+        <Stack.Screen
+          component={ResidentSOSScreen}
+          name="ResidentSOS"
+          options={{ title: "SOS" }}
+        />
+        <Stack.Screen
+          component={ResidentReviewsScreen}
+          name="ResidentReviews"
+          options={{ title: "Reviews" }}
+        />
+        <Stack.Screen
+          component={ResidentReferralScreen}
+          name="ResidentReferral"
+          options={{ title: "Referral" }}
+        />
+        <Stack.Screen
+          component={ResidentNotificationsScreen}
+          name="ResidentNotifications"
+          options={{ title: "Notifications" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

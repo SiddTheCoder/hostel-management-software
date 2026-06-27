@@ -103,6 +103,25 @@ export const publicHostelListQuerySchema = z.object({
   type: hostelTypeSchema.optional(),
 });
 
+export const publicHostelCompareQuerySchema = z.object({
+  ids: z
+    .string()
+    .trim()
+    .min(1)
+    .transform((value) =>
+      value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    )
+    .pipe(
+      z
+        .array(objectIdSchema)
+        .min(2, "Select at least 2 hostels to compare.")
+        .max(3, "Compare up to 3 hostels at a time."),
+    ),
+});
+
 export const inquiryStatusSchema = z.enum([
   "NEW",
   "CONTACTED",

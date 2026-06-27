@@ -1,0 +1,239 @@
+import { Types } from "mongoose";
+import type { z } from "zod";
+
+import type { ApiPrincipal } from "@/lib/api-auth";
+import { connectToDatabase } from "@/lib/db";
+import { AuditLogModel } from "@/models/AuditLog";
+import { RatingReviewModel } from "@/models/RatingReview";
+import { ReviewModerationLogModel } from "@/models/ReviewModerationLog";
+import {
+  findCurrentResident,
+  normalizeObjectId,
+  serializeResidentSummary,
+} from "@/modules/residents/resident-access";
+import type {
+  platformReviewListQuerySchema,
+  reviewCreateSchema,
+  reviewModerationSchema,
+} from "@/modules/reviews/review.validation";
+
+type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;
+type ReviewModerationInput = z.infer<typeof reviewModerationSchema>;
+type PlatformReviewListQuery = z.infer<typeof platformReviewListQuerySchema>;
+
+type ReviewRecord = {
+  _id: Types.ObjectId;
+  cleanlinessRating?: number;
+  comment?: string;
+  createdAt?: Date;
+  foodRating?: number;
+  hiddenAt?: Date;
+  hiddenBy?: Types.ObjectId;
+  hostelId: Types.ObjectId;
+  overallRating: number;
+  residentId: Types.ObjectId;
+  safetyRating?: number;
+  status: "VISIBLE" | "HIDDEN";
+  updatedAt?: Date;
+  userId: Types.ObjectId;
+};
+
+export class ReviewServiceError extends Error {
+  constructor(
+    message: string,
+    public errorCode = "REVIEW_ERROR",
+    public status = 400,
+  ) {
+    super(message);
+  }
+}
+
+function serializeReview(review: ReviewRecord) {
+  return {
+    cleanlinessRating: review.cleanlinessRating,
+    comment: review.comment ?? "",
+    createdAt: review.createdAt?.toISOString(),
+    foodRating: review.foodRating,
+    hiddenAt: review.hiddenAt?.toISOString(),
+    hiddenBy: review.hiddenBy?.toString(),
+    hostelId: review.hostelId.toString(),
+    id: review._id.toString(),
+    overallRating: review.overallRating,
+    residentId: review.residentId.toString(),
+    safetyRating: review.safetyRating,
+    status: review.status,
+    updatedAt: review.updatedAt?.toISOString(),
+    userId: review.userId.toString(),
+  };
+}
+
+async function auditReviewAction(
+  principal: ApiPrincipal,
+  review: ReviewRecord,
+  action: string,
+  metadata: Record<string, unknown> = {},
+) {
+  await AuditLogModel.create({
+    action,
+    actorId: principal.userId,
+    entityId: review._id.toString(),
+    entityType: "RatingReview",
+    hostelId: review.hostelId,
+    metadata,
+  });
+}
+
+export async function createResidentReview(
+  input: ReviewCreateInput,
+  principal: ApiPrincipal,
+) {
+  await connectToDatabase();
+
+  const resident = await findCurrentResident(principal);
+
+  if (!["ACTIVE", "MOVED_OUT"].includes(resident.status)) {
+    throw new ReviewServiceError(
+      "Only verified current or past residents can review.",
+      "REVIEW_NOT_ALLOWED",
+      403,
+    );
+  }
+
+  const review = (await RatingReviewModel.findOneAndUpdate(
+    {
+      hostelId: resident.hostelId,
+      residentId: resident._id,
+    },
+    {
+      $set: {
+        ...input,
+        hostelId: resident.hostelId,
+        residentId: resident._id,
+        status: "VISIBLE",
+        userId: principal.userId,
+      },
+      $unset: {
+        hiddenAt: "",
+        hiddenBy: "",
+      },
+    },
+    { new: true, upsert: true },
+  ).lean<ReviewRecord>()) as ReviewRecord;
+
+  await auditReviewAction(principal, review, "REVIEW_SUBMITTED");
+
+  return {
+    resident: serializeResidentSummary(resident),
+    review: serializeReview(review),
+  };
+}
+
+export async function listPublicHostelReviews(hostelId: string) {
+  await connectToDatabase();
+
+  const objectId = normalizeObjectId(hostelId, "hostel id");
+  const reviews = await RatingReviewModel.find({
+    hostelId: objectId,
+    status: "VISIBLE",
+  })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .lean<ReviewRecord[]>();
+  const averageRating =
+    reviews.length === 0
+      ? 0
+      : reviews.reduce((sum, review) => sum + review.overallRating, 0) / reviews.length;
+
+  return {
+    reviews: reviews.map(serializeReview),
+    summary: {
+      averageRating,
+      total: reviews.length,
+    },
+  };
+}
+
+export async function listPlatformReviews(query: PlatformReviewListQuery) {
+  await connectToDatabase();
+
+  const filter: Record<string, unknown> = {};
+
+  if (query.hostelId) {
+    filter.hostelId = normalizeObjectId(query.hostelId, "hostel id");
+  }
+
+  if (query.status) {
+    filter.status = query.status;
+  }
+
+  const reviews = await RatingReviewModel.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(200)
+    .lean<ReviewRecord[]>();
+
+  return {
+    reviews: reviews.map(serializeReview),
+  };
+}
+
+async function moderateReview(
+  reviewId: string,
+  action: "HIDE" | "UNHIDE",
+  input: ReviewModerationInput,
+  principal: ApiPrincipal,
+) {
+  await connectToDatabase();
+
+  const status = action === "HIDE" ? "HIDDEN" : "VISIBLE";
+  const review = await RatingReviewModel.findOneAndUpdate(
+    { _id: normalizeObjectId(reviewId, "review id") },
+    action === "HIDE"
+      ? {
+          $set: {
+            hiddenAt: new Date(),
+            hiddenBy: principal.userId,
+            status,
+          },
+        }
+      : {
+          $set: { status },
+          $unset: { hiddenAt: "", hiddenBy: "" },
+        },
+    { new: true },
+  ).lean<ReviewRecord | null>();
+
+  if (!review) {
+    throw new ReviewServiceError("Review was not found.", "REVIEW_NOT_FOUND", 404);
+  }
+
+  await Promise.all([
+    ReviewModerationLogModel.create({
+      action,
+      actorId: principal.userId,
+      hostelId: review.hostelId,
+      reason: input.reason,
+      reviewId: review._id,
+    }),
+    auditReviewAction(principal, review, `REVIEW_${action}`, { reason: input.reason }),
+  ]);
+
+  return {
+    review: serializeReview(review),
+  };
+}
+
+export function hideReview(
+  reviewId: string,
+  input: ReviewModerationInput,
+  principal: ApiPrincipal,
+) {
+  return moderateReview(reviewId, "HIDE", input, principal);
+}
+
+export function unhideReview(
+  reviewId: string,
+  input: ReviewModerationInput,
+  principal: ApiPrincipal,
+) {
+  return moderateReview(reviewId, "UNHIDE", input, principal);
+}

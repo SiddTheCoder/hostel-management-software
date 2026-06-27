@@ -9,7 +9,11 @@ import {
   View,
 } from "react-native";
 
-import { getResidentDashboard, logout, type ResidentDashboard } from "../api/client";
+import {
+  getResidentDashboard,
+  logout,
+  type ResidentDashboard,
+} from "../api/client";
 import { clearSession } from "../auth/token-store";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { screenStyles } from "./styles";
@@ -50,7 +54,10 @@ export function ResidentHomeScreen({ navigation, route }: Props) {
     try {
       await logout(session.refreshToken);
     } catch {
-      Alert.alert("Logged out locally", "The server session could not be reached.");
+      Alert.alert(
+        "Logged out locally",
+        "The server session could not be reached.",
+      );
     } finally {
       await clearSession();
       navigation.reset({ index: 0, routes: [{ name: "Login" }] });
@@ -61,9 +68,7 @@ export function ResidentHomeScreen({ navigation, route }: Props) {
     <ScrollView contentContainerStyle={screenStyles.scrollContent}>
       <View>
         <Text style={screenStyles.title}>Resident dashboard</Text>
-        <Text style={screenStyles.body}>
-          Signed in as {session.user.name}.
-        </Text>
+        <Text style={screenStyles.body}>Signed in as {session.user.name}.</Text>
       </View>
 
       {isLoading ? <ActivityIndicator color="#10b981" /> : null}
@@ -79,7 +84,8 @@ export function ResidentHomeScreen({ navigation, route }: Props) {
               {dashboard.roomBed.bed?.bedNumber ?? "-"}
             </Text>
             <Text style={screenStyles.meta}>
-              {dashboard.hostel?.location?.area} {dashboard.hostel?.location?.city}
+              {dashboard.hostel?.location?.area}{" "}
+              {dashboard.hostel?.location?.city}
             </Text>
           </View>
 
@@ -132,6 +138,12 @@ export function ResidentHomeScreen({ navigation, route }: Props) {
           ["ResidentPayments", "Payments"],
           ["ResidentFood", "Food"],
           ["ResidentNotices", "Notices"],
+          ["ResidentComplaints", "Complaints"],
+          ["ResidentNightStatus", "Status"],
+          ["ResidentSOS", "SOS"],
+          ["ResidentReviews", "Reviews"],
+          ["ResidentReferral", "Referral"],
+          ["ResidentNotifications", "Alerts"],
         ].map(([screen, label]) => (
           <TouchableOpacity
             key={screen}
@@ -150,6 +162,30 @@ export function ResidentHomeScreen({ navigation, route }: Props) {
 
               if (screen === "ResidentNotices") {
                 navigation.navigate("ResidentNotices", { session });
+              }
+
+              if (screen === "ResidentComplaints") {
+                navigation.navigate("ResidentComplaints", { session });
+              }
+
+              if (screen === "ResidentNightStatus") {
+                navigation.navigate("ResidentNightStatus", { session });
+              }
+
+              if (screen === "ResidentSOS") {
+                navigation.navigate("ResidentSOS", { session });
+              }
+
+              if (screen === "ResidentReviews") {
+                navigation.navigate("ResidentReviews", { session });
+              }
+
+              if (screen === "ResidentReferral") {
+                navigation.navigate("ResidentReferral", { session });
+              }
+
+              if (screen === "ResidentNotifications") {
+                navigation.navigate("ResidentNotifications", { session });
               }
             }}
             style={[screenStyles.button, { flex: 1, minHeight: 44 }]}

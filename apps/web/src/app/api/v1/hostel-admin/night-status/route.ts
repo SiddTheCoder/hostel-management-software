@@ -1,0 +1,22 @@
+import type { NextRequest } from "next/server";
+
+import { requireHostelStaffPrincipal } from "@/lib/api-auth";
+import { handleRouteError, successResponse } from "@/lib/api-response";
+import { listAdminNightStatus } from "@/modules/safety/safety.service";
+import { nightStatusListQuerySchema } from "@/modules/safety/safety.validation";
+
+export const runtime = "nodejs";
+
+export async function GET(request: NextRequest) {
+  try {
+    const principal = await requireHostelStaffPrincipal(request);
+    const query = nightStatusListQuerySchema.parse(
+      Object.fromEntries(request.nextUrl.searchParams.entries()),
+    );
+    const result = await listAdminNightStatus(query, principal);
+
+    return successResponse(result, "Night status loaded");
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}

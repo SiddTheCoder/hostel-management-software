@@ -11,6 +11,7 @@ import { HostelDocumentModel } from "@/models/HostelDocument";
 import { HostelModel } from "@/models/Hostel";
 import { HostelVerificationModel } from "@/models/HostelVerification";
 import { InquiryModel } from "@/models/Inquiry";
+import { RatingReviewModel } from "@/models/RatingReview";
 import { InquiryNoteModel } from "@/models/InquiryNote";
 import { RoomModel } from "@/models/Room";
 import type {
@@ -28,6 +29,7 @@ import type {
   inquiryNoteCreateSchema,
   platformHostelCreateSchema,
   platformHostelListQuerySchema,
+  publicHostelCompareQuerySchema,
   publicInquiryCreateSchema,
   publicHostelListQuerySchema,
   roomCreateSchema,
@@ -39,6 +41,7 @@ type PlatformHostelCreateInput = z.infer<typeof platformHostelCreateSchema>;
 type PlatformHostelListQuery = z.infer<typeof platformHostelListQuerySchema>;
 type HostelRejectInput = z.infer<typeof hostelRejectSchema>;
 type PublicHostelListQuery = z.infer<typeof publicHostelListQuerySchema>;
+type PublicHostelCompareQuery = z.infer<typeof publicHostelCompareQuerySchema>;
 type PublicInquiryCreateInput = z.infer<typeof publicInquiryCreateSchema>;
 type HostelAdminInquiryListQuery = z.infer<typeof hostelAdminInquiryListQuerySchema>;
 type HostelAdminInquiryStatusInput = z.infer<typeof hostelAdminInquiryStatusSchema>;
@@ -189,6 +192,15 @@ type BedRecord = {
   roomId: Types.ObjectId;
   status: "AVAILABLE" | "OCCUPIED" | "RESERVED" | "MAINTENANCE";
   updatedAt?: Date;
+};
+
+type RatingSummaryRecord = {
+  _id: Types.ObjectId;
+  averageRating: number;
+  cleanlinessRating: number;
+  foodRating: number;
+  safetyRating: number;
+  total: number;
 };
 
 export class HostelServiceError extends Error {
@@ -906,6 +918,89 @@ export async function getPublicHostelBySlug(slug: string) {
 
   return {
     hostel: serializePublicHostel(hostel),
+  };
+}
+
+export async function comparePublicHostels(query: PublicHostelCompareQuery) {
+  await connectToDatabase();
+
+  const hostelIds = normalizeObjectIds(query.ids);
+  const hostels = await HostelModel.find({
+    _id: { $in: hostelIds },
+    isDeleted: false,
+    status: "PUBLISHED",
+    verificationStatus: "VERIFIED",
+  }).lean<HostelRecord[]>();
+
+  if (hostels.length !== hostelIds.length) {
+    throw new HostelServiceError(
+      "One or more hostels are not available for public comparison.",
+      "PUBLIC_HOSTEL_COMPARE_NOT_FOUND",
+      404,
+    );
+  }
+
+  const ratings = await RatingReviewModel.aggregate<RatingSummaryRecord>([
+    {
+      $match: {
+        hostelId: { $in: hostelIds },
+        status: "VISIBLE",
+      },
+    },
+    {
+      $group: {
+        _id: "$hostelId",
+        averageRating: { $avg: "$overallRating" },
+        cleanlinessRating: { $avg: "$cleanlinessRating" },
+        foodRating: { $avg: "$foodRating" },
+        safetyRating: { $avg: "$safetyRating" },
+        total: { $sum: 1 },
+      },
+    },
+  ]);
+  const ratingByHostelId = new Map(
+    ratings.map((rating) => [rating._id.toString(), rating]),
+  );
+  const byRequestedOrder = new Map(
+    hostels.map((hostel) => [hostel._id.toString(), hostel]),
+  );
+
+  return {
+    hostels: query.ids
+      .map((id) => byRequestedOrder.get(id))
+      .filter((hostel): hostel is HostelRecord => Boolean(hostel))
+      .map((hostel) => {
+        const rating = ratingByHostelId.get(hostel._id.toString());
+
+        return {
+          ...serializePublicHostel(hostel),
+          comparison: {
+            facilities: hostel.facilities ?? [],
+            foodScore: rating?.foodRating ?? 0,
+            locationText: [
+              hostel.location.address,
+              hostel.location.area,
+              hostel.location.city,
+            ]
+              .filter(Boolean)
+              .join(", "),
+            monthlyFee: {
+              currency: hostel.pricing?.currency ?? "NPR",
+              max: hostel.pricing?.monthlyRentMax ?? 0,
+              min: hostel.pricing?.monthlyRentMin ?? 0,
+            },
+            ratingSummary: {
+              averageRating: rating?.averageRating ?? 0,
+              cleanlinessRating: rating?.cleanlinessRating ?? 0,
+              safetyRating: rating?.safetyRating ?? 0,
+              total: rating?.total ?? 0,
+            },
+            roomTypes: hostel.roomTypes ?? [],
+            vacancy: hostel.capacitySummary?.vacantBeds ?? 0,
+            verificationStatus: hostel.verificationStatus,
+          },
+        };
+      }),
   };
 }
 

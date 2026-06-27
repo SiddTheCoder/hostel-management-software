@@ -58,8 +58,9 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
 import {
   adminMetrics,
@@ -96,6 +97,54 @@ import {
 } from "./shared";
 
 export function ServiceProviderRegistrationPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const value = (name: string) => {
+      const field = form.get(name);
+
+      return typeof field === "string" ? field.trim() : "";
+    };
+
+    setIsSubmitting(true);
+    setMessage("");
+
+    try {
+      await browserApi("/api/v1/public/service-providers/register", {
+        body: JSON.stringify({
+          area: value("area"),
+          availability: value("availability") || undefined,
+          category: value("category"),
+          city: value("city") || "Kathmandu",
+          description: value("description") || undefined,
+          documents: value("documentUrl")
+            ? [
+                {
+                  documentType: value("documentType") || "PROFILE_DOCUMENT",
+                  fileUrl: value("documentUrl"),
+                },
+              ]
+            : [],
+          experience: value("experience") || undefined,
+          fullName: value("fullName"),
+          phone: value("phone"),
+        }),
+        method: "POST",
+      });
+      event.currentTarget.reset();
+      setMessage("Registration submitted for platform review.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Could not submit registration.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <PublicShell active="providers">
       <section className="mx-auto grid max-w-[1280px] gap-6 px-6 py-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -123,32 +172,122 @@ export function ServiceProviderRegistrationPage() {
           action={<StatusPill tone="warning">Pending approval</StatusPill>}
           title="Provider Details"
         >
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField icon={UserRound} label="Full Name" placeholder="CleanStay Nepal" />
-            <FormField icon={Phone} label="Phone" placeholder="9841002300" />
-            <FormField label="Category" placeholder="Cleaner / Plumber / Electrician" />
-            <FormField icon={MapPin} label="Area" placeholder="Lalitpur, Kathmandu" />
-            <FormField
-              icon={CalendarDays}
-              label="Availability"
-              placeholder="Weekdays, emergency, on-call"
-            />
-            <FormField label="Experience" placeholder="5+ years serving hostels" />
-          </div>
-          <label className="mt-4 block text-sm font-semibold text-primary">
-            Description
-            <textarea
-              className="mt-2 min-h-28 w-full rounded-lg border border-border bg-surface p-3 text-sm outline-none focus:border-brand-teal"
-              placeholder="Describe your service coverage, tools, and response time."
-            />
-          </label>
-          <div className="mt-4 rounded-lg border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
-            <Upload className="mx-auto mb-2 size-5" />
-            Optional photo or document upload UI
-          </div>
-          <button className="mt-5 w-full rounded-md bg-brand-teal px-5 py-3 text-sm font-semibold text-white">
-            Submit Provider Registration
-          </button>
+          {message ? (
+            <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-primary">
+              {message}
+            </div>
+          ) : null}
+          <form onSubmit={submit}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-primary">
+                Full Name
+                <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
+                  <UserRound className="size-4 text-muted-foreground" />
+                  <input
+                    className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+                    name="fullName"
+                    placeholder="CleanStay Nepal"
+                    required
+                  />
+                </span>
+              </label>
+              <label className="block text-sm font-semibold text-primary">
+                Phone
+                <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
+                  <Phone className="size-4 text-muted-foreground" />
+                  <input
+                    className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+                    name="phone"
+                    placeholder="9841002300"
+                    required
+                  />
+                </span>
+              </label>
+              <label className="block text-sm font-semibold text-primary">
+                Category
+                <select
+                  className="mt-2 h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal"
+                  name="category"
+                  required
+                >
+                  {[
+                    "PLUMBER",
+                    "ELECTRICIAN",
+                    "DOCTOR_CLINIC",
+                    "INTERNET_TECHNICIAN",
+                    "CLEANER",
+                    "CARPENTER",
+                    "PAINTER",
+                    "WATER_SUPPLIER",
+                    "APPLIANCE_REPAIR",
+                    "ROOM_REPAIR",
+                    "OTHER",
+                  ].map((category) => (
+                    <option key={category} value={category}>
+                      {category.replaceAll("_", " ")}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-primary">
+                Area
+                <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
+                  <MapPin className="size-4 text-muted-foreground" />
+                  <input
+                    className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+                    name="area"
+                    placeholder="Lalitpur"
+                    required
+                  />
+                </span>
+              </label>
+              <FormField icon={MapPin} label="City" placeholder="Kathmandu" />
+              <input name="city" type="hidden" value="Kathmandu" />
+              <label className="block text-sm font-semibold text-primary">
+                Availability
+                <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
+                  <CalendarDays className="size-4 text-muted-foreground" />
+                  <input
+                    className="h-full w-full bg-transparent text-sm font-normal outline-none placeholder:text-muted-foreground"
+                    name="availability"
+                    placeholder="Weekdays, emergency, on-call"
+                  />
+                </span>
+              </label>
+              <label className="block text-sm font-semibold text-primary">
+                Experience
+                <input
+                  className="mt-2 h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal"
+                  name="experience"
+                  placeholder="5+ years serving hostels"
+                />
+              </label>
+              <label className="block text-sm font-semibold text-primary">
+                Document URL
+                <input
+                  className="mt-2 h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal"
+                  name="documentUrl"
+                  placeholder="https://..."
+                  type="url"
+                />
+              </label>
+              <input name="documentType" type="hidden" value="PROFILE_DOCUMENT" />
+            </div>
+            <label className="mt-4 block text-sm font-semibold text-primary">
+              Description
+              <textarea
+                className="mt-2 min-h-28 w-full rounded-lg border border-border bg-surface p-3 text-sm outline-none focus:border-brand-teal"
+                name="description"
+                placeholder="Describe your service coverage, tools, and response time."
+              />
+            </label>
+            <button
+              className="mt-5 w-full rounded-md bg-brand-teal px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Provider Registration"}
+            </button>
+          </form>
         </SectionCard>
       </section>
     </PublicShell>

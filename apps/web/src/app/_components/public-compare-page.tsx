@@ -2,15 +2,85 @@
 
 import { PhoneCall, Plus, Send, Star, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { hostelListings, type HostelSummary } from "@/lib/hostelhub-data";
 import { PublicShell, SectionCard, StatusPill, formatMoney } from "./shared";
+
+type PublicHostel = {
+  capacitySummary?: {
+    vacantBeds?: number;
+  };
+  comparison?: {
+    foodScore?: number;
+    locationText?: string;
+    monthlyFee?: {
+      min?: number;
+    };
+    ratingSummary?: {
+      averageRating?: number;
+      total?: number;
+    };
+    vacancy?: number;
+  };
+  description?: string;
+  facilities: string[];
+  hostelType: "BOYS" | "GIRLS" | "CO_LIVING";
+  id: string;
+  location: {
+    address?: string;
+    area: string;
+    city?: string;
+  };
+  name: string;
+  photos: Array<{
+    url?: string;
+  }>;
+  pricing?: {
+    monthlyRentMin?: number;
+  };
+  roomTypes: string[];
+  slug: string;
+  verificationStatus: "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED";
+};
+
+function mapPublicHostel(hostel: PublicHostel): HostelSummary {
+  return {
+    address: hostel.comparison?.locationText ?? hostel.location.address ?? "",
+    area: hostel.location.area,
+    city: hostel.location.city ?? "Kathmandu",
+    description: hostel.description ?? "",
+    facilities: hostel.facilities,
+    foodScore: hostel.comparison?.foodScore ?? 0,
+    id: hostel.id,
+    image: hostel.photos[0]?.url ?? hostelListings[0]?.image ?? "",
+    name: hostel.name,
+    owner: "Verified hostel",
+    price: hostel.comparison?.monthlyFee?.min ?? hostel.pricing?.monthlyRentMin ?? 0,
+    rating: hostel.comparison?.ratingSummary?.averageRating ?? 0,
+    reviews: hostel.comparison?.ratingSummary?.total ?? 0,
+    roomTypes: hostel.roomTypes,
+    slug: hostel.slug,
+    status: "published",
+    type:
+      hostel.hostelType === "BOYS"
+        ? "boys"
+        : hostel.hostelType === "GIRLS"
+          ? "girls"
+          : "co-living",
+    vacancy: hostel.comparison?.vacancy ?? hostel.capacitySummary?.vacantBeds ?? 0,
+    verified: hostel.verificationStatus === "VERIFIED",
+  };
+}
 
 export function PublicComparePage() {
   const [comparedHostels, setComparedHostels] = useState<HostelSummary[]>(
     hostelListings.slice(0, 3),
   );
+  const [availableHostels, setAvailableHostels] =
+    useState<HostelSummary[]>(hostelListings);
+  const [message, setMessage] = useState("");
 
   const rows = [
     ["Hostel", "name"],
@@ -29,7 +99,7 @@ export function PublicComparePage() {
   };
 
   const addHostel = () => {
-    const remaining = hostelListings.filter(
+    const remaining = availableHostels.filter(
       (h) => !comparedHostels.find((ch) => ch.id === h.id),
     );
     if (remaining.length > 0 && comparedHostels.length < 3) {
@@ -38,6 +108,41 @@ export function PublicComparePage() {
       alert("You can compare up to 3 hostels side-by-side.");
     }
   };
+
+  useEffect(() => {
+    async function loadComparison() {
+      try {
+        const publicData = await browserApi<{ hostels: PublicHostel[] }>(
+          "/api/v1/public/hostels",
+        );
+
+        if (publicData.hostels.length < 2) {
+          return;
+        }
+
+        const ids = publicData.hostels
+          .slice(0, 3)
+          .map((hostel) => hostel.id)
+          .join(",");
+        const comparisonData = await browserApi<{ hostels: PublicHostel[] }>(
+          `/api/v1/public/hostels/compare?ids=${encodeURIComponent(ids)}`,
+        );
+        const mapped = comparisonData.hostels.map(mapPublicHostel);
+
+        setAvailableHostels(publicData.hostels.map(mapPublicHostel));
+        setComparedHostels(mapped);
+        setMessage("Loaded live hostel comparison data.");
+      } catch {
+        setMessage("Showing demo comparison until published hostels are available.");
+      }
+    }
+
+    const timer = window.setTimeout(() => {
+      void loadComparison();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <PublicShell active="compare">
@@ -68,6 +173,11 @@ export function PublicComparePage() {
             &larr; Back to Hostels
           </Link>
         </div>
+        {message ? (
+          <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-primary">
+            {message}
+          </div>
+        ) : null}
 
         <SectionCard className="overflow-x-auto">
           <div

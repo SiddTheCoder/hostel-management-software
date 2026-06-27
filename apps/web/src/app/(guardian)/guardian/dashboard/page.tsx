@@ -1,5 +1,5 @@
-import { PortalExperiencePage } from "@/app/_components/portal-experience-page";
+import { GuardianDashboardPageContent } from "@/app/_components/daily-operations-pages";
 
 export default function GuardianDashboardPage() {
-  return <PortalExperiencePage portal="guardian" screen="dashboard" />;
+  return <GuardianDashboardPageContent />;
 }

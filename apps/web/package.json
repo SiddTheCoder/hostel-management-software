@@ -11,7 +11,11 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:platform-owner": "node scripts/seed-platform-owner.mjs"
+    "seed:platform-owner": "node scripts/seed-platform-owner.mjs",
+    "seed:demo": "node scripts/seed-demo-data.mjs",
+    "recover:admin": "node scripts/recover-admin-account.mjs",
+    "check:private-documents": "node scripts/check-private-documents.mjs",
+    "deploy:check": "next build"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

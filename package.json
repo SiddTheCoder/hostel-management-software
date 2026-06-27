@@ -8,7 +8,12 @@
     "web:format": "npm --prefix apps/web run format",
     "web:test": "npm --prefix apps/web run test",
     "web:seed:platform-owner": "npm --prefix apps/web run seed:platform-owner",
+    "web:seed:demo": "npm --prefix apps/web run seed:demo",
+    "web:recover:admin": "npm --prefix apps/web run recover:admin",
+    "web:check:private-documents": "npm --prefix apps/web run check:private-documents",
+    "web:deploy:check": "npm --prefix apps/web run deploy:check",
     "mobile:start": "npm --prefix apps/mobile run start",
-    "mobile:typecheck": "npm --prefix apps/mobile run typecheck"
+    "mobile:typecheck": "npm --prefix apps/mobile run typecheck",
+    "mobile:build:test": "npm --prefix apps/mobile run build:test"
   }
 }

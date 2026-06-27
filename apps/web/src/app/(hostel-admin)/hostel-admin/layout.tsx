@@ -19,12 +19,19 @@ const navItems = [
     label: "Complaints",
   },
   { href: "/hostel-admin/night-status", icon: "moon" as const, label: "Night Status" },
+  { href: "/hostel-admin/sos-alerts", icon: "siren" as const, label: "SOS Alerts" },
   {
     href: "/hostel-admin/move-in-out",
     icon: "receipt" as const,
     label: "Move-In/Move-Out",
   },
+  {
+    href: "/hostel-admin/service-providers",
+    icon: "wrench" as const,
+    label: "Service Providers",
+  },
   { href: "/hostel-admin/maintenance", icon: "wrench" as const, label: "Maintenance" },
+  { href: "/hostel-admin/referrals", icon: "message" as const, label: "Referrals" },
   { href: "/hostel-admin/reports", icon: "file" as const, label: "Reports" },
   { href: "/hostel-admin/settings", icon: "settings" as const, label: "Settings" },
 ];
