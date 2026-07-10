@@ -140,6 +140,7 @@ export function PublicHostelRegistrationLandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayedWord, setDisplayedWord] = useState("HostelHub");
   const [showBottomCta, setShowBottomCta] = useState(false);
+  const [bordersDone, setBordersDone] = useState(false);
   const featureRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
 
@@ -182,35 +183,41 @@ export function PublicHostelRegistrationLandingPage() {
   const SlideIcon = heroSlides[currentSlide].icon;
 
   return (
-    <PublicShell active="register-hostel">
+    <PublicShell active="register-hostel" transparentHeader>
       <div className="relative overflow-hidden">
-        {/* Animated borders */}
-        <div className="pointer-events-none fixed inset-0 z-50">
+        {/* Animated borders — grow from all 4 sides for 3s, then fade out */}
+        <motion.div
+          className="pointer-events-none fixed inset-0 z-50"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: bordersDone ? 0 : 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           <motion.div
             className="absolute top-0 left-0 h-1 bg-gradient-to-r from-brand-teal to-cyan-500"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 3, ease: "easeOut" }}
           />
           <motion.div
             className="absolute bottom-0 right-0 h-1 bg-gradient-to-l from-brand-teal to-cyan-500"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 3, ease: "easeOut" }}
           />
           <motion.div
             className="absolute left-0 top-0 w-1 bg-gradient-to-b from-brand-teal to-cyan-500"
             initial={{ height: "0%" }}
             animate={{ height: "100%" }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            onAnimationComplete={() => setBordersDone(true)}
           />
           <motion.div
             className="absolute right-0 top-0 w-1 bg-gradient-to-b from-brand-teal to-cyan-500"
             initial={{ height: "0%" }}
             animate={{ height: "100%" }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 3, ease: "easeOut" }}
           />
-        </div>
+        </motion.div>
 
         <div className="pointer-events-none absolute -inset-1 opacity-30 dark:opacity-10">
           <div className="absolute -left-40 -top-40 size-80 rounded-full bg-brand-teal blur-3xl" />

@@ -396,13 +396,15 @@ export function FormField({
 export function PublicShell({
   active,
   children,
+  transparentHeader,
 }: {
   active: "blog" | "browse" | "compare" | "home" | "pricing" | "providers" | "register-hostel";
   children: ReactNode;
+  transparentHeader?: boolean;
 }) {
   return (
     <AnimatedPage className="min-h-screen bg-background text-foreground">
-      <PublicHeader active={active} />
+      <PublicHeader active={active} transparentAtTop={transparentHeader} />
       {children}
     </AnimatedPage>
   );

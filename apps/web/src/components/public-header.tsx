@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 type PublicHeaderProps = {
   active: "blog" | "browse" | "compare" | "home" | "pricing" | "providers" | "register-hostel";
+  transparentAtTop?: boolean;
 };
 
 const navItems = [
@@ -64,11 +65,12 @@ function dashboardHrefForRole(role: Role) {
   return landingPathForRole(role) ?? "/hostels";
 }
 
-export function PublicHeader({ active }: PublicHeaderProps) {
+export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
   const router = useRouter();
   const [isSessionChecked, setIsSessionChecked] = useState(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const loadCurrentUser = useCallback(async () => {
@@ -120,6 +122,14 @@ export function PublicHeader({ active }: PublicHeaderProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!transparentAtTop) return;
+    function onScroll() { setScrolled(window.scrollY > 20); }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [transparentAtTop]);
+
   async function handleLogout() {
     await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
     setUser(null);
@@ -128,7 +138,14 @@ export function PublicHeader({ active }: PublicHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur dark:bg-card/95">
+    <header
+      className={cn(
+        "sticky top-0 z-50 transition-all duration-300",
+        transparentAtTop && !scrolled
+          ? "border-transparent bg-transparent"
+          : "border-b border-border bg-surface/95 backdrop-blur dark:bg-card/95",
+      )}
+    >
       <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4 md:px-8">
         <Link
           href="/"
