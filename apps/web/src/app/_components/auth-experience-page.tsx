@@ -157,11 +157,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
             <div className="mt-8 space-y-5">
               {mode === "login" ? (
                 <>
-                  <FormField
-                    icon={User}
-                    label="Email"
-                    placeholder="Enter your email"
-                  />
+                  <FormField icon={User} label="Email" placeholder="Enter your email" />
                   <FormField
                     icon={LockKeyhole}
                     label="Password"
@@ -329,11 +325,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                       ),
                     )}
                   </div>
-                  <FormField
-                    icon={Mail}
-                    label="Email"
-                    placeholder="name@example.com"
-                  />
+                  <FormField icon={Mail} label="Email" placeholder="name@example.com" />
                   <FormField icon={KeyRound} label="OTP Code" placeholder="000000" />
                   <FormField
                     icon={LockKeyhole}

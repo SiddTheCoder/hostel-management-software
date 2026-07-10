@@ -2,6 +2,22 @@ import { Schema, model, models } from "mongoose";
 
 import { validateFileAssetMetadata } from "@/lib/file-assets";
 
+const variantSchema = new Schema(
+  {
+    variant: {
+      type: String,
+      enum: ["ORIGINAL", "THUMBNAIL", "MEDIUM", "LARGE"],
+      required: true,
+    },
+    key: { type: String, required: true },
+    width: { type: Number },
+    height: { type: Number },
+    sizeBytes: { type: Number },
+    mimeType: { type: String },
+  },
+  { _id: false },
+);
+
 const fileAssetSchema = new Schema(
   {
     hostelId: { ref: "Hostel", type: Schema.Types.ObjectId },
@@ -18,6 +34,7 @@ const fileAssetSchema = new Schema(
       default: "PRIVATE",
     },
     publicUrl: String,
+    variants: { type: [variantSchema], default: [] },
     status: { type: String, enum: ["ACTIVE", "DELETED"], default: "ACTIVE" },
     createdBy: { ref: "User", type: Schema.Types.ObjectId },
     updatedBy: { ref: "User", type: Schema.Types.ObjectId },

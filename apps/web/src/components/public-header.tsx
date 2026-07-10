@@ -1,23 +1,132 @@
-import { Heart, Home } from "lucide-react";
-import Link from "next/link";
+"use client";
 
+import { Heart, Home, LogOut } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { landingPathForRole } from "@/lib/route-access";
+import { Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type PublicHeaderProps = {
-  active: "blog" | "browse" | "compare" | "home" | "pricing" | "providers";
+  active: "blog" | "browse" | "compare" | "home" | "pricing" | "providers" | "register-hostel";
 };
 
 const navItems = [
   { href: "/", id: "home", label: "Home" },
   { href: "/hostels", id: "browse", label: "Hostels" },
   { href: "/compare", id: "compare", label: "Compare" },
+  { href: "/register-hostel", id: "register-hostel", label: "Register Hostel" },
   { href: "/service-providers/register", id: "providers", label: "Service Providers" },
   { href: "/#blog", id: "blog", label: "Blog" },
   { href: "/#about", id: "about", label: "About Us" },
   { href: "/#contact", id: "contact", label: "Contact" },
 ] as const;
 
+type CurrentUser = {
+  email: string | null;
+  name: string;
+  role: Role;
+};
+
+type MeResponse =
+  | {
+      data: {
+        user: CurrentUser;
+      };
+      success: true;
+    }
+  | {
+      message: string;
+      success: false;
+    };
+
+const DASHBOARD_ROLES = new Set([
+  Role.PLATFORM_OWNER,
+  Role.HOSTEL_OWNER,
+  Role.HOSTEL_ADMIN,
+  Role.WARDEN,
+  Role.RESIDENT,
+  Role.GUARDIAN,
+]);
+
+function hasDashboard(role: Role) {
+  return DASHBOARD_ROLES.has(role);
+}
+
+function dashboardHrefForRole(role: Role) {
+  if (role === Role.PUBLIC_USER || role === Role.SERVICE_PROVIDER) {
+    return "/hostels";
+  }
+
+  return landingPathForRole(role) ?? "/hostels";
+}
+
 export function PublicHeader({ active }: PublicHeaderProps) {
+  const router = useRouter();
+  const [isSessionChecked, setIsSessionChecked] = useState(false);
+  const [user, setUser] = useState<CurrentUser | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const response = await fetch("/api/v1/auth/me", {
+        credentials: "include",
+      });
+      const payload = (await response.json().catch(() => null)) as MeResponse | null;
+
+      if (!response.ok || !payload?.success) {
+        setUser(null);
+        return;
+      }
+
+      setUser(payload.data.user);
+    } catch {
+      setUser(null);
+    } finally {
+      setIsSessionChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadCurrentUser();
+    }, 0);
+
+    function handleFocus() {
+      void loadCurrentUser();
+    }
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [loadCurrentUser]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  async function handleLogout() {
+    await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
+    setUser(null);
+    setMenuOpen(false);
+    router.push("/");
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur dark:bg-card/95">
       <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4 md:px-8">
@@ -44,6 +153,7 @@ export function PublicHeader({ active }: PublicHeaderProps) {
           ))}
         </nav>
         <div className="flex items-center gap-3">
+          <ThemeToggle className="hidden md:inline-flex" />
           <button
             aria-label="Saved hostels"
             className="hidden size-10 items-center justify-center rounded-full border border-border text-primary transition hover:border-brand-teal hover:text-brand-teal md:inline-flex"
@@ -51,12 +161,57 @@ export function PublicHeader({ active }: PublicHeaderProps) {
           >
             <Heart className="size-5" />
           </button>
-          <Link
-            href="/login"
-            className="hidden rounded-lg bg-brand-teal px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 md:inline-flex"
-          >
-            Login / Sign up
-          </Link>
+          {isSessionChecked ? (
+            user && hasDashboard(user.role) ? (
+              <Link
+                href={dashboardHrefForRole(user.role)}
+                className="inline-flex rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 md:px-5 md:py-3"
+              >
+                Dashboard
+              </Link>
+            ) : user ? (
+              <div ref={menuRef} className="relative">
+                <button
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-primary transition hover:border-brand-teal hover:text-brand-teal md:px-4 md:py-2.5"
+                >
+                  <span className="flex size-7 items-center justify-center rounded-full bg-brand-teal/10 text-xs font-bold text-brand-teal">
+                    {user.name
+                      .split(" ")
+                      .map((p) => p[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </span>
+                  <span className="hidden md:inline">{user.email ?? user.name}</span>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-border bg-surface p-1 shadow-lg">
+                    <div className="border-b border-border px-3 py-2">
+                      <p className="truncate text-sm font-semibold text-primary">{user.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 transition hover:bg-red-50"
+                    >
+                      <LogOut className="size-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 md:px-5 md:py-3"
+              >
+                Login / Sign up
+              </Link>
+            )
+          ) : (
+            <span className="inline-flex h-10 w-28 rounded-lg bg-muted md:h-11 md:w-32" />
+          )}
         </div>
       </div>
     </header>

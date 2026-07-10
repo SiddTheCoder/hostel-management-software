@@ -2,10 +2,12 @@
 
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 
 import { destinationForRole } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
+
+import { GoogleAuthButton } from "../google-auth-button";
 
 type LoginUser = {
   role: Role;
@@ -25,35 +27,6 @@ type LoginResponse =
       message: string;
     };
 
-type GoogleCredentialResponse = {
-  credential?: string;
-};
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (options: {
-            callback: (response: GoogleCredentialResponse) => void;
-            client_id: string;
-          }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: {
-              shape?: "rectangular" | "pill" | "circle" | "square";
-              size?: "large" | "medium" | "small";
-              text?: "signin_with" | "signup_with" | "continue_with" | "signin";
-              theme?: "outline" | "filled_blue" | "filled_black";
-              width?: number;
-            },
-          ) => void;
-        };
-      };
-    };
-  }
-}
-
 function destinationAfterLogin(role: Role) {
   const searchParams = new URLSearchParams(window.location.search);
   const requestedNext = searchParams.get("next");
@@ -67,21 +40,20 @@ const routeErrorMessages: Record<string, string> = {
   session_expired: "Your session expired. Please login again.",
 };
 
-export function LoginForm() {
-  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+type LoginFormProps = {
+  googleClientId: string;
+};
+
+export function LoginForm({ googleClientId }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [identifier, setIdentifier] = useState("");
-  const [isGoogleReady, setIsGoogleReady] = useState(false);
-  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const routeError = searchParams.get("error");
   const visibleError = error || (routeError ? routeErrorMessages[routeError] : "");
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
   const completeLogin = useCallback(
     async function completeLogin(response: Response) {
       const payload = (await response.json().catch(() => null)) as LoginResponse | null;
@@ -95,81 +67,13 @@ export function LoginForm() {
     },
     [router],
   );
-
-  useEffect(() => {
-    if (!googleClientId || !googleButtonRef.current) {
-      return;
-    }
-
-    const clientId = googleClientId;
-    let isMounted = true;
-
-    async function handleGoogleCredential(response: GoogleCredentialResponse) {
-      if (!response.credential) {
-        setError("Google did not return a sign-in token.");
-        return;
-      }
-
-      setError("");
-      setIsGoogleSubmitting(true);
-
-      try {
-        const googleResponse = await fetch("/api/v1/auth/google", {
-          body: JSON.stringify({ idToken: response.credential }),
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-        });
-
-        await completeLogin(googleResponse);
-      } catch (googleError) {
-        setError(
-          googleError instanceof Error
-            ? googleError.message
-            : "Google sign-in failed. Please try again.",
-        );
-      } finally {
-        setIsGoogleSubmitting(false);
-      }
-    }
-
-    function renderGoogleButton() {
-      if (!isMounted || !window.google || !googleButtonRef.current) {
-        return;
-      }
-
-      window.google.accounts.id.initialize({
-        callback: handleGoogleCredential,
-        client_id: clientId,
-      });
-      window.google.accounts.id.renderButton(googleButtonRef.current, {
-        shape: "rectangular",
-        size: "large",
-        text: "continue_with",
-        theme: "outline",
-        width: googleButtonRef.current.offsetWidth || 320,
-      });
-      setIsGoogleReady(true);
-    }
-
-    if (window.google) {
-      renderGoogleButton();
-    } else {
-      const script = document.createElement("script");
-
-      script.async = true;
-      script.defer = true;
-      script.onload = renderGoogleButton;
-      script.src = "https://accounts.google.com/gsi/client";
-      document.head.appendChild(script);
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [completeLogin, googleClientId]);
+  const handleGoogleSuccess = useCallback(
+    (user: { role: Role }) => {
+      router.push(destinationAfterLogin(user.role));
+      router.refresh();
+    },
+    [router],
+  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -313,25 +217,18 @@ export function LoginForm() {
         <div className="h-px flex-1 bg-border" />
       </div>
 
-      <div ref={googleButtonRef} className="min-h-11 w-full overflow-hidden rounded-lg" />
-      {!googleClientId ? (
-        <button
-          className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface text-sm font-medium text-primary transition hover:bg-muted dark:bg-card"
-          disabled
-          type="button"
-        >
-          <span className="font-bold text-[#4285f4]">G</span>
-          Google
-        </button>
-      ) : !isGoogleReady || isGoogleSubmitting ? (
-        <p className="text-sm text-muted-foreground">
-          {isGoogleSubmitting ? "Completing Google sign-in..." : "Loading Google..."}
-        </p>
-      ) : null}
+      <GoogleAuthButton
+        clientId={googleClientId}
+        onError={setError}
+        onSuccess={handleGoogleSuccess}
+      />
 
       <p className="pt-2 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <a className="font-medium text-role-resident hover:underline" href="/signup">
+        <a
+          className="font-medium text-role-resident hover:underline"
+          href={searchParams.get("next") ? `/signup?next=${encodeURIComponent(searchParams.get("next")!)}` : "/signup"}
+        >
           Sign up
         </a>
       </p>

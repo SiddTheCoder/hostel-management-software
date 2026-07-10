@@ -48,11 +48,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 function SidebarMenu({ className, ...props }: React.ComponentProps<"nav">) {
   return (
-    <nav
-      data-slot="sidebar-menu"
-      className={cn("space-y-1 p-4", className)}
-      {...props}
-    />
+    <nav data-slot="sidebar-menu" className={cn("space-y-1 p-4", className)} {...props} />
   );
 }
 

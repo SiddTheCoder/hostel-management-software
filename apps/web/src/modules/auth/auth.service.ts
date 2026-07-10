@@ -207,15 +207,15 @@ export async function issueSessionForUser(
   context?: RequestContext,
 ) {
   const safeUser = publicUser(user);
-  const session = await SessionModel.create({
+
+  const session = new SessionModel({
     expiresAt: refreshTokenExpiresAt(),
     ipAddress: context?.ipAddress,
-    refreshTokenHash: "pending",
     userAgent: context?.userAgent,
     userId: safeUser.id,
   });
-
   const sessionId = String(session._id);
+
   const tokenInput = {
     hostelIds: safeUser.hostelIds,
     role: safeUser.role,

@@ -21,7 +21,20 @@ export async function browserApi<T>(input: RequestInfo | URL, init?: RequestInit
     ...init,
     headers,
   });
-  const payload = (await response.json()) as ApiPayload<T>;
+
+  const text = await response.text();
+  let payload: ApiPayload<T>;
+
+  try {
+    payload = JSON.parse(text) as ApiPayload<T>;
+  } catch {
+    const isHtml = text.trim().startsWith("<!");
+    throw new Error(
+      isHtml
+        ? `Server returned an HTML page (${response.status}). The API endpoint "${typeof input === "string" ? input : input.url}" may not exist or there is a server error.`
+        : `Invalid JSON response (${response.status}) from the server.`,
+    );
+  }
 
   if (!response.ok || !payload.success) {
     throw new Error(payload.message || "Request failed");

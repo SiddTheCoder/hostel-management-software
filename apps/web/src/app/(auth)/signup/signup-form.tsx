@@ -1,8 +1,13 @@
 "use client";
 
 import { CheckCircle2, KeyRound, Mail, RefreshCw, UserRound } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useState, type FormEvent } from "react";
+
+import { destinationForRole } from "@/lib/route-access";
+import { Role } from "@/lib/roles";
+
+import { GoogleAuthButton } from "../google-auth-button";
 
 type AuthResponse<T> =
   | {
@@ -31,6 +36,10 @@ type RegisterData = {
 
 type SignupStep = "details" | "verify";
 
+type SignupFormProps = {
+  googleClientId: string;
+};
+
 async function authRequest<T>(path: string, body: unknown) {
   const response = await fetch(path, {
     body: JSON.stringify(body),
@@ -49,8 +58,9 @@ async function authRequest<T>(path: string, body: unknown) {
   return payload.data;
 }
 
-export function SignupForm() {
+export function SignupForm({ googleClientId }: SignupFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<SignupStep>("details");
   const [challengeId, setChallengeId] = useState("");
   const [devCode, setDevCode] = useState("");
@@ -66,6 +76,23 @@ export function SignupForm() {
   });
 
   const identifier = form.email.trim().toLowerCase();
+  const nextParam = searchParams.get("next");
+
+  function redirectAfterAuth(role: Role) {
+    if (nextParam) {
+      router.push(nextParam);
+    } else {
+      router.push(role === Role.PUBLIC_USER ? "/hostels" : destinationForRole(role));
+    }
+    router.refresh();
+  }
+
+  const handleGoogleSuccess = useCallback(
+    (user: { role: Role }) => {
+      redirectAfterAuth(user.role);
+    },
+    [router, nextParam],
+  );
 
   async function sendOtp() {
     const data = await authRequest<OtpRequestData>("/api/v1/auth/otp/request", {
@@ -133,8 +160,7 @@ export function SignupForm() {
         password: form.password,
       });
 
-      router.push("/hostels");
-      router.refresh();
+      redirectAfterAuth(Role.PUBLIC_USER);
     } catch (signupError) {
       setError(
         signupError instanceof Error
@@ -168,7 +194,7 @@ export function SignupForm() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, name: event.target.value }))
                 }
-                placeholder="Asha Rai"
+                placeholder="Alex Morgan"
                 required
                 value={form.name}
               />
@@ -219,6 +245,20 @@ export function SignupForm() {
           >
             {isSubmitting ? "Sending OTP..." : "Send email OTP"}
           </button>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Or continue with
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <GoogleAuthButton
+            clientId={googleClientId}
+            onError={setError}
+            onSuccess={handleGoogleSuccess}
+          />
         </form>
       ) : (
         <form className="space-y-4" onSubmit={completeSignup}>
@@ -229,7 +269,8 @@ export function SignupForm() {
             </div>
             {expiresAt ? (
               <p className="mt-2">
-                Expires at {new Date(expiresAt).toLocaleTimeString([], {
+                Expires at{" "}
+                {new Date(expiresAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}

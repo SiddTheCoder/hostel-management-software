@@ -4,13 +4,17 @@ import { AuthShell } from "../auth-shell";
 import { LoginForm } from "./login-form";
 
 export default function LoginPage() {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+
   return (
     <AuthShell
       subtitle="Sign in with your email and password, or continue with Google."
       title="Login to HostelHub"
     >
-      <Suspense fallback={<p className="mt-10 text-sm text-muted-foreground">Loading login...</p>}>
-        <LoginForm />
+      <Suspense
+        fallback={<p className="mt-10 text-sm text-muted-foreground">Loading login...</p>}
+      >
+        <LoginForm googleClientId={googleClientId} />
       </Suspense>
     </AuthShell>
   );

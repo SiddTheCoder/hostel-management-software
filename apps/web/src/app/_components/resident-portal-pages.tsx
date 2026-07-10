@@ -14,7 +14,14 @@ import {
   Utensils,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 
 import {
   EmptyState,
@@ -381,6 +388,8 @@ export function ResidentPaymentsPageContent() {
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [state, setState] = useState<LoadState>("idle");
   const [message, setMessage] = useState("");
+  const [proofAssetId, setProofAssetId] = useState("");
+  const [uploadingProof, setUploadingProof] = useState(false);
 
   const proofByPaymentId = useMemo(
     () => new Map(proofs.map((proof) => [proof.paymentId, proof])),
@@ -411,20 +420,43 @@ export function ResidentPaymentsPageContent() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
+  async function handleProofFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    setUploadingProof(true);
+    try {
+      const { uploadFile, optimizeImage } = await import("@/lib/client-upload");
+      const assetId = await uploadFile(file, "PRIVATE");
+      optimizeImage(assetId).catch(() => {});
+      setProofAssetId(assetId);
+      setMessage("Proof image uploaded.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not upload image.");
+    } finally {
+      setUploadingProof(false);
+    }
+  }
+
   async function handleProof(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const paymentId = field(form, "paymentId");
 
+    if (!proofAssetId) {
+      setMessage("Please upload a proof image first.");
+      return;
+    }
+
     try {
       await browserApi(`/api/v1/resident/payments/${paymentId}/proof`, {
         body: JSON.stringify({
-          proofImageAssetId: field(form, "proofImageAssetId"),
+          proofImageAssetId: proofAssetId,
           transactionCode: optionalField(form, "transactionCode"),
         }),
         method: "POST",
       });
       event.currentTarget.reset();
+      setProofAssetId("");
       setMessage("Proof submitted.");
       await load();
     } catch (error) {
@@ -486,9 +518,29 @@ export function ResidentPaymentsPageContent() {
                   </option>
                 ))}
             </Select>
-            <Input label="Proof image asset id" name="proofImageAssetId" required />
+            <div className="grid gap-2">
+              <label className="text-sm font-semibold text-primary">Proof Image</label>
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-resident file:px-3 file:text-xs file:font-semibold file:text-white"
+                disabled={uploadingProof}
+                onChange={handleProofFile}
+                required
+                type="file"
+              />
+              {uploadingProof ? (
+                <p className="text-xs text-muted-foreground">Uploading...</p>
+              ) : proofAssetId ? (
+                <p className="text-xs text-emerald-600">Image uploaded.</p>
+              ) : null}
+            </div>
+            <input name="proofImageAssetId" type="hidden" value={proofAssetId} />
             <Input label="Transaction code" name="transactionCode" />
-            <button className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-role-resident text-sm font-semibold text-white">
+            <button
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-role-resident text-sm font-semibold text-white disabled:opacity-50"
+              disabled={uploadingProof || !proofAssetId}
+              type="submit"
+            >
               <Upload className="size-4" />
               Submit Proof
             </button>
@@ -504,6 +556,8 @@ export function ResidentFoodPageContent() {
   const [photos, setPhotos] = useState<FoodPhoto[]>([]);
   const [state, setState] = useState<LoadState>("idle");
   const [message, setMessage] = useState("");
+  const [photoAssetId, setPhotoAssetId] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
@@ -552,9 +606,31 @@ export function ResidentFoodPageContent() {
     }
   }
 
+  async function handlePhotoFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const { uploadFile, optimizeImage } = await import("@/lib/client-upload");
+      const assetId = await uploadFile(file, "PRIVATE");
+      optimizeImage(assetId).catch(() => {});
+      setPhotoAssetId(assetId);
+      setMessage("Food photo uploaded to storage.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not upload photo.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   async function handlePhoto(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+
+    if (!photoAssetId) {
+      setMessage("Please upload a photo first.");
+      return;
+    }
 
     try {
       await browserApi("/api/v1/resident/food/photos", {
@@ -562,11 +638,12 @@ export function ResidentFoodPageContent() {
           caption: optionalField(form, "caption"),
           date: field(form, "date"),
           mealType: field(form, "mealType"),
-          photoAssetId: field(form, "photoAssetId"),
+          photoAssetId,
         }),
         method: "POST",
       });
       event.currentTarget.reset();
+      setPhotoAssetId("");
       setMessage("Food photo uploaded.");
       await load();
     } catch (error) {
@@ -605,8 +682,17 @@ export function ResidentFoodPageContent() {
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {photos.map((photo) => (
               <div className="rounded-lg border border-border p-3" key={photo.id}>
+                {photo.photoAssetId ? (
+                  <img
+                    alt={photo.caption ?? "Food photo"}
+                    className="mb-2 h-32 w-full rounded-md object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                    src={`/api/v1/files/${photo.photoAssetId}/url?variant=THUMBNAIL`}
+                  />
+                ) : null}
                 <p className="font-semibold text-primary">{photo.mealType}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{photo.photoAssetId}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{photo.caption}</p>
               </div>
             ))}
@@ -645,7 +731,23 @@ export function ResidentFoodPageContent() {
           </Panel>
           <Panel title="Upload Photo">
             <form className="grid gap-3" onSubmit={handlePhoto}>
-              <Input label="Photo asset id" name="photoAssetId" required />
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold text-primary">Photo</label>
+                <input
+                  accept="image/jpeg,image/png,image/webp"
+                  className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-resident file:px-3 file:text-xs file:font-semibold file:text-white"
+                  disabled={uploadingPhoto}
+                  onChange={handlePhotoFile}
+                  required
+                  type="file"
+                />
+                {uploadingPhoto ? (
+                  <p className="text-xs text-muted-foreground">Uploading...</p>
+                ) : photoAssetId ? (
+                  <p className="text-xs text-emerald-600">Photo uploaded.</p>
+                ) : null}
+              </div>
+              <input name="photoAssetId" type="hidden" value={photoAssetId} />
               <Input label="Date" name="date" required type="date" />
               <Select label="Meal" name="mealType" required>
                 {["BREAKFAST", "LUNCH", "SNACKS", "DINNER"].map((meal) => (
@@ -655,7 +757,11 @@ export function ResidentFoodPageContent() {
                 ))}
               </Select>
               <Input label="Caption" name="caption" />
-              <button className="h-11 rounded-md border border-role-resident text-sm font-semibold text-role-resident">
+              <button
+                className="h-11 rounded-md border border-role-resident text-sm font-semibold text-role-resident disabled:opacity-50"
+                disabled={uploadingPhoto || !photoAssetId}
+                type="submit"
+              >
                 Upload Photo
               </button>
             </form>

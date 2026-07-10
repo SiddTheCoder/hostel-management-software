@@ -19,6 +19,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  type ChangeEvent,
   type FormEvent,
   type ReactNode,
 } from "react";
@@ -858,13 +859,26 @@ export function HostelAdminPaymentsPage() {
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {proofs.map((proof) => (
             <div className="rounded-lg border border-border p-4" key={proof.id}>
+              {proof.proofImageAssetId ? (
+                <a
+                  href={`/api/v1/files/${proof.proofImageAssetId}/url?variant=MEDIUM`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <img
+                    alt="Payment proof"
+                    className="mb-3 h-40 w-full rounded-md object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                    src={`/api/v1/files/${proof.proofImageAssetId}/url?variant=THUMBNAIL`}
+                  />
+                </a>
+              ) : null}
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold text-primary">
                     {residentById.get(proof.residentId)?.firstName ?? "Resident"} proof
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {proof.proofImageAssetId}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {proof.transactionCode}
@@ -904,6 +918,8 @@ export function HostelAdminFoodPage() {
   const [menus, setMenus] = useState<FoodMenu[]>([]);
   const [state, setState] = useState<LoadState>("idle");
   const [message, setMessage] = useState("");
+  const [photoAssetId, setPhotoAssetId] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
@@ -956,9 +972,30 @@ export function HostelAdminFoodPage() {
     }
   }
 
+  async function handlePhotoFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const { uploadFile } = await import("@/lib/client-upload");
+      const assetId = await uploadFile(file, "PRIVATE");
+      setPhotoAssetId(assetId);
+      setMessage("Food photo uploaded to storage.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not upload photo.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   async function handlePhotoUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+
+    if (!photoAssetId) {
+      setMessage("Please upload a photo first.");
+      return;
+    }
 
     try {
       await browserApi("/api/v1/hostel-admin/food/photos", {
@@ -966,11 +1003,12 @@ export function HostelAdminFoodPage() {
           caption: optionalField(form, "caption"),
           date: field(form, "date"),
           mealType: field(form, "mealType"),
-          photoAssetId: field(form, "photoAssetId"),
+          photoAssetId,
         }),
         method: "POST",
       });
       event.currentTarget.reset();
+      setPhotoAssetId("");
       setMessage("Food photo uploaded.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not upload photo.");
@@ -1061,7 +1099,23 @@ export function HostelAdminFoodPage() {
           </Panel>
           <Panel title="Upload Photo">
             <form className="grid gap-3" onSubmit={handlePhotoUpload}>
-              <Input label="Photo asset id" name="photoAssetId" required />
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold text-primary">Photo</label>
+                <input
+                  accept="image/jpeg,image/png,image/webp"
+                  className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-admin file:px-3 file:text-xs file:font-semibold file:text-white"
+                  disabled={uploadingPhoto}
+                  onChange={handlePhotoFile}
+                  required
+                  type="file"
+                />
+                {uploadingPhoto ? (
+                  <p className="text-xs text-muted-foreground">Uploading...</p>
+                ) : photoAssetId ? (
+                  <p className="text-xs text-emerald-600">Photo uploaded.</p>
+                ) : null}
+              </div>
+              <input name="photoAssetId" type="hidden" value={photoAssetId} />
               <Input label="Date" name="date" required type="date" />
               <Select label="Meal" name="mealType" required>
                 {["BREAKFAST", "LUNCH", "SNACKS", "DINNER"].map((meal) => (
@@ -1071,7 +1125,11 @@ export function HostelAdminFoodPage() {
                 ))}
               </Select>
               <Input label="Caption" name="caption" />
-              <button className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-role-admin text-sm font-semibold text-role-admin">
+              <button
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-role-admin text-sm font-semibold text-role-admin disabled:opacity-50"
+                disabled={uploadingPhoto || !photoAssetId}
+                type="submit"
+              >
                 <Upload className="size-4" />
                 Upload
               </button>
