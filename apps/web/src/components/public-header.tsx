@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type PublicHeaderProps = {
-  active?: "blog" | "browse" | "compare" | "pricing" | "providers" | "register-hostel";
+  active?: "about" | "blog" | "browse" | "compare" | "contact" | "home" | "pricing" | "privacy" | "providers" | "register-hostel" | "terms";
 };
 
 type CurrentUser = {
@@ -53,13 +53,19 @@ function dashboardHrefForRole(role: Role) {
 }
 
 const navItems = [
+  { href: "/", id: "home", label: "Home" },
   { href: "/hostels", id: "browse", label: "Hostels" },
   { href: "/compare", id: "compare", label: "Compare" },
   { href: "/register-hostel", id: "register-hostel", label: "Register Hostel" },
   { href: "/service-providers/register", id: "providers", label: "Service Providers" },
-  { href: "/#blog", id: "blog", label: "Blog" },
-  { href: "/#about", id: "about", label: "About Us" },
-  { href: "/#contact", id: "contact", label: "Contact" },
+] as const;
+
+const moreItems = [
+  { href: "/blog", id: "blog", label: "Blog" },
+  { href: "/about", id: "about", label: "About Us" },
+  { href: "/contact", id: "contact", label: "Contact" },
+  { href: "/terms", id: "terms", label: "Terms" },
+  { href: "/privacy", id: "privacy", label: "Privacy Policy" },
 ] as const;
 
 export function PublicHeader({ active }: PublicHeaderProps) {
@@ -157,19 +163,37 @@ export function PublicHeader({ active }: PublicHeaderProps) {
               {item.label}
             </Link>
           ))}
+          <div className="group relative flex h-full items-center">
+            <button
+              className={cn(
+                "flex h-full items-center gap-1 border-b-2 border-transparent pt-1 transition hover:text-brand-teal",
+                moreItems.some((i) => i.id === active) && "border-b-2 border-brand-teal text-brand-teal",
+              )}
+            >
+              More
+              <ChevronDown className="size-3.5 transition group-hover:rotate-180" />
+            </button>
+            <div className="absolute left-1/2 top-full mt-0 -translate-x-1/2 w-44 origin-top scale-95 rounded-lg border border-border bg-surface p-1.5 shadow-lg opacity-0 transition-all duration-150 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto">
+              {moreItems.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className={cn(
+                    "block rounded-md px-3 py-2 text-sm text-foreground transition hover:bg-muted",
+                    active === item.id && "bg-muted font-semibold",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </nav>
 
         <div className="flex items-center gap-2">
           <ThemeToggle className="hidden md:inline-flex" />
           {isSessionChecked ? (
-            user && hasDashboard(user.role) ? (
-              <Link
-                href={dashboardHrefForRole(user.role)}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-teal px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-110"
-              >
-                Dashboard
-              </Link>
-            ) : user ? (
+            user ? (
               <div ref={menuRef} className="relative">
                 <button
                   onClick={() => setMenuOpen((o) => !o)}
@@ -196,6 +220,15 @@ export function PublicHeader({ active }: PublicHeaderProps) {
                       <p className="truncate text-sm font-medium text-foreground">{user.name || user.email}</p>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </div>
+                    {hasDashboard(user.role) && (
+                      <Link
+                        href={dashboardHrefForRole(user.role)}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground transition hover:bg-muted"
+                      >
+                        <LayoutDashboard className="size-4" />
+                        Dashboard
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 transition hover:bg-red-50"

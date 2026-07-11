@@ -57,8 +57,12 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+
+import { checkAuthWithRefresh } from "@/lib/auth-check";
+import { landingPathForRole } from "@/lib/route-access";
+import { Role } from "@/lib/roles";
 
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
@@ -89,11 +93,40 @@ import {
 const PUBLIC_HERO_IMAGE =
   "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=80";
 
+const DASHBOARD_ROLES = new Set([
+  Role.PLATFORM_OWNER,
+  Role.HOSTEL_OWNER,
+  Role.HOSTEL_ADMIN,
+  Role.WARDEN,
+  Role.RESIDENT,
+  Role.GUARDIAN,
+]);
+
 export function PublicHomePage() {
+  const router = useRouter();
   const [searchVal, setSearchVal] = useState("");
   const [featuredHostels, setFeaturedHostels] = useState<
     ReturnType<typeof mapPublicHostelToSummary>[]
   >([]);
+
+  useEffect(() => {
+    async function redirectIfDashboardRole() {
+      try {
+        const response = await checkAuthWithRefresh();
+        if (!response.ok) return;
+        const payload = await response.json().catch(() => null);
+        if (!payload?.success) return;
+        const role = payload.data.user.role as Role;
+        if (DASHBOARD_ROLES.has(role)) {
+          const path = landingPathForRole(role);
+          if (path) router.replace(path);
+        }
+      } catch {
+        // not authenticated — stay on page
+      }
+    }
+    void redirectIfDashboardRole();
+  }, [router]);
 
   useEffect(() => {
     async function loadFeaturedHostels() {
