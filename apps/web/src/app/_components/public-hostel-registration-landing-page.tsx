@@ -184,7 +184,7 @@ export function PublicHostelRegistrationLandingPage() {
 
   return (
     <PublicShell active="register-hostel">
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden -mt-16">
         {/* Animated borders — grow from all 4 sides for 3s, then fade out */}
         <motion.div
           className="pointer-events-none fixed inset-0 z-50"
@@ -225,7 +225,7 @@ export function PublicHostelRegistrationLandingPage() {
         </div>
 
         {/* Hero */}
-        <section className="relative mx-auto max-w-[1200px] px-6 pt-24 pb-16 md:pt-36 md:pb-24">
+        <section className="relative mx-auto max-w-[1200px] px-6 pt-28 pb-16 md:pt-40 md:pb-24">
           <motion.div
             className="mx-auto max-w-4xl text-center"
             initial="hidden"

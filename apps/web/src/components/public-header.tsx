@@ -137,11 +137,11 @@ export function PublicHeader({ active }: PublicHeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
+        "fixed top-0 z-50 transition-all duration-300",
         scrolled ? "bg-surface/80 backdrop-blur-lg" : "bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4 md:px-8">
+      <div className="flex h-16 w-full items-center justify-between px-4 md:px-8">
         <Link href="/" className="flex items-center gap-2 font-heading text-lg font-semibold text-brand-teal">
           <span className="flex size-8 items-center justify-center rounded-md bg-brand-teal text-sm font-bold text-white">
             H

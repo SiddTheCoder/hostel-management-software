@@ -403,7 +403,7 @@ export function PublicShell({
   return (
     <AnimatedPage className="min-h-screen bg-background text-foreground">
       <PublicHeader active={active} />
-      {children}
+      <div className="pt-16">{children}</div>
     </AnimatedPage>
   );
 }

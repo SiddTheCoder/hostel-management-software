@@ -175,7 +175,7 @@ export function PublicHomePage() {
 
   return (
     <PublicShell>
-      <section className="relative w-full overflow-hidden bg-white">
+      <section className="relative w-full overflow-hidden bg-white -mt-16">
         {/* Right side background image with smooth fade on the left */}
         <div className="absolute right-0 top-0 hidden h-full w-[54%] lg:block">
           <div
@@ -192,7 +192,7 @@ export function PublicHomePage() {
           </div>
         </div>
 
-        <div className="mx-auto relative z-10 grid max-w-[1448px] gap-10 px-6 py-12 lg:grid-cols-[0.88fr_1fr] lg:items-center">
+        <div className="mx-auto relative z-10 grid max-w-[1448px] gap-10 px-6 pt-24 pb-12 lg:grid-cols-[0.88fr_1fr] lg:items-center">
           <div className="py-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm">
               <ShieldCheck className="size-4 text-brand-teal" />
