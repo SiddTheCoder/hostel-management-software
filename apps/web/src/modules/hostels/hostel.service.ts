@@ -5,38 +5,21 @@ import { connectToDatabase } from "@/lib/db";
 import { Role } from "@/lib/roles";
 import { assertHostelAccess } from "@/lib/tenant";
 import { AuditLogModel } from "@/models/AuditLog";
-import { BedModel } from "@/models/Bed";
-import { FloorModel } from "@/models/Floor";
 import { HostelApplicationModel } from "@/models/HostelApplication";
 import { HostelDocumentModel } from "@/models/HostelDocument";
 import { HostelModel } from "@/models/Hostel";
 import { HostelVerificationModel } from "@/models/HostelVerification";
 import { InquiryModel } from "@/models/Inquiry";
 import { RatingReviewModel } from "@/models/RatingReview";
-import { InquiryNoteModel } from "@/models/InquiryNote";
-import { RoomModel } from "@/models/Room";
 import { UserModel } from "@/models/User";
 import type {
-  bedCreateSchema,
-  bedUpdateSchema,
-  floorCreateSchema,
-  hostelAdminInquiryListQuerySchema,
-  hostelAdminInquiryStatusSchema,
-  hostelAdminProfileQuerySchema,
-  hostelAdminProfileUpdateSchema,
-  hostelPhotoCreateSchema,
-  hostelPhotoDeleteQuerySchema,
-  hostelScopedListQuerySchema,
   hostelRejectSchema,
-  inquiryNoteCreateSchema,
   platformHostelCreateSchema,
   platformHostelListQuerySchema,
   publicHostelCompareQuerySchema,
   publicHostelApplicationCreateSchema,
   publicInquiryCreateSchema,
   publicHostelListQuerySchema,
-  roomCreateSchema,
-  roomUpdateSchema,
 } from "@/modules/hostels/hostel.validation";
 import type { z } from "zod";
 
@@ -49,19 +32,6 @@ type HostelRejectInput = z.infer<typeof hostelRejectSchema>;
 type PublicHostelListQuery = z.infer<typeof publicHostelListQuerySchema>;
 type PublicHostelCompareQuery = z.infer<typeof publicHostelCompareQuerySchema>;
 type PublicInquiryCreateInput = z.infer<typeof publicInquiryCreateSchema>;
-type HostelAdminInquiryListQuery = z.infer<typeof hostelAdminInquiryListQuerySchema>;
-type HostelAdminInquiryStatusInput = z.infer<typeof hostelAdminInquiryStatusSchema>;
-type InquiryNoteCreateInput = z.infer<typeof inquiryNoteCreateSchema>;
-type HostelAdminProfileQuery = z.infer<typeof hostelAdminProfileQuerySchema>;
-type HostelAdminProfileUpdateInput = z.infer<typeof hostelAdminProfileUpdateSchema>;
-type HostelPhotoCreateInput = z.infer<typeof hostelPhotoCreateSchema>;
-type HostelPhotoDeleteQuery = z.infer<typeof hostelPhotoDeleteQuerySchema>;
-type HostelScopedListQuery = z.infer<typeof hostelScopedListQuerySchema>;
-type FloorCreateInput = z.infer<typeof floorCreateSchema>;
-type RoomCreateInput = z.infer<typeof roomCreateSchema>;
-type RoomUpdateInput = z.infer<typeof roomUpdateSchema>;
-type BedCreateInput = z.infer<typeof bedCreateSchema>;
-type BedUpdateInput = z.infer<typeof bedUpdateSchema>;
 
 type HostelRecord = {
   _id: Types.ObjectId;
@@ -138,78 +108,6 @@ type UserOwnerRecord = {
 
 type HostelStatus = HostelRecord["status"];
 
-type InquiryStatus = "NEW" | "CONTACTED" | "VISIT_SCHEDULED" | "CONVERTED" | "CLOSED";
-
-type InquiryRecord = {
-  _id: Types.ObjectId;
-  budgetRange?: string;
-  createdAt?: Date;
-  email?: string;
-  gender?: string;
-  hostelId: Types.ObjectId;
-  message?: string;
-  name: string;
-  phone: string;
-  preferredRoomType?: string;
-  preferredVisitDate?: Date;
-  source: "PUBLIC_WEBSITE" | "ADMIN_CREATED";
-  status: InquiryStatus;
-  updatedAt?: Date;
-};
-
-type InquiryNoteRecord = {
-  _id: Types.ObjectId;
-  authorId: Types.ObjectId;
-  createdAt?: Date;
-  hostelId: Types.ObjectId;
-  inquiryId: Types.ObjectId;
-  nextFollowUpAt?: Date;
-  note: string;
-  statusSnapshot?: InquiryStatus;
-};
-
-type FloorRecord = {
-  _id: Types.ObjectId;
-  createdAt?: Date;
-  description?: string;
-  hostelId: Types.ObjectId;
-  level: number;
-  name: string;
-  sortOrder?: number;
-  status: "ACTIVE" | "INACTIVE";
-  updatedAt?: Date;
-};
-
-type RoomRecord = {
-  _id: Types.ObjectId;
-  capacity: number;
-  createdAt?: Date;
-  facilities?: string[];
-  floorId: Types.ObjectId;
-  hostelId: Types.ObjectId;
-  notes?: string;
-  repairStatus: "OK" | "NEEDS_REPAIR" | "UNDER_REPAIR";
-  roomNumber: string;
-  roomType: string;
-  status: "ACTIVE" | "INACTIVE";
-  updatedAt?: Date;
-  vacancyStatus: "VACANT" | "PARTIAL" | "FULL";
-};
-
-type BedRecord = {
-  _id: Types.ObjectId;
-  assignedResidentId?: Types.ObjectId;
-  bedNumber: string;
-  createdAt?: Date;
-  floorId: Types.ObjectId;
-  hostelId: Types.ObjectId;
-  notes?: string;
-  repairStatus: "OK" | "NEEDS_REPAIR" | "UNDER_REPAIR";
-  roomId: Types.ObjectId;
-  status: "AVAILABLE" | "OCCUPIED" | "RESERVED" | "MAINTENANCE";
-  updatedAt?: Date;
-};
-
 type RatingSummaryRecord = {
   _id: Types.ObjectId;
   averageRating: number;
@@ -229,7 +127,7 @@ export class HostelServiceError extends Error {
   }
 }
 
-function normalizeObjectId(value: string) {
+export function normalizeObjectId(value: string) {
   if (!Types.ObjectId.isValid(value)) {
     throw new HostelServiceError("Invalid hostel id.", "INVALID_HOSTEL_ID", 422);
   }
@@ -258,7 +156,7 @@ async function uniqueSlug(name: string, area: string) {
   return candidate;
 }
 
-function serializeHostel(hostel: HostelRecord) {
+export function serializeHostel(hostel: HostelRecord) {
   return {
     capacitySummary: hostel.capacitySummary ?? {},
     contact: hostel.contact ?? {},
@@ -289,7 +187,7 @@ function serializeHostel(hostel: HostelRecord) {
   };
 }
 
-function serializePublicHostel(hostel: HostelRecord) {
+export function serializePublicHostel(hostel: HostelRecord) {
   return {
     capacitySummary: hostel.capacitySummary ?? {},
     demoDataLabel: hostel.demoDataLabel ?? "",
@@ -314,6 +212,25 @@ function serializePublicHostel(hostel: HostelRecord) {
   };
 }
 
+type InquiryStatus = "NEW" | "CONTACTED" | "VISIT_SCHEDULED" | "CONVERTED" | "CLOSED";
+
+type InquiryRecord = {
+  _id: Types.ObjectId;
+  budgetRange?: string;
+  createdAt?: Date;
+  email?: string;
+  gender?: string;
+  hostelId: Types.ObjectId;
+  message?: string;
+  name: string;
+  phone: string;
+  preferredRoomType?: string;
+  preferredVisitDate?: Date;
+  source: "PUBLIC_WEBSITE" | "ADMIN_CREATED";
+  status: InquiryStatus;
+  updatedAt?: Date;
+};
+
 function serializeInquiry(inquiry: InquiryRecord) {
   return {
     budgetRange: inquiry.budgetRange ?? "",
@@ -333,67 +250,6 @@ function serializeInquiry(inquiry: InquiryRecord) {
   };
 }
 
-function serializeInquiryNote(note: InquiryNoteRecord) {
-  return {
-    authorId: note.authorId.toString(),
-    createdAt: note.createdAt?.toISOString(),
-    hostelId: note.hostelId.toString(),
-    id: note._id.toString(),
-    inquiryId: note.inquiryId.toString(),
-    nextFollowUpAt: note.nextFollowUpAt?.toISOString(),
-    note: note.note,
-    statusSnapshot: note.statusSnapshot,
-  };
-}
-
-function serializeFloor(floor: FloorRecord) {
-  return {
-    createdAt: floor.createdAt?.toISOString(),
-    description: floor.description ?? "",
-    hostelId: floor.hostelId.toString(),
-    id: floor._id.toString(),
-    level: floor.level,
-    name: floor.name,
-    sortOrder: floor.sortOrder ?? 0,
-    status: floor.status,
-    updatedAt: floor.updatedAt?.toISOString(),
-  };
-}
-
-function serializeRoom(room: RoomRecord) {
-  return {
-    capacity: room.capacity,
-    createdAt: room.createdAt?.toISOString(),
-    facilities: room.facilities ?? [],
-    floorId: room.floorId.toString(),
-    hostelId: room.hostelId.toString(),
-    id: room._id.toString(),
-    notes: room.notes ?? "",
-    repairStatus: room.repairStatus,
-    roomNumber: room.roomNumber,
-    roomType: room.roomType,
-    status: room.status,
-    updatedAt: room.updatedAt?.toISOString(),
-    vacancyStatus: room.vacancyStatus,
-  };
-}
-
-function serializeBed(bed: BedRecord) {
-  return {
-    assignedResidentId: bed.assignedResidentId?.toString(),
-    bedNumber: bed.bedNumber,
-    createdAt: bed.createdAt?.toISOString(),
-    floorId: bed.floorId.toString(),
-    hostelId: bed.hostelId.toString(),
-    id: bed._id.toString(),
-    notes: bed.notes ?? "",
-    repairStatus: bed.repairStatus,
-    roomId: bed.roomId.toString(),
-    status: bed.status,
-    updatedAt: bed.updatedAt?.toISOString(),
-  };
-}
-
 function serializeApplication(application: HostelApplicationRecord | null) {
   if (!application) {
     return null;
@@ -409,7 +265,7 @@ function serializeApplication(application: HostelApplicationRecord | null) {
   };
 }
 
-async function auditHostelAction(
+export async function auditHostelAction(
   principal: ApiPrincipal,
   hostelId: Types.ObjectId,
   action: string,
@@ -425,7 +281,7 @@ async function auditHostelAction(
   });
 }
 
-async function findHostelByIdOrThrow(hostelId: string) {
+export async function findHostelByIdOrThrow(hostelId: string) {
   const hostel = await HostelModel.findOne({
     _id: normalizeObjectId(hostelId),
     isDeleted: false,
@@ -438,7 +294,7 @@ async function findHostelByIdOrThrow(hostelId: string) {
   return hostel;
 }
 
-function definedUpdate(input: Record<string, unknown>, omittedKeys: string[] = []) {
+export function definedUpdate(input: Record<string, unknown>, omittedKeys: string[] = []) {
   return Object.fromEntries(
     Object.entries(input).filter(
       ([key, value]) => value !== undefined && !omittedKeys.includes(key),
@@ -446,11 +302,11 @@ function definedUpdate(input: Record<string, unknown>, omittedKeys: string[] = [
   );
 }
 
-function normalizeObjectIds(values: string[]) {
+export function normalizeObjectIds(values: string[]) {
   return values.map((value) => normalizeObjectId(value));
 }
 
-function resolveAdminHostelId(principal: ApiPrincipal, requestedHostelId?: string) {
+export function resolveAdminHostelId(principal: ApiPrincipal, requestedHostelId?: string) {
   if (requestedHostelId) {
     assertHostelAccess(principal, requestedHostelId);
     return normalizeObjectId(requestedHostelId);
@@ -467,7 +323,7 @@ function resolveAdminHostelId(principal: ApiPrincipal, requestedHostelId?: strin
   );
 }
 
-function scopedHostelFilter(principal: ApiPrincipal, requestedHostelId?: string) {
+export function scopedHostelFilter(principal: ApiPrincipal, requestedHostelId?: string) {
   if (requestedHostelId) {
     return { hostelId: resolveAdminHostelId(principal, requestedHostelId) };
   }
@@ -479,7 +335,7 @@ function scopedHostelFilter(principal: ApiPrincipal, requestedHostelId?: string)
   };
 }
 
-async function findScopedHostel(principal: ApiPrincipal, requestedHostelId?: string) {
+export async function findScopedHostel(principal: ApiPrincipal, requestedHostelId?: string) {
   const hostelId = resolveAdminHostelId(principal, requestedHostelId);
   const hostel = await HostelModel.findOne({
     _id: hostelId,
@@ -491,88 +347,6 @@ async function findScopedHostel(principal: ApiPrincipal, requestedHostelId?: str
   }
 
   return hostel;
-}
-
-async function findFloorInHostel(floorId: string, hostelId: Types.ObjectId) {
-  const floor = await FloorModel.findOne({
-    _id: normalizeObjectId(floorId),
-    hostelId,
-    isDeleted: false,
-  }).lean<FloorRecord | null>();
-
-  if (!floor) {
-    throw new HostelServiceError("Floor was not found.", "FLOOR_NOT_FOUND", 404);
-  }
-
-  return floor;
-}
-
-async function findRoomInHostel(roomId: string, hostelId: Types.ObjectId) {
-  const room = await RoomModel.findOne({
-    _id: normalizeObjectId(roomId),
-    hostelId,
-    isDeleted: false,
-  }).lean<RoomRecord | null>();
-
-  if (!room) {
-    throw new HostelServiceError("Room was not found.", "ROOM_NOT_FOUND", 404);
-  }
-
-  return room;
-}
-
-async function refreshCapacitySummary(hostelId: Types.ObjectId) {
-  const [totalRooms, totalBeds, vacantBeds] = await Promise.all([
-    RoomModel.countDocuments({ hostelId, isDeleted: false, status: "ACTIVE" }),
-    BedModel.countDocuments({ hostelId, isDeleted: false }),
-    BedModel.countDocuments({ hostelId, isDeleted: false, status: "AVAILABLE" }),
-  ]);
-
-  await HostelModel.updateOne(
-    { _id: hostelId, isDeleted: false },
-    {
-      $set: {
-        capacitySummary: {
-          totalBeds,
-          totalRooms,
-          vacantBeds,
-        },
-      },
-    },
-  );
-}
-
-async function refreshRoomVacancyStatus(room: RoomRecord) {
-  const occupiedBeds = await BedModel.countDocuments({
-    isDeleted: false,
-    roomId: room._id,
-    status: { $in: ["OCCUPIED", "RESERVED"] },
-  });
-  const nextStatus =
-    occupiedBeds === 0 ? "VACANT" : occupiedBeds >= room.capacity ? "FULL" : "PARTIAL";
-
-  await RoomModel.updateOne(
-    { _id: room._id, isDeleted: false },
-    { $set: { vacancyStatus: nextStatus } },
-  );
-}
-
-async function findScopedInquiry(
-  inquiryId: string,
-  principal: ApiPrincipal,
-  requestedHostelId?: string,
-) {
-  const inquiry = await InquiryModel.findOne({
-    _id: normalizeObjectId(inquiryId),
-    isDeleted: false,
-    ...scopedHostelFilter(principal, requestedHostelId),
-  }).lean<InquiryRecord | null>();
-
-  if (!inquiry) {
-    throw new HostelServiceError("Inquiry was not found.", "INQUIRY_NOT_FOUND", 404);
-  }
-
-  return inquiry;
 }
 
 async function findOrCreatePublicHostelOwner(
@@ -1189,487 +963,5 @@ export async function createPublicHostelInquiry(
   return {
     hostel: serializePublicHostel(hostel),
     inquiry: serializeInquiry(inquiry),
-  };
-}
-
-export async function listHostelAdminInquiries(
-  query: HostelAdminInquiryListQuery,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const filter: Record<string, unknown> = {
-    isDeleted: false,
-    ...scopedHostelFilter(principal, query.hostelId),
-  };
-
-  if (query.status) {
-    filter.status = query.status;
-  }
-
-  const inquiries = await InquiryModel.find(filter)
-    .sort({ createdAt: -1 })
-    .limit(100)
-    .lean<InquiryRecord[]>();
-
-  return {
-    inquiries: inquiries.map(serializeInquiry),
-  };
-}
-
-export async function updateHostelAdminInquiryStatus(
-  inquiryId: string,
-  input: HostelAdminInquiryStatusInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const inquiry = await findScopedInquiry(inquiryId, principal, input.hostelId);
-  const updatedInquiry = await InquiryModel.findOneAndUpdate(
-    { _id: inquiry._id, isDeleted: false },
-    {
-      $set: {
-        status: input.status,
-        updatedBy: principal.userId,
-      },
-    },
-    { new: true },
-  ).lean<InquiryRecord | null>();
-
-  if (!updatedInquiry) {
-    throw new HostelServiceError("Inquiry was not found.", "INQUIRY_NOT_FOUND", 404);
-  }
-
-  await auditHostelAction(principal, inquiry.hostelId, "INQUIRY_STATUS_UPDATED", {
-    inquiryId: inquiry._id.toString(),
-    status: input.status,
-  });
-
-  return {
-    inquiry: serializeInquiry(updatedInquiry),
-  };
-}
-
-export async function addHostelAdminInquiryNote(
-  inquiryId: string,
-  input: InquiryNoteCreateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const inquiry = await findScopedInquiry(inquiryId, principal, input.hostelId);
-  const note = await InquiryNoteModel.create({
-    authorId: principal.userId,
-    hostelId: inquiry.hostelId,
-    inquiryId: inquiry._id,
-    nextFollowUpAt: input.nextFollowUpAt,
-    note: input.note,
-    statusSnapshot: inquiry.status,
-  });
-
-  await auditHostelAction(principal, inquiry.hostelId, "INQUIRY_NOTE_ADDED", {
-    inquiryId: inquiry._id.toString(),
-    noteId: note._id.toString(),
-  });
-
-  return {
-    inquiry: serializeInquiry(inquiry),
-    note: serializeInquiryNote(note),
-  };
-}
-
-export async function getHostelAdminProfile(
-  query: HostelAdminProfileQuery,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostel = await findScopedHostel(principal, query.hostelId);
-
-  return {
-    hostel: serializeHostel(hostel),
-  };
-}
-
-export async function updateHostelAdminProfile(
-  input: HostelAdminProfileUpdateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostel = await findScopedHostel(principal, input.hostelId);
-  const profileUpdate = definedUpdate(input, ["hostelId"]);
-  const updatedHostel = await HostelModel.findOneAndUpdate(
-    { _id: hostel._id, isDeleted: false },
-    {
-      $set: {
-        ...profileUpdate,
-        updatedBy: principal.userId,
-      },
-    },
-    { new: true },
-  ).lean<HostelRecord | null>();
-
-  if (!updatedHostel) {
-    throw new HostelServiceError("Hostel was not found.", "HOSTEL_NOT_FOUND", 404);
-  }
-
-  await auditHostelAction(principal, hostel._id, "HOSTEL_PROFILE_UPDATED");
-
-  return {
-    hostel: serializeHostel(updatedHostel),
-  };
-}
-
-export async function addHostelAdminProfilePhoto(
-  input: HostelPhotoCreateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostel = await findScopedHostel(principal, input.hostelId);
-  const updatedHostel = await HostelModel.findOneAndUpdate(
-    { _id: hostel._id, isDeleted: false },
-    {
-      $push: {
-        photos: {
-          alt: input.alt,
-          fileAssetId: input.fileAssetId,
-          url: input.url,
-        },
-      },
-      $set: {
-        updatedBy: principal.userId,
-      },
-    },
-    { new: true },
-  ).lean<HostelRecord | null>();
-
-  if (!updatedHostel) {
-    throw new HostelServiceError("Hostel was not found.", "HOSTEL_NOT_FOUND", 404);
-  }
-
-  await auditHostelAction(principal, hostel._id, "HOSTEL_PROFILE_PHOTO_ADDED");
-
-  return {
-    hostel: serializeHostel(updatedHostel),
-  };
-}
-
-export async function deleteHostelAdminProfilePhoto(
-  photoId: string,
-  query: HostelPhotoDeleteQuery,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostel = await findScopedHostel(principal, query.hostelId);
-  const updatedHostel = await HostelModel.findOneAndUpdate(
-    { _id: hostel._id, isDeleted: false },
-    {
-      $pull: {
-        photos: {
-          _id: normalizeObjectId(photoId),
-        },
-      },
-      $set: {
-        updatedBy: principal.userId,
-      },
-    },
-    { new: true },
-  ).lean<HostelRecord | null>();
-
-  if (!updatedHostel) {
-    throw new HostelServiceError("Hostel was not found.", "HOSTEL_NOT_FOUND", 404);
-  }
-
-  await auditHostelAction(principal, hostel._id, "HOSTEL_PROFILE_PHOTO_DELETED", {
-    photoId,
-  });
-
-  return {
-    hostel: serializeHostel(updatedHostel),
-  };
-}
-
-export async function createHostelAdminFloor(
-  input: FloorCreateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostelId = resolveAdminHostelId(principal, input.hostelId);
-  const floor = await FloorModel.create({
-    ...input,
-    createdBy: principal.userId,
-    hostelId,
-    updatedBy: principal.userId,
-  });
-
-  await auditHostelAction(principal, hostelId, "HOSTEL_FLOOR_CREATED", {
-    floorId: floor._id.toString(),
-  });
-
-  return {
-    floor: serializeFloor(floor),
-  };
-}
-
-export async function listHostelAdminFloors(
-  query: HostelScopedListQuery,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const floors = await FloorModel.find({
-    isDeleted: false,
-    ...scopedHostelFilter(principal, query.hostelId),
-  })
-    .sort({ sortOrder: 1, level: 1 })
-    .lean<FloorRecord[]>();
-
-  return {
-    floors: floors.map(serializeFloor),
-  };
-}
-
-export async function createHostelAdminRoom(
-  input: RoomCreateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostelId = resolveAdminHostelId(principal, input.hostelId);
-  const floor = await findFloorInHostel(input.floorId, hostelId);
-  const room = await RoomModel.create({
-    ...input,
-    createdBy: principal.userId,
-    floorId: floor._id,
-    hostelId,
-    status: "ACTIVE",
-    updatedBy: principal.userId,
-  });
-
-  await refreshCapacitySummary(hostelId);
-  await auditHostelAction(principal, hostelId, "HOSTEL_ROOM_CREATED", {
-    roomId: room._id.toString(),
-  });
-
-  return {
-    room: serializeRoom(room),
-  };
-}
-
-export async function listHostelAdminRooms(
-  query: HostelScopedListQuery,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const rooms = await RoomModel.find({
-    isDeleted: false,
-    ...scopedHostelFilter(principal, query.hostelId),
-  })
-    .sort({ floorId: 1, roomNumber: 1 })
-    .lean<RoomRecord[]>();
-
-  return {
-    rooms: rooms.map(serializeRoom),
-  };
-}
-
-export async function updateHostelAdminRoom(
-  roomId: string,
-  input: RoomUpdateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const existingRoom = await RoomModel.findOne({
-    _id: normalizeObjectId(roomId),
-    isDeleted: false,
-    ...scopedHostelFilter(principal, input.hostelId),
-  }).lean<RoomRecord | null>();
-
-  if (!existingRoom) {
-    throw new HostelServiceError("Room was not found.", "ROOM_NOT_FOUND", 404);
-  }
-
-  const roomUpdate = definedUpdate(input, ["hostelId"]);
-
-  if (input.floorId) {
-    const floor = await findFloorInHostel(input.floorId, existingRoom.hostelId);
-    roomUpdate.floorId = floor._id;
-  }
-
-  const updatedRoom = await RoomModel.findOneAndUpdate(
-    { _id: existingRoom._id, isDeleted: false },
-    {
-      $set: {
-        ...roomUpdate,
-        updatedBy: principal.userId,
-      },
-    },
-    { new: true },
-  ).lean<RoomRecord | null>();
-
-  if (!updatedRoom) {
-    throw new HostelServiceError("Room was not found.", "ROOM_NOT_FOUND", 404);
-  }
-
-  await refreshCapacitySummary(existingRoom.hostelId);
-  await auditHostelAction(principal, existingRoom.hostelId, "HOSTEL_ROOM_UPDATED", {
-    roomId: existingRoom._id.toString(),
-  });
-
-  return {
-    room: serializeRoom(updatedRoom),
-  };
-}
-
-export async function createHostelAdminBed(
-  input: BedCreateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostelId = resolveAdminHostelId(principal, input.hostelId);
-  const room = await findRoomInHostel(input.roomId, hostelId);
-  const bed = await BedModel.create({
-    ...input,
-    assignedResidentId: input.assignedResidentId
-      ? normalizeObjectId(input.assignedResidentId)
-      : undefined,
-    createdBy: principal.userId,
-    floorId: room.floorId,
-    hostelId,
-    roomId: room._id,
-    updatedBy: principal.userId,
-  });
-
-  await refreshRoomVacancyStatus(room);
-  await refreshCapacitySummary(hostelId);
-  await auditHostelAction(principal, hostelId, "HOSTEL_BED_CREATED", {
-    bedId: bed._id.toString(),
-    roomId: room._id.toString(),
-  });
-
-  return {
-    bed: serializeBed(bed),
-  };
-}
-
-export async function updateHostelAdminBed(
-  bedId: string,
-  input: BedUpdateInput,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const existingBed = await BedModel.findOne({
-    _id: normalizeObjectId(bedId),
-    isDeleted: false,
-    ...scopedHostelFilter(principal, input.hostelId),
-  }).lean<BedRecord | null>();
-
-  if (!existingBed) {
-    throw new HostelServiceError("Bed was not found.", "BED_NOT_FOUND", 404);
-  }
-
-  const bedUpdate = definedUpdate(input, ["hostelId"]);
-  const unsetUpdate: Record<string, ""> = {};
-  let currentRoom = await findRoomInHostel(
-    existingBed.roomId.toString(),
-    existingBed.hostelId,
-  );
-  let previousRoom: RoomRecord | null = null;
-
-  if (input.roomId) {
-    const nextRoom = await findRoomInHostel(input.roomId, existingBed.hostelId);
-
-    if (nextRoom._id.toString() !== existingBed.roomId.toString()) {
-      previousRoom = currentRoom;
-    }
-
-    currentRoom = nextRoom;
-    bedUpdate.floorId = nextRoom.floorId;
-    bedUpdate.roomId = nextRoom._id;
-  }
-
-  if (input.assignedResidentId === null) {
-    delete bedUpdate.assignedResidentId;
-    unsetUpdate.assignedResidentId = "";
-  } else if (input.assignedResidentId) {
-    bedUpdate.assignedResidentId = normalizeObjectId(input.assignedResidentId);
-  }
-
-  const modifier: Record<string, unknown> = {
-    $set: {
-      ...bedUpdate,
-      updatedBy: principal.userId,
-    },
-  };
-
-  if (Object.keys(unsetUpdate).length > 0) {
-    modifier.$unset = unsetUpdate;
-  }
-
-  const updatedBed = await BedModel.findOneAndUpdate(
-    { _id: existingBed._id, isDeleted: false },
-    modifier,
-    { new: true },
-  ).lean<BedRecord | null>();
-
-  if (!updatedBed) {
-    throw new HostelServiceError("Bed was not found.", "BED_NOT_FOUND", 404);
-  }
-
-  if (previousRoom) {
-    await refreshRoomVacancyStatus(previousRoom);
-  }
-
-  await refreshRoomVacancyStatus(currentRoom);
-  await refreshCapacitySummary(existingBed.hostelId);
-  await auditHostelAction(principal, existingBed.hostelId, "HOSTEL_BED_UPDATED", {
-    bedId: existingBed._id.toString(),
-  });
-
-  return {
-    bed: serializeBed(updatedBed),
-  };
-}
-
-export async function getHostelAdminRoomMap(
-  query: HostelScopedListQuery,
-  principal: ApiPrincipal,
-) {
-  await connectToDatabase();
-
-  const hostel = await findScopedHostel(principal, query.hostelId);
-  const [floors, rooms, beds] = await Promise.all([
-    FloorModel.find({ hostelId: hostel._id, isDeleted: false })
-      .sort({ sortOrder: 1, level: 1 })
-      .lean<FloorRecord[]>(),
-    RoomModel.find({ hostelId: hostel._id, isDeleted: false })
-      .sort({ floorId: 1, roomNumber: 1 })
-      .lean<RoomRecord[]>(),
-    BedModel.find({ hostelId: hostel._id, isDeleted: false })
-      .sort({ roomId: 1, bedNumber: 1 })
-      .lean<BedRecord[]>(),
-  ]);
-
-  return {
-    floors: floors.map((floor) => ({
-      ...serializeFloor(floor),
-      rooms: rooms
-        .filter((room) => room.floorId.toString() === floor._id.toString())
-        .map((room) => ({
-          ...serializeRoom(room),
-          beds: beds
-            .filter((bed) => bed.roomId.toString() === room._id.toString())
-            .map(serializeBed),
-        })),
-    })),
-    hostel: serializeHostel(hostel),
   };
 }

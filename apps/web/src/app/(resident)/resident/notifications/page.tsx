@@ -1,4 +1,4 @@
-import { NotificationsPageContent } from "@/app/_components/daily-operations-pages";
+import { NotificationsPageContent } from "@/app/_components/notifications-page";
 
 export default function ResidentNotificationsPage() {
   return <NotificationsPageContent />;

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { CreditCard, Settings } from "lucide-react";
 
-import { PlatformHostelsPageContent } from "@/app/_components/core-portal-pages";
+import { PlatformHostelsPageContent } from "@/app/_components/platform-hostels-page";
 import { PortalPlaceholderPage } from "@/components/portal-placeholder-page";
 
 type PlatformScreenPageProps = {

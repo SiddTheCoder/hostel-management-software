@@ -120,13 +120,15 @@ vi.mock("@/models/Room", () => ({
 }));
 
 import {
-  createHostelAdminFloor,
-  createHostelAdminRoom,
   createPublicHostelInquiry,
   getPublicHostelBySlug,
-  listHostelAdminInquiries,
   listPublicHostels,
 } from "@/modules/hostels/hostel.service";
+import {
+  createHostelAdminFloor,
+  createHostelAdminRoom,
+} from "@/modules/hostels/hostel-spatial.service";
+import { listHostelAdminInquiries } from "@/modules/hostels/hostel-inquiry.service";
 
 const hostelId = "64f0f0f0f0f0f0f0f0f0f0f4";
 const otherHostelId = "64f0f0f0f0f0f0f0f0f0f0f5";

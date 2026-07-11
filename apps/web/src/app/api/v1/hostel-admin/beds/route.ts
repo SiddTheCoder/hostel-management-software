@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { handleRouteError, successResponse } from "@/lib/api-response";
 import { requireHostelStaffPrincipal } from "@/lib/api-auth";
-import { createHostelAdminBed } from "@/modules/hostels/hostel.service";
+import { createHostelAdminBed } from "@/modules/hostels/hostel-spatial.service";
 import { bedCreateSchema } from "@/modules/hostels/hostel.validation";
 
 export const runtime = "nodejs";

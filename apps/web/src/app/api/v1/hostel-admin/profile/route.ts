@@ -5,7 +5,7 @@ import { requireHostelStaffPrincipal } from "@/lib/api-auth";
 import {
   getHostelAdminProfile,
   updateHostelAdminProfile,
-} from "@/modules/hostels/hostel.service";
+} from "@/modules/hostels/hostel-profile.service";
 import {
   hostelAdminProfileQuerySchema,
   hostelAdminProfileUpdateSchema,

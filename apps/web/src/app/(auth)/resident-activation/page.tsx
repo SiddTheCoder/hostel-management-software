@@ -1,4 +1,4 @@
-import { ResidentActivationPageContent } from "@/app/_components/resident-portal-pages";
+import { ResidentActivationPageContent } from "@/app/_components/resident-activation-page";
 
 export default function ResidentActivationPage() {
   return <ResidentActivationPageContent />;

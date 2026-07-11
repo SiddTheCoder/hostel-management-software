@@ -2,13 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { checkAuthWithRefresh } from "@/lib/auth-check";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [ok, setOk] = useState(false);
 
   useEffect(() => {
-    fetch("/api/v1/auth/me", { credentials: "include" })
+    checkAuthWithRefresh()
       .then((r) => {
         if (r.ok) {
           setOk(true);

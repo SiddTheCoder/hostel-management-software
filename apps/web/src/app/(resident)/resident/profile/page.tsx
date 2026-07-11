@@ -1,4 +1,4 @@
-import { ResidentProfilePageContent } from "@/app/_components/resident-portal-pages";
+import { ResidentProfilePageContent } from "@/app/_components/resident-profile-page";
 
 export default function ResidentProfilePage() {
   return <ResidentProfilePageContent />;

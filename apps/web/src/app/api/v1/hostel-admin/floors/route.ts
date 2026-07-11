@@ -5,7 +5,7 @@ import { requireHostelStaffPrincipal } from "@/lib/api-auth";
 import {
   createHostelAdminFloor,
   listHostelAdminFloors,
-} from "@/modules/hostels/hostel.service";
+} from "@/modules/hostels/hostel-spatial.service";
 import {
   floorCreateSchema,
   hostelScopedListQuerySchema,

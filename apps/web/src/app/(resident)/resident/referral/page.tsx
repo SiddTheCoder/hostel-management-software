@@ -1,4 +1,4 @@
-import { ResidentReferralPageContent } from "@/app/_components/phase5-pages";
+import { ResidentReferralPageContent } from "@/app/_components/resident-referral-page";
 
 export default function ResidentReferralPage() {
   return <ResidentReferralPageContent />;

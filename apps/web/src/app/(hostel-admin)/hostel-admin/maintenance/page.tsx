@@ -1,4 +1,4 @@
-import { HostelAdminMaintenancePageContent } from "@/app/_components/phase5-pages";
+import { HostelAdminMaintenancePageContent } from "@/app/_components/hostel-admin-maintenance-page";
 
 export default function HostelAdminMaintenancePage() {
   return <HostelAdminMaintenancePageContent />;

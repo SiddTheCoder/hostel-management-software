@@ -149,7 +149,7 @@ function FileUploadArea({
 export function PublicHostelRegistrationPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
-  const [selectedPlan, setSelectedPlan] = useState(plans[1].id);
+  const [selectedPlan, setSelectedPlan] = useState(plans[0].id);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -188,7 +188,7 @@ export function PublicHostelRegistrationPage() {
   const [businessDoc, setBusinessDoc] = useState<UploadedFile[]>([]);
   const [ownerIdDoc, setOwnerIdDoc] = useState<UploadedFile[]>([]);
 
-  const selectedPlanDetail = plans.find((p) => p.id === selectedPlan) ?? plans[1];
+  const selectedPlanDetail = plans.find((p) => p.id === selectedPlan) ?? plans[0];
 
   const capacitySummary = useMemo(() => {
     return rooms.reduce(

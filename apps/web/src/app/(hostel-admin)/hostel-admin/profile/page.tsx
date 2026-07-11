@@ -1,4 +1,4 @@
-import { HostelAdminProfilePageContent } from "@/app/_components/core-portal-pages";
+import { HostelAdminProfilePageContent } from "@/app/_components/hostel-admin-profile-page";
 
 export default function HostelProfilePage() {
   return <HostelAdminProfilePageContent />;

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { handleRouteError, successResponse } from "@/lib/api-response";
 import { requireHostelStaffPrincipal } from "@/lib/api-auth";
-import { getHostelAdminRoomMap } from "@/modules/hostels/hostel.service";
+import { getHostelAdminRoomMap } from "@/modules/hostels/hostel-spatial.service";
 import { hostelScopedListQuerySchema } from "@/modules/hostels/hostel.validation";
 
 export const runtime = "nodejs";

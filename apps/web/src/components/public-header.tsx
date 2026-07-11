@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { checkAuthWithRefresh } from "@/lib/auth-check";
 import { landingPathForRole } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
@@ -70,14 +71,14 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
   const [isSessionChecked, setIsSessionChecked] = useState(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(
+    typeof window !== "undefined" ? window.scrollY > 20 : false,
+  );
   const menuRef = useRef<HTMLDivElement>(null);
 
   const loadCurrentUser = useCallback(async () => {
     try {
-      const response = await fetch("/api/v1/auth/me", {
-        credentials: "include",
-      });
+      const response = await checkAuthWithRefresh();
       const payload = (await response.json().catch(() => null)) as MeResponse | null;
 
       if (!response.ok || !payload?.success) {
@@ -125,7 +126,6 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
   useEffect(() => {
     if (!transparentAtTop) return;
     function onScroll() { setScrolled(window.scrollY > 20); }
-    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [transparentAtTop]);
@@ -140,7 +140,7 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
+        "sticky top-0 z-50",
         transparentAtTop && !scrolled
           ? "border-transparent bg-transparent"
           : "border-b border-border bg-surface/95 backdrop-blur dark:bg-card/95",

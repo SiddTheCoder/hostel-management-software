@@ -1,4 +1,4 @@
-import { PlatformReportsPageContent } from "@/app/_components/phase5-pages";
+import { PlatformReportsPageContent } from "@/app/_components/platform-reports-page";
 
 export default function PlatformReportsPage() {
   return <PlatformReportsPageContent />;

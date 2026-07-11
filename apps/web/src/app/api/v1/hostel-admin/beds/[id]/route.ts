@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { handleRouteError, successResponse } from "@/lib/api-response";
 import { requireHostelStaffPrincipal } from "@/lib/api-auth";
-import { updateHostelAdminBed } from "@/modules/hostels/hostel.service";
+import { updateHostelAdminBed } from "@/modules/hostels/hostel-spatial.service";
 import { bedUpdateSchema } from "@/modules/hostels/hostel.validation";
 
 type RouteContext = {

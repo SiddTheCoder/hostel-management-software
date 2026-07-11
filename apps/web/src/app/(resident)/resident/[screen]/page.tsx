@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import { FileText, Settings } from "lucide-react";
 
-import {
-  ResidentPaymentsPageContent,
-  ResidentProfilePageContent,
-} from "@/app/_components/resident-portal-pages";
+import { ResidentPaymentsPageContent } from "@/app/_components/resident-payments-page";
+import { ResidentProfilePageContent } from "@/app/_components/resident-profile-page";
 import { PortalPlaceholderPage } from "@/components/portal-placeholder-page";
 
 type ResidentScreenPageProps = {

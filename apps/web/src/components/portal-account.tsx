@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { LogOut } from "lucide-react";
+import { checkAuthWithRefresh } from "@/lib/auth-check";
 
 type CurrentUser = {
   email: string | null;
@@ -40,9 +41,7 @@ export function PortalAccount() {
 
     async function loadCurrentUser() {
       try {
-        const response = await fetch("/api/v1/auth/me", {
-          credentials: "include",
-        });
+        const response = await checkAuthWithRefresh();
         const payload = (await response.json().catch(() => null)) as MeResponse | null;
 
         if (!response.ok || !payload?.success) {

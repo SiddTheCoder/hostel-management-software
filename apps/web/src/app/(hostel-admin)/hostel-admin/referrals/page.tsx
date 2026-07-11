@@ -1,4 +1,4 @@
-import { HostelAdminReferralsPageContent } from "@/app/_components/phase5-pages";
+import { HostelAdminReferralsPageContent } from "@/app/_components/hostel-admin-referrals-page";
 
 export default function HostelAdminReferralsPage() {
   return <HostelAdminReferralsPageContent />;
