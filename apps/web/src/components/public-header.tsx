@@ -1,6 +1,7 @@
 "use client";
 
-import { Heart, Home, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,23 +13,12 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type PublicHeaderProps = {
-  active: "blog" | "browse" | "compare" | "home" | "pricing" | "providers" | "register-hostel";
-  transparentAtTop?: boolean;
+  active?: "blog" | "browse" | "compare" | "pricing" | "providers" | "register-hostel";
 };
-
-const navItems = [
-  { href: "/", id: "home", label: "Home" },
-  { href: "/hostels", id: "browse", label: "Hostels" },
-  { href: "/compare", id: "compare", label: "Compare" },
-  { href: "/register-hostel", id: "register-hostel", label: "Register Hostel" },
-  { href: "/service-providers/register", id: "providers", label: "Service Providers" },
-  { href: "/#blog", id: "blog", label: "Blog" },
-  { href: "/#about", id: "about", label: "About Us" },
-  { href: "/#contact", id: "contact", label: "Contact" },
-] as const;
 
 type CurrentUser = {
   email: string | null;
+  image: string | null;
   name: string;
   role: Role;
 };
@@ -66,14 +56,22 @@ function dashboardHrefForRole(role: Role) {
   return landingPathForRole(role) ?? "/hostels";
 }
 
-export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
+const navItems = [
+  { href: "/hostels", id: "browse", label: "Hostels" },
+  { href: "/compare", id: "compare", label: "Compare" },
+  { href: "/register-hostel", id: "register-hostel", label: "Register Hostel" },
+  { href: "/service-providers/register", id: "providers", label: "Service Providers" },
+  { href: "/#blog", id: "blog", label: "Blog" },
+  { href: "/#about", id: "about", label: "About Us" },
+  { href: "/#contact", id: "contact", label: "Contact" },
+] as const;
+
+export function PublicHeader({ active }: PublicHeaderProps) {
   const router = useRouter();
   const [isSessionChecked, setIsSessionChecked] = useState(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(
-    typeof window !== "undefined" ? window.scrollY > 20 : false,
-  );
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const loadCurrentUser = useCallback(async () => {
@@ -124,11 +122,10 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!transparentAtTop) return;
-    function onScroll() { setScrolled(window.scrollY > 20); }
+    function onScroll() { setScrolled(window.scrollY > 50); }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [transparentAtTop]);
+  }, []);
 
   async function handleLogout() {
     await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
@@ -140,49 +137,39 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50",
-        transparentAtTop && !scrolled
-          ? "border-transparent bg-transparent"
-          : "border-b border-border bg-surface/95 backdrop-blur dark:bg-card/95",
+        "sticky top-0 z-50 transition-all duration-300",
+        scrolled ? "bg-surface/80 backdrop-blur-lg" : "bg-transparent",
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4 md:px-8">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-heading text-xl font-bold text-brand-teal"
-        >
-          <Home className="size-7 fill-brand-teal/10" />
-          HostelHub
+        <Link href="/" className="flex items-center gap-2 font-heading text-lg font-semibold text-brand-teal">
+          <span className="flex size-8 items-center justify-center rounded-md bg-brand-teal text-sm font-bold text-white">
+            H
+          </span>
         </Link>
-        <nav className="hidden h-full items-center gap-7 text-sm font-semibold text-primary md:flex">
+
+        <nav className="hidden h-full items-center gap-6 text-sm font-medium text-primary md:flex">
           {navItems.map((item) => (
             <Link
               key={item.id}
               href={item.href}
               className={cn(
                 "flex h-full items-center border-b-2 border-transparent pt-1 transition hover:text-brand-teal",
-                active === item.id &&
-                  "border-b-2 border-brand-teal font-bold text-brand-teal",
+                active === item.id && "border-b-2 border-brand-teal text-brand-teal",
               )}
             >
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-2">
           <ThemeToggle className="hidden md:inline-flex" />
-          <button
-            aria-label="Saved hostels"
-            className="hidden size-10 items-center justify-center rounded-full border border-border text-primary transition hover:border-brand-teal hover:text-brand-teal md:inline-flex"
-            type="button"
-          >
-            <Heart className="size-5" />
-          </button>
           {isSessionChecked ? (
             user && hasDashboard(user.role) ? (
               <Link
                 href={dashboardHrefForRole(user.role)}
-                className="inline-flex rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 md:px-5 md:py-3"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-teal px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-110"
               >
                 Dashboard
               </Link>
@@ -190,22 +177,27 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
               <div ref={menuRef} className="relative">
                 <button
                   onClick={() => setMenuOpen((o) => !o)}
-                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-primary transition hover:border-brand-teal hover:text-brand-teal md:px-4 md:py-2.5"
+                  className="flex items-center gap-2 rounded-full p-1 pr-3 text-sm font-medium text-primary transition hover:bg-muted"
                 >
-                  <span className="flex size-7 items-center justify-center rounded-full bg-brand-teal/10 text-xs font-bold text-brand-teal">
-                    {user.name
-                      .split(" ")
-                      .map((p) => p[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase()}
-                  </span>
-                  <span className="hidden md:inline">{user.email ?? user.name}</span>
+                  {user.image ? (
+                    <Image
+                      src={user.image}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="size-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-8 items-center justify-center rounded-full bg-brand-teal/10 text-sm font-semibold text-brand-teal">
+                      {(user.email ?? user.name).charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="hidden md:inline text-muted-foreground">{user.email ?? user.name}</span>
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-border bg-surface p-1 shadow-lg">
                     <div className="border-b border-border px-3 py-2">
-                      <p className="truncate text-sm font-semibold text-primary">{user.name}</p>
+                      <p className="truncate text-sm font-medium text-primary">{user.name}</p>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <button
@@ -219,15 +211,23 @@ export function PublicHeader({ active, transparentAtTop }: PublicHeaderProps) {
                 )}
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="inline-flex rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 md:px-5 md:py-3"
-              >
-                Login / Sign up
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-primary transition hover:bg-muted"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-lg bg-brand-teal px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-110"
+                >
+                  Sign Up
+                </Link>
+              </div>
             )
           ) : (
-            <span className="inline-flex h-10 w-28 rounded-lg bg-muted md:h-11 md:w-32" />
+            <span className="inline-flex h-10 w-28 rounded-lg bg-muted md:h-10 md:w-32" />
           )}
         </div>
       </div>

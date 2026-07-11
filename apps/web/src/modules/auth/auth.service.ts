@@ -47,6 +47,7 @@ function publicUser(user: {
   _id: unknown;
   email?: string | null;
   hostelIds?: unknown[];
+  image?: string | null;
   name: string;
   phone?: string | null;
   role: Role;
@@ -56,6 +57,7 @@ function publicUser(user: {
     id: String(user._id),
     email: user.email ?? null,
     hostelIds: (user.hostelIds ?? []).map((hostelId) => String(hostelId)),
+    image: user.image ?? null,
     name: user.name,
     phone: user.phone ?? null,
     role: user.role,
@@ -454,12 +456,18 @@ async function verifyGoogleIdToken(input: GoogleAuthInput) {
       );
     }
 
+    const picture =
+      typeof payload.picture === "string" && payload.picture.trim().length > 0
+        ? payload.picture.trim()
+        : null;
+
     return {
       email,
       name:
         typeof payload.name === "string" && payload.name.trim().length > 0
           ? payload.name.trim()
           : email,
+      picture,
       providerAccountId: subject,
     };
   } catch (error) {
@@ -516,10 +524,14 @@ export async function authenticateWithGoogle(
     user = await UserModel.create({
       email: googleAccount.email,
       emailVerifiedAt: new Date(),
+      image: googleAccount.picture,
       name: googleAccount.name,
       role: Role.PUBLIC_USER,
       status: "ACTIVE",
     });
+  } else if (googleAccount.picture && !user.get("image")) {
+    user.set("image", googleAccount.picture);
+    await user.save();
   }
 
   if (!linkedAccount) {

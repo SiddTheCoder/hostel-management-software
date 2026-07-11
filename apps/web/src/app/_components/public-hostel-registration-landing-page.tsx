@@ -183,7 +183,7 @@ export function PublicHostelRegistrationLandingPage() {
   const SlideIcon = heroSlides[currentSlide].icon;
 
   return (
-    <PublicShell active="register-hostel" transparentHeader>
+    <PublicShell active="register-hostel">
       <div className="relative overflow-hidden">
         {/* Animated borders — grow from all 4 sides for 3s, then fade out */}
         <motion.div

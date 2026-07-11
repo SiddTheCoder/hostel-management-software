@@ -174,7 +174,7 @@ export function PublicHomePage() {
   ];
 
   return (
-    <PublicShell active="home">
+    <PublicShell>
       <section className="relative w-full overflow-hidden bg-white">
         {/* Right side background image with smooth fade on the left */}
         <div className="absolute right-0 top-0 hidden h-full w-[54%] lg:block">
