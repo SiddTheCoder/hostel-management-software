@@ -77,7 +77,7 @@ export const PlatformServiceProvidersPageContent = React.memo(
               <div className="rounded-lg border border-border p-4" key={provider.id}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-primary">{provider.fullName}</p>
+                    <p className="font-semibold text-foreground">{provider.fullName}</p>
                     <p className="text-sm text-muted-foreground">
                       {provider.category.replaceAll("_", " ")} / {provider.area}
                     </p>

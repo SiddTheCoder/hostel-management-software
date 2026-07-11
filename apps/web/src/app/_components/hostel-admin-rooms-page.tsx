@@ -123,13 +123,13 @@ export const HostelAdminRoomsPageContent = memo(function HostelAdminRoomsPageCon
           <div className="space-y-4">
             {floors.map((floor) => (
               <div className="rounded-lg border border-border p-4" key={floor.id}>
-                <h3 className="font-semibold text-primary">{floor.name}</h3>
+                <h3 className="font-semibold text-foreground">{floor.name}</h3>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   {floor.rooms.map((room) => (
                     <div className="rounded-md border border-border p-3" key={room.id}>
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="font-semibold text-primary">
+                          <p className="font-semibold text-foreground">
                             Room {room.roomNumber}
                           </p>
                           <p className="text-sm text-muted-foreground">

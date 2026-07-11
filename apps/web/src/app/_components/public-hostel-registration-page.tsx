@@ -110,7 +110,7 @@ function FileUploadArea({
               </div>
             )}
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-primary">{f.name}</p>
+              <p className="truncate text-sm font-medium text-foreground">{f.name}</p>
               {f.uploading ? (
                 <p className="text-xs text-muted-foreground">Uploading...</p>
               ) : (
@@ -377,7 +377,7 @@ export function PublicHostelRegistrationPage() {
     <PublicShell active="register-hostel">
       <form className="mx-auto max-w-[1200px] px-4 py-8 md:px-6" onSubmit={submit}>
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-primary md:text-3xl">Register Your Hostel</h1>
+          <h1 className="text-2xl font-bold text-foreground md:text-3xl">Register Your Hostel</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Fill in the details below to submit your hostel for platform review.
           </p>
@@ -414,7 +414,7 @@ export function PublicHostelRegistrationPage() {
               <Check className="size-10" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-primary">Application Submitted</h2>
+              <h2 className="text-2xl font-bold text-foreground">Application Submitted</h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Your hostel registration has been received. Our team will review your application
                 and you will be notified via email and WhatsApp once approved.
@@ -430,16 +430,16 @@ export function PublicHostelRegistrationPage() {
               {step === 1 ? (
                 <section className="app-card">
                   <div className="border-b border-border px-5 py-4">
-                    <h2 className="text-lg font-semibold text-primary">Step 1 of 5: Basic Information</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Step 1 of 5: Basic Information</h2>
                     <p className="mt-1 text-sm text-muted-foreground">Tell us about your hostel and the owner.</p>
                   </div>
                   <div className="space-y-5 p-5">
                     <div className="grid gap-5 md:grid-cols-2">
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Hostel Name <span className="text-danger">*</span>
                         <input className="input-field" onChange={(e) => setHostelName(e.target.value)} required value={hostelName} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Hostel Type <span className="text-danger">*</span>
                         <select className="input-field" onChange={(e) => setHostelType(e.target.value as typeof hostelType)} value={hostelType}>
                           <option value="BOYS">Boys Hostel</option>
@@ -447,56 +447,56 @@ export function PublicHostelRegistrationPage() {
                           <option value="CO_LIVING">Co-living</option>
                         </select>
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Year Established
                         <input className="input-field" max={new Date().getFullYear()} min={1950} onChange={(e) => setYearEstablished(e.target.value)} placeholder="e.g. 2020" type="number" value={yearEstablished} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Total Resident Capacity
                         <input className="input-field" min={0} onChange={(e) => setTotalCapacity(e.target.value)} placeholder="e.g. 100" type="number" value={totalCapacity} />
                       </label>
                     </div>
-                    <label className="grid gap-1.5 text-sm font-semibold text-primary md:col-span-2">
+                    <label className="grid gap-1.5 text-sm font-semibold text-foreground md:col-span-2">
                       Description <span className="text-danger">*</span>
                       <textarea className="input-field min-h-24" maxLength={2000} onChange={(e) => setDescription(e.target.value)} placeholder="Tell prospective residents about your hostel — location highlights, atmosphere, nearby colleges, etc." required value={description} />
                     </label>
                     <div className="border-t border-border pt-5">
-                      <h3 className="mb-4 text-sm font-bold text-primary">Owner Contact</h3>
+                      <h3 className="mb-4 text-sm font-bold text-foreground">Owner Contact</h3>
                       <div className="grid gap-5 md:grid-cols-2">
-                        <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                           Full Name <span className="text-danger">*</span>
                           <input className="input-field" onChange={(e) => setOwnerName(e.target.value)} required value={ownerName} />
                         </label>
-                        <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                           Phone <span className="text-danger">*</span>
                           <input className="input-field" onChange={(e) => setPhone(e.target.value)} required type="tel" value={phone} />
                         </label>
-                        <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                           Email
                           <input className="input-field" onChange={(e) => setEmail(e.target.value)} type="email" value={email} />
                         </label>
-                        <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                           Alternate Phone
                           <input className="input-field" onChange={(e) => setAlternatePhone(e.target.value)} type="tel" value={alternatePhone} />
                         </label>
                       </div>
                     </div>
                     <div className="border-t border-border pt-5">
-                      <h3 className="mb-4 text-sm font-bold text-primary">Food Details</h3>
+                      <h3 className="mb-4 text-sm font-bold text-foreground">Food Details</h3>
                       <div className="grid gap-5 md:grid-cols-3">
-                        <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                           Meals Per Day
                           <input className="input-field" min={0} onChange={(e) => setMealsPerDay(e.target.value)} type="number" value={mealsPerDay} />
                         </label>
                         <div className="flex items-end gap-4 pb-2">
-                          <label className="flex items-center gap-2 text-sm font-medium text-primary">
+                          <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                             <input checked={hasVeg} className="size-4 rounded text-brand-teal" onChange={(e) => setHasVeg(e.target.checked)} type="checkbox" /> Veg
                           </label>
-                          <label className="flex items-center gap-2 text-sm font-medium text-primary">
+                          <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                             <input checked={hasNonVeg} className="size-4 rounded text-brand-teal" onChange={(e) => setHasNonVeg(e.target.checked)} type="checkbox" /> Non-Veg
                           </label>
                         </div>
-                        <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                           Food Notes
                           <input className="input-field" onChange={(e) => setFoodNotes(e.target.value)} placeholder="Any special food notes" value={foodNotes} />
                         </label>
@@ -509,44 +509,44 @@ export function PublicHostelRegistrationPage() {
               {step === 2 ? (
                 <section className="app-card">
                   <div className="border-b border-border px-5 py-4">
-                    <h2 className="text-lg font-semibold text-primary">Step 2 of 5: Location & Facilities</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Step 2 of 5: Location & Facilities</h2>
                     <p className="mt-1 text-sm text-muted-foreground">Where is your hostel located and what do you offer?</p>
                   </div>
                   <div className="space-y-5 p-5">
                     <div className="grid gap-5 md:grid-cols-2">
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Country
                         <input className="input-field bg-muted/40" disabled value={country} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Province <span className="text-danger">*</span>
                         <select className="input-field" onChange={(e) => setProvince(e.target.value)} value={province}>
                           {nepaliProvinces.map((p) => <option key={p}>{p}</option>)}
                         </select>
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         City <span className="text-danger">*</span>
                         <input className="input-field" onChange={(e) => setCity(e.target.value)} required value={city} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Area / Locality <span className="text-danger">*</span>
                         <input className="input-field" onChange={(e) => setArea(e.target.value)} required value={area} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary md:col-span-2">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground md:col-span-2">
                         Street Address
                         <input className="input-field" onChange={(e) => setAddress(e.target.value)} value={address} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Landmark
                         <input className="input-field" onChange={(e) => setLandmark(e.target.value)} placeholder="Near..." value={landmark} />
                       </label>
-                      <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                         Google Maps Link
                         <input className="input-field" onChange={(e) => setMapLink(e.target.value)} placeholder="https://maps.google.com/..." value={mapLink} />
                       </label>
                     </div>
                     <div className="border-t border-border pt-5">
-                      <h3 className="mb-4 text-sm font-bold text-primary">Facilities</h3>
+                      <h3 className="mb-4 text-sm font-bold text-foreground">Facilities</h3>
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {facilityOptions.map((facility) => (
                           <label key={facility} className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2.5 text-xs font-semibold transition hover:border-brand-teal">
@@ -556,7 +556,7 @@ export function PublicHostelRegistrationPage() {
                         ))}
                       </div>
                     </div>
-                    <label className="grid gap-1.5 text-sm font-semibold text-primary">
+                    <label className="grid gap-1.5 text-sm font-semibold text-foreground">
                       House Rules
                       <textarea className="input-field min-h-20" onChange={(e) => setRules(e.target.value)} placeholder="No smoking, No visitors after 9 PM, etc. (one per line)" value={rules} />
                     </label>
@@ -567,11 +567,11 @@ export function PublicHostelRegistrationPage() {
               {step === 3 ? (
                 <section className="app-card">
                   <div className="border-b border-border px-5 py-4">
-                    <h2 className="text-lg font-semibold text-primary">Step 3 of 5: Rooms & Floors</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Step 3 of 5: Rooms & Floors</h2>
                     <p className="mt-1 text-sm text-muted-foreground">Configure your room layout floor by floor.</p>
                   </div>
                   <div className="space-y-5 p-5">
-                    <label className="grid max-w-xs gap-1.5 text-sm font-semibold text-primary">
+                    <label className="grid max-w-xs gap-1.5 text-sm font-semibold text-foreground">
                       Total Floors
                       <input
                         className="input-field"
@@ -591,7 +591,7 @@ export function PublicHostelRegistrationPage() {
                       return (
                         <div key={floorNum} className="rounded-xl border border-border bg-muted/20 p-4">
                           <div className="mb-3 flex items-center justify-between">
-                            <h4 className="flex items-center gap-2 text-sm font-bold text-primary">
+                            <h4 className="flex items-center gap-2 text-sm font-bold text-foreground">
                               <Building2 className="size-4 text-brand-teal" />
                               Floor {floorNum}
                             </h4>
@@ -603,7 +603,7 @@ export function PublicHostelRegistrationPage() {
                           {floorRooms.map((room) => (
                             <div key={room.id} className="mb-3 rounded-lg border border-border bg-surface p-4">
                               <div className="grid gap-3 md:grid-cols-4">
-                                <label className="grid gap-1 text-xs font-semibold text-primary">
+                                <label className="grid gap-1 text-xs font-semibold text-foreground">
                                   Room Type
                                   <select className="input-field h-9 text-xs" onChange={(e) => updateRoom(room.id, { roomType: e.target.value })} value={room.roomType}>
                                     <option value="">Select type</option>
@@ -611,32 +611,32 @@ export function PublicHostelRegistrationPage() {
                                     <option value="Custom">Custom</option>
                                   </select>
                                 </label>
-                                <label className="grid gap-1 text-xs font-semibold text-primary">
+                                <label className="grid gap-1 text-xs font-semibold text-foreground">
                                   Rooms
                                   <input className="input-field h-9 text-xs" min={0} onChange={(e) => updateRoom(room.id, { rooms: e.target.value })} placeholder="Count" type="number" value={room.rooms} />
                                 </label>
-                                <label className="grid gap-1 text-xs font-semibold text-primary">
+                                <label className="grid gap-1 text-xs font-semibold text-foreground">
                                   Beds per Room
                                   <input className="input-field h-9 text-xs" min={0} onChange={(e) => updateRoom(room.id, { bedsPerRoom: e.target.value })} placeholder="Beds" type="number" value={room.bedsPerRoom} />
                                 </label>
-                                <label className="grid gap-1 text-xs font-semibold text-primary">
+                                <label className="grid gap-1 text-xs font-semibold text-foreground">
                                   Rent per Bed (NPR)
                                   <input className="input-field h-9 text-xs" min={0} onChange={(e) => updateRoom(room.id, { monthlyRent: e.target.value })} placeholder="Rent" type="number" value={room.monthlyRent} />
                                 </label>
-                                <label className="grid gap-1 text-xs font-semibold text-primary">
+                                <label className="grid gap-1 text-xs font-semibold text-foreground">
                                   Room Size (sq ft)
                                   <input className="input-field h-9 text-xs" onChange={(e) => updateRoom(room.id, { roomSize: e.target.value })} placeholder="e.g. 150" type="number" value={room.roomSize} />
                                 </label>
-                                <label className="grid gap-1 text-xs font-semibold text-primary">
+                                <label className="grid gap-1 text-xs font-semibold text-foreground">
                                   Vacant Beds
                                   <input className="input-field h-9 text-xs" min={0} onChange={(e) => updateRoom(room.id, { vacantBeds: e.target.value })} placeholder="0" type="number" value={room.vacantBeds} />
                                 </label>
                                 <div className="flex items-end gap-3 pb-1">
-                                  <label className="flex items-center gap-1.5 text-xs font-medium text-primary">
+                                  <label className="flex items-center gap-1.5 text-xs font-medium text-foreground">
                                     <input checked={room.attachedBathroom} className="size-3.5 rounded text-brand-teal" onChange={(e) => updateRoom(room.id, { attachedBathroom: e.target.checked })} type="checkbox" />
                                     Bathroom
                                   </label>
-                                  <label className="flex items-center gap-1.5 text-xs font-medium text-primary">
+                                  <label className="flex items-center gap-1.5 text-xs font-medium text-foreground">
                                     <input checked={room.balcony} className="size-3.5 rounded text-brand-teal" onChange={(e) => updateRoom(room.id, { balcony: e.target.checked })} type="checkbox" />
                                     Balcony
                                   </label>
@@ -666,7 +666,7 @@ export function PublicHostelRegistrationPage() {
                     })}
 
                     <div className="border-t border-border pt-5">
-                      <label className="grid max-w-xs gap-1.5 text-sm font-semibold text-primary">
+                      <label className="grid max-w-xs gap-1.5 text-sm font-semibold text-foreground">
                         Admission Fee (NPR)
                         <input className="input-field" min={0} onChange={(e) => setAdmissionFee(e.target.value)} type="number" value={admissionFee} />
                       </label>
@@ -678,31 +678,31 @@ export function PublicHostelRegistrationPage() {
               {step === 4 ? (
                 <section className="app-card">
                   <div className="border-b border-border px-5 py-4">
-                    <h2 className="text-lg font-semibold text-primary">Step 4 of 5: Documents & Photos</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Step 4 of 5: Documents & Photos</h2>
                     <p className="mt-1 text-sm text-muted-foreground">Upload photos and verification documents.</p>
                   </div>
                   <div className="space-y-6 p-5">
                     <div>
-                      <h3 className="mb-3 text-sm font-bold text-primary">Main Hostel Photo</h3>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Main Hostel Photo</h3>
                       <FileUploadArea files={mainPhoto} onFileSelect={handleFileSelect(setMainPhoto, 1)} onRemove={(id) => setMainPhoto((prev) => prev.filter((x) => x.id !== id))} label="Upload main photo" />
                     </div>
                     <div>
-                      <h3 className="mb-3 text-sm font-bold text-primary">Additional Photos</h3>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Additional Photos</h3>
                       <FileUploadArea files={additionalPhotos} onFileSelect={handleFileSelect(setAdditionalPhotos, 5)} onRemove={(id) => setAdditionalPhotos((prev) => prev.filter((x) => x.id !== id))} maxFiles={5} label="Add more photos" />
                     </div>
                     <div className="border-t border-border pt-5">
-                      <h3 className="mb-4 text-sm font-bold text-primary">Verification Documents</h3>
+                      <h3 className="mb-4 text-sm font-bold text-foreground">Verification Documents</h3>
                       <div className="space-y-5">
                         <div>
-                          <p className="mb-2 text-xs font-semibold text-primary">Ownership / Rental Proof</p>
+                          <p className="mb-2 text-xs font-semibold text-foreground">Ownership / Rental Proof</p>
                           <FileUploadArea files={ownershipDoc} onFileSelect={handleFileSelect(setOwnershipDoc, 1)} onRemove={(id) => setOwnershipDoc((prev) => prev.filter((x) => x.id !== id))} label="Upload ownership or rental agreement" />
                         </div>
                         <div>
-                          <p className="mb-2 text-xs font-semibold text-primary">Business Registration</p>
+                          <p className="mb-2 text-xs font-semibold text-foreground">Business Registration</p>
                           <FileUploadArea files={businessDoc} onFileSelect={handleFileSelect(setBusinessDoc, 1)} onRemove={(id) => setBusinessDoc((prev) => prev.filter((x) => x.id !== id))} label="Upload business registration document" />
                         </div>
                         <div>
-                          <p className="mb-2 text-xs font-semibold text-primary">Owner ID Proof (Citizenship / Passport)</p>
+                          <p className="mb-2 text-xs font-semibold text-foreground">Owner ID Proof (Citizenship / Passport)</p>
                           <FileUploadArea files={ownerIdDoc} onFileSelect={handleFileSelect(setOwnerIdDoc, 1)} onRemove={(id) => setOwnerIdDoc((prev) => prev.filter((x) => x.id !== id))} label="Upload owner ID" />
                         </div>
                       </div>
@@ -714,42 +714,42 @@ export function PublicHostelRegistrationPage() {
               {step === 5 ? (
                 <section className="app-card">
                   <div className="border-b border-border px-5 py-4">
-                    <h2 className="text-lg font-semibold text-primary">Step 5 of 5: Review & Submit</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Step 5 of 5: Review & Submit</h2>
                     <p className="mt-1 text-sm text-muted-foreground">Review all information before submitting.</p>
                   </div>
                   <div className="space-y-5 p-5">
                     <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <h3 className="mb-3 text-sm font-bold text-primary">Hostel Details</h3>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Hostel Details</h3>
                       <div className="grid gap-2 text-sm md:grid-cols-2">
-                        <p><span className="text-muted-foreground">Name:</span> <span className="font-medium text-primary">{hostelName || "-"}</span></p>
-                        <p><span className="text-muted-foreground">Type:</span> <span className="font-medium text-primary">{{ BOYS: "Boys", GIRLS: "Girls", CO_LIVING: "Co-living" }[hostelType]}</span></p>
-                        <p><span className="text-muted-foreground">Established:</span> <span className="font-medium text-primary">{yearEstablished || "-"}</span></p>
-                        <p><span className="text-muted-foreground">Capacity:</span> <span className="font-medium text-primary">{totalCapacity || "-"} residents</span></p>
-                        <p className="md:col-span-2"><span className="text-muted-foreground">Description:</span> <span className="font-medium text-primary">{description ? `${description.slice(0, 100)}${description.length > 100 ? "..." : ""}` : "-"}</span></p>
+                        <p><span className="text-muted-foreground">Name:</span> <span className="font-medium text-foreground">{hostelName || "-"}</span></p>
+                        <p><span className="text-muted-foreground">Type:</span> <span className="font-medium text-foreground">{{ BOYS: "Boys", GIRLS: "Girls", CO_LIVING: "Co-living" }[hostelType]}</span></p>
+                        <p><span className="text-muted-foreground">Established:</span> <span className="font-medium text-foreground">{yearEstablished || "-"}</span></p>
+                        <p><span className="text-muted-foreground">Capacity:</span> <span className="font-medium text-foreground">{totalCapacity || "-"} residents</span></p>
+                        <p className="md:col-span-2"><span className="text-muted-foreground">Description:</span> <span className="font-medium text-foreground">{description ? `${description.slice(0, 100)}${description.length > 100 ? "..." : ""}` : "-"}</span></p>
                       </div>
                     </div>
 
                     <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <h3 className="mb-3 text-sm font-bold text-primary">Location</h3>
-                      <p className="text-sm text-primary">{area ? `${area}, ${city}, ${province}, ${country}` : city}</p>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Location</h3>
+                      <p className="text-sm text-foreground">{area ? `${area}, ${city}, ${province}, ${country}` : city}</p>
                       {landmark ? <p className="mt-1 text-xs text-muted-foreground">Near: {landmark}</p> : null}
-                      <p className="mt-2 text-sm font-medium text-primary">{facilities.length} facilities · {rules.split("\n").filter(Boolean).length} rules</p>
+                      <p className="mt-2 text-sm font-medium text-foreground">{facilities.length} facilities · {rules.split("\n").filter(Boolean).length} rules</p>
                     </div>
 
                     <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <h3 className="mb-3 text-sm font-bold text-primary">Rooms & Pricing</h3>
-                      <p className="text-sm text-primary">{capacitySummary.totalBeds} beds across {capacitySummary.totalRooms} rooms on {totalFloors} floor(s)</p>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Rooms & Pricing</h3>
+                      <p className="text-sm text-foreground">{capacitySummary.totalBeds} beds across {capacitySummary.totalRooms} rooms on {totalFloors} floor(s)</p>
                       {rentValues.length > 0 ? (
                         <p className="mt-1 text-sm">
                           <span className="text-muted-foreground">Rent range:</span>{" "}
-                          <span className="font-medium text-primary">NPR {Math.min(...rentValues).toLocaleString()} - {Math.max(...rentValues).toLocaleString()} / bed</span>
+                          <span className="font-medium text-foreground">NPR {Math.min(...rentValues).toLocaleString()} - {Math.max(...rentValues).toLocaleString()} / bed</span>
                         </p>
                       ) : null}
-                      {admissionFee ? <p className="text-sm"><span className="text-muted-foreground">Admission fee:</span> <span className="font-medium text-primary">NPR {Number(admissionFee).toLocaleString()}</span></p> : null}
+                      {admissionFee ? <p className="text-sm"><span className="text-muted-foreground">Admission fee:</span> <span className="font-medium text-foreground">NPR {Number(admissionFee).toLocaleString()}</span></p> : null}
                     </div>
 
                     <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <h3 className="mb-3 text-sm font-bold text-primary">Documents</h3>
+                      <h3 className="mb-3 text-sm font-bold text-foreground">Documents</h3>
                       <div className="space-y-1 text-sm">
                         <p>Main photo: {mainPhoto.some((p) => p.url) ? <span className="text-success">Uploaded</span> : <span className="text-muted-foreground">Not uploaded</span>}</p>
                         <p>Additional photos: {additionalPhotos.filter((p) => p.url).length}</p>
@@ -760,7 +760,7 @@ export function PublicHostelRegistrationPage() {
                     </div>
 
                     <div className="rounded-lg border-2 border-brand-teal/20 bg-brand-teal/5 p-5">
-                      <h3 className="mb-4 text-sm font-bold text-primary">Select Your Plan</h3>
+                      <h3 className="mb-4 text-sm font-bold text-foreground">Select Your Plan</h3>
                       <div className="grid gap-3 md:grid-cols-3">
                         {plans.map((plan) => (
                           <button
@@ -772,7 +772,7 @@ export function PublicHostelRegistrationPage() {
                             onClick={() => setSelectedPlan(plan.id)}
                             type="button"
                           >
-                            <p className="text-sm font-bold text-primary">{plan.name}</p>
+                            <p className="text-sm font-bold text-foreground">{plan.name}</p>
                             <p className="mt-1 text-xs text-muted-foreground">{plan.capacity}</p>
                             <p className="mt-3 text-lg font-extrabold text-brand-teal">{formatMoney(plan.price)}<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
                           </button>
@@ -804,19 +804,19 @@ export function PublicHostelRegistrationPage() {
 
             <aside className="space-y-4">
               <div className="app-card p-4">
-                <h3 className="text-sm font-bold text-primary">Application Summary</h3>
+                <h3 className="text-sm font-bold text-foreground">Application Summary</h3>
                 <div className="mt-4 space-y-2.5 text-sm">
-                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Plan</span><span className="font-semibold text-primary">{selectedPlanDetail.name}</span></div>
+                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Plan</span><span className="font-semibold text-foreground">{selectedPlanDetail.name}</span></div>
                   <div className="flex items-center justify-between"><span className="text-muted-foreground">Monthly Fee</span><span className="font-semibold text-brand-teal">{formatMoney(selectedPlanDetail.price)}</span></div>
                   <hr className="border-border" />
-                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Total Beds</span><span className="font-semibold text-primary">{capacitySummary.totalBeds}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Total Rooms</span><span className="font-semibold text-primary">{capacitySummary.totalRooms}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Vacant Beds</span><span className="font-semibold text-primary">{capacitySummary.vacantBeds}</span></div>
+                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Total Beds</span><span className="font-semibold text-foreground">{capacitySummary.totalBeds}</span></div>
+                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Total Rooms</span><span className="font-semibold text-foreground">{capacitySummary.totalRooms}</span></div>
+                  <div className="flex items-center justify-between"><span className="text-muted-foreground">Vacant Beds</span><span className="font-semibold text-foreground">{capacitySummary.vacantBeds}</span></div>
                 </div>
               </div>
 
               <div className="app-card p-4">
-                <h3 className="text-sm font-bold text-primary">What happens next?</h3>
+                <h3 className="text-sm font-bold text-foreground">What happens next?</h3>
                 <div className="mt-3 space-y-2.5 text-xs text-muted-foreground">
                   <p className="flex items-start gap-2"><span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-brand-teal/10 text-[9px] font-bold text-brand-teal">1</span>Platform reviews your application</p>
                   <p className="flex items-start gap-2"><span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-brand-teal/10 text-[9px] font-bold text-brand-teal">2</span>You receive notification via email & WhatsApp</p>
@@ -831,7 +831,7 @@ export function PublicHostelRegistrationPage() {
         {!submitted && step < 5 ? (
           <div className="mx-auto mt-8 flex max-w-3xl items-center justify-between">
             <button
-              className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-muted disabled:opacity-40"
+              className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-40"
               disabled={step === 1 || isSubmitting}
               onClick={() => setStep((s) => Math.max(1, s - 1))}
               type="button"

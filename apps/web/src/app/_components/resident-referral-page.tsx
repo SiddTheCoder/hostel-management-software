@@ -69,7 +69,7 @@ export const ResidentReferralPageContent = React.memo(
               <div className="rounded-lg border border-border p-4" key={referral.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-primary">{referral.name}</p>
+                    <p className="font-semibold text-foreground">{referral.name}</p>
                     <p className="text-sm text-muted-foreground">{referral.phone}</p>
                   </div>
                   <StatusBadge>{referral.status}</StatusBadge>

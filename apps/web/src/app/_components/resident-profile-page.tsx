@@ -71,7 +71,7 @@ export const ResidentProfilePageContent = memo(function ResidentProfilePageConte
       {profile ? (
         <div className="grid gap-5 xl:grid-cols-3">
           <Panel title="Resident">
-            <p className="text-xl font-bold text-primary">
+            <p className="text-xl font-bold text-foreground">
               {profile.resident.firstName} {profile.resident.lastName}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">{profile.resident.phone}</p>
@@ -82,11 +82,11 @@ export const ResidentProfilePageContent = memo(function ResidentProfilePageConte
           </Panel>
           <Panel title="Room & Bed">
             <p className="text-sm text-muted-foreground">Room</p>
-            <p className="mt-1 text-2xl font-bold text-primary">
+            <p className="mt-1 text-2xl font-bold text-foreground">
               {profile.roomBed.room?.roomNumber ?? "-"}
             </p>
             <p className="mt-4 text-sm text-muted-foreground">Bed</p>
-            <p className="mt-1 text-2xl font-bold text-primary">
+            <p className="mt-1 text-2xl font-bold text-foreground">
               {profile.roomBed.bed?.bedNumber ?? "-"}
             </p>
           </Panel>
@@ -94,7 +94,7 @@ export const ResidentProfilePageContent = memo(function ResidentProfilePageConte
             <div className="space-y-4">
               {profile.guardians.map((guardian) => (
                 <div key={guardian.id}>
-                  <p className="font-semibold text-primary">
+                  <p className="font-semibold text-foreground">
                     {guardian.firstName} {guardian.lastName}
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -104,7 +104,7 @@ export const ResidentProfilePageContent = memo(function ResidentProfilePageConte
               ))}
               {profile.emergencyContacts.map((contact) => (
                 <div key={contact.id}>
-                  <p className="font-semibold text-primary">{contact.name}</p>
+                  <p className="font-semibold text-foreground">{contact.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {contact.relation} / {contact.phone}
                   </p>

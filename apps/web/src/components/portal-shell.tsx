@@ -169,7 +169,7 @@ export function PortalShell({
           <Link href="/" className="flex items-center gap-3">
             <Building2 className={cn("size-8", styles.icon)} />
             <div>
-              <p className="font-heading text-lg font-bold text-primary">{portalName}</p>
+              <p className="font-heading text-lg font-bold text-foreground">{portalName}</p>
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             </div>
           </Link>
@@ -200,11 +200,11 @@ export function PortalShell({
 
           <SidebarFooter>
             <div className="rounded-lg border border-border bg-muted/30 p-4">
-              <p className="text-sm font-bold text-primary">Need Help?</p>
+              <p className="text-sm font-bold text-foreground">Need Help?</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 Contact support or open the help center.
               </p>
-              <button className="mt-3 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm font-semibold text-primary">
+              <button className="mt-3 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground">
                 Help Center
               </button>
             </div>
@@ -229,7 +229,7 @@ export function PortalShell({
               <button className="rounded-lg border border-border p-2 text-muted-foreground md:hidden">
                 <Menu className="size-5" />
               </button>
-              <h1 className="truncate font-heading text-xl font-semibold text-primary">
+              <h1 className="truncate font-heading text-xl font-semibold text-foreground">
                 {workspaceName ?? activeItem?.label ?? "Dashboard"}
               </h1>
             </div>
@@ -238,7 +238,7 @@ export function PortalShell({
               <Search className="mr-2 size-4 text-muted-foreground" />
               <input
                 className={cn(
-                  "w-full bg-transparent text-sm text-primary outline-none placeholder:text-muted-foreground focus:ring-2",
+                  "w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2",
                   styles.focus,
                 )}
                 placeholder={searchPlaceholder}
@@ -249,7 +249,7 @@ export function PortalShell({
               <ThemeToggle />
               <button
                 aria-label="Notifications"
-                className="relative inline-flex size-10 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground shadow-sm transition hover:text-primary dark:bg-card"
+                className="relative inline-flex size-10 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-card"
                 type="button"
               >
                 <Bell className="size-4" />

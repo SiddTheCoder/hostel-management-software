@@ -115,10 +115,10 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
             <Home className="size-10 fill-brand-teal/10" />
             <span className="font-heading text-4xl font-bold">HostelHub</span>
           </Link>
-          <h1 className="mt-16 max-w-xl text-4xl font-bold leading-tight text-primary">
+          <h1 className="mt-16 max-w-xl text-4xl font-bold leading-tight text-foreground">
             Welcome back! Let us get you logged in.
           </h1>
-          <p className="mt-6 max-w-lg text-lg leading-8 text-primary/80">
+          <p className="mt-6 max-w-lg text-lg leading-8 text-foreground/80">
             HostelHub is the all-in-one platform to discover, manage, and grow your hostel
             operations.
           </p>
@@ -139,7 +139,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                   <ShieldCheck className="size-6" />
                 </span>
                 <div>
-                  <p className="font-semibold text-primary">{title}</p>
+                  <p className="font-semibold text-foreground">{title}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
                 </div>
               </div>
@@ -151,8 +151,8 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
           />
         </section>
         <section className="flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-xl rounded-xl border border-border bg-white p-10 shadow-lg">
-            <h2 className="text-3xl font-bold text-primary">{content.title}</h2>
+          <div className="w-full max-w-xl rounded-xl border border-border bg-surface p-10 shadow-lg">
+            <h2 className="text-3xl font-bold text-foreground">{content.title}</h2>
             <p className="mt-3 text-muted-foreground">{content.subtitle}</p>
             <div className="mt-8 space-y-5">
               {mode === "login" ? (
@@ -165,7 +165,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                     type="password"
                   />
                   <div className="flex items-center justify-between text-sm">
-                    <label className="flex items-center gap-2 text-primary">
+                    <label className="flex items-center gap-2 text-foreground">
                       <input className="size-4 rounded border-border" type="checkbox" />
                       Remember me
                     </label>
@@ -187,7 +187,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                     <LockKeyhole className="size-4" />
                     Sign in
                   </Link>
-                  <div className="rounded-lg border border-brand-teal/20 bg-brand-teal-soft/40 p-4 text-sm text-primary">
+                  <div className="rounded-lg border border-brand-teal/20 bg-brand-teal-soft/40 p-4 text-sm text-foreground">
                     <p className="font-semibold">Role-aware redirect</p>
                     <p className="mt-1 text-muted-foreground">
                       You will be redirected to the right dashboard based on your role.
@@ -241,7 +241,7 @@ export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
                   <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
                     {["Email OTP", "Google"].map((item) => (
                       <button
-                        className="rounded-md bg-white px-3 py-2 text-sm font-semibold shadow-sm"
+                        className="rounded-md bg-surface px-3 py-2 text-sm font-semibold shadow-sm"
                         key={item}
                       >
                         {item}

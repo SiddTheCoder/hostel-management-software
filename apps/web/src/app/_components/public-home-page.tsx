@@ -175,7 +175,7 @@ export function PublicHomePage() {
 
   return (
     <PublicShell>
-      <section className="relative w-full overflow-hidden bg-white -mt-16">
+      <section className="relative w-full overflow-hidden bg-background -mt-16">
         {/* Right side background image with smooth fade on the left */}
         <div className="absolute right-0 top-0 hidden h-full w-[54%] lg:block">
           <div
@@ -183,22 +183,22 @@ export function PublicHomePage() {
             style={{ backgroundImage: `url("${PUBLIC_HERO_IMAGE}")` }}
           />
           {/* Fading overlay from white to transparent (left-to-right) */}
-          <div className="absolute inset-y-0 left-0 w-48 bg-gradient-to-r from-white via-white/80 to-transparent" />
+          <div className="absolute inset-y-0 left-0 w-48 bg-gradient-to-r from-background via-background/80 to-transparent" />
 
           {/* Slider Dots */}
           <div className="absolute bottom-10 left-[45%] flex gap-2">
-            <span className="size-2 rounded-full bg-white" />
-            <span className="size-2 rounded-full bg-white/40" />
+            <span className="size-2 rounded-full bg-background" />
+            <span className="size-2 rounded-full bg-background/40" />
           </div>
         </div>
 
-        <div className="mx-auto relative z-10 grid max-w-[1448px] gap-10 px-6 pt-24 pb-12 lg:grid-cols-[0.88fr_1fr] lg:items-center">
-          <div className="py-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm">
+        <div className="mx-auto relative z-10 grid min-h-[75vh] max-w-[1448px] gap-10 px-6 pt-32 pb-12 lg:grid-cols-[0.88fr_1fr] lg:items-center">
+          <div className="py-10">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-sm">
               <ShieldCheck className="size-4 text-brand-teal" />
               Trusted by Students & Families
             </span>
-            <h1 className="mt-8 max-w-xl font-heading text-5xl lg:text-[56px] font-extrabold leading-[1.15] text-primary">
+            <h1 className="mt-8 max-w-xl font-heading text-5xl lg:text-[56px] font-extrabold leading-[1.15] text-foreground">
               Find the Best <span className="text-brand-teal font-extrabold">Hostel</span>{" "}
               for You
             </h1>
@@ -206,7 +206,7 @@ export function PublicHomePage() {
               Discover verified hostels, compare facilities, check reviews and book your
               stay.
             </p>
-            <div className="mt-8 flex max-w-lg items-center gap-2 rounded-lg border border-border bg-white p-1.5 shadow-md focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
+            <div className="mt-8 flex max-w-lg items-center gap-2 rounded-lg border border-border bg-card p-1.5 shadow-md focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
               <Search className="ml-3 size-5 text-muted-foreground" />
               <input
                 className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
@@ -224,7 +224,7 @@ export function PublicHomePage() {
                 Search
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap gap-6 text-xs font-bold text-primary">
+            <div className="mt-8 flex flex-wrap gap-6 text-xs font-bold text-foreground">
               {[
                 { label: "Verified Hostels", icon: CheckCircle2 },
                 { label: "Trusted by Students", icon: CheckCircle2 },
@@ -240,7 +240,7 @@ export function PublicHomePage() {
 
           <div className="relative flex justify-end lg:pr-8 py-10">
             {/* Overlay card matching the reference image */}
-            <div className="rounded-xl border border-border/80 bg-white/95 backdrop-blur-sm p-4 shadow-2xl flex gap-4 w-[320px] mt-36 transition hover:scale-[1.01]">
+            <div className="rounded-xl border border-border/80 bg-card/95 backdrop-blur-sm p-4 shadow-2xl flex gap-4 w-[320px] mt-36 transition hover:scale-[1.01]">
               <div
                 className="size-24 rounded-lg bg-cover bg-center shrink-0 shadow-sm"
                 style={{
@@ -250,14 +250,14 @@ export function PublicHomePage() {
               <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                 <div>
                   <h4
-                    className="font-bold text-sm text-primary truncate"
+                    className="font-bold text-sm text-foreground truncate"
                     title={heroHostel?.name ?? "Verified hostel"}
                   >
                     {heroHostel?.name ?? "Verified hostel"}
                   </h4>
                   <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px]">
                     <Star className="size-3 fill-warning text-warning" />
-                    <span className="font-bold text-primary">
+                    <span className="font-bold text-foreground">
                       {heroHostel?.rating ? heroHostel.rating.toFixed(1) : "New"}
                     </span>
                     <span className="text-muted-foreground font-normal">
@@ -276,7 +276,7 @@ export function PublicHomePage() {
                       : "Published hostels appear here"}
                   </p>
                 </div>
-                <p className="mt-1 font-bold text-primary text-xs">
+                <p className="mt-1 font-bold text-foreground text-xs">
                   {heroHostel ? formatMoney(heroHostel.price) : "NPR --"}{" "}
                   <span className="font-normal text-[10px] text-muted-foreground">
                     / month
@@ -289,10 +289,10 @@ export function PublicHomePage() {
       </section>
 
       {/* Featured verified hostels */}
-      <section className="mx-auto max-w-[1448px] px-6 py-12">
+      <section className="mx-auto max-w-[1448px] px-6 pb-12 pt-4">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-primary">
+            <h2 className="text-xl font-extrabold text-foreground">
               Featured Verified Hostels
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -324,16 +324,16 @@ export function PublicHomePage() {
             const Icon = item.icon;
             return (
               <Link
-                className="group rounded-xl border border-border/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-teal/40 hover:shadow-md"
+                className="group rounded-xl border border-border/80 bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-teal/40 hover:shadow-md"
                 href={item.href}
                 key={item.title}
               >
-                <span className="flex size-11 items-center justify-center rounded-lg bg-slate-50 text-brand-teal ring-1 ring-border transition group-hover:bg-brand-teal group-hover:text-white">
+                <span className="flex size-11 items-center justify-center rounded-lg bg-muted text-brand-teal ring-1 ring-border transition group-hover:bg-brand-teal group-hover:text-white">
                   <Icon className="size-5" />
                 </span>
                 <div className="mt-5 flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="text-base font-extrabold text-primary">
+                    <h3 className="text-base font-extrabold text-foreground">
                       {item.title}
                     </h3>
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -350,7 +350,7 @@ export function PublicHomePage() {
 
       <section className="mx-auto max-w-[1448px] px-6 pb-12">
         <Link
-          className="group grid overflow-hidden rounded-xl border border-border bg-white shadow-sm transition hover:border-brand-teal/40 hover:shadow-md lg:grid-cols-[0.78fr_1fr]"
+          className="group grid overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition hover:border-brand-teal/40 hover:shadow-md lg:grid-cols-[0.78fr_1fr]"
           href="/service-providers/register"
         >
           <div className="relative min-h-[260px] bg-slate-900">
@@ -360,7 +360,7 @@ export function PublicHomePage() {
             />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/40 to-brand-teal/50" />
             <div className="relative flex h-full flex-col justify-between p-7 text-white">
-              <StatusPill className="w-fit bg-white text-brand-teal" tone="teal">
+              <StatusPill className="w-fit bg-surface text-brand-teal" tone="teal">
                 Service Providers
               </StatusPill>
               <div>
@@ -377,7 +377,7 @@ export function PublicHomePage() {
             <p className="text-xs font-bold uppercase tracking-wider text-brand-teal">
               Provider Network
             </p>
-            <h2 className="mt-3 text-2xl font-extrabold text-primary">
+            <h2 className="mt-3 text-2xl font-extrabold text-foreground">
               Join HostelHub as a verified service provider
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -387,7 +387,7 @@ export function PublicHomePage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {["Cleaning", "Maintenance", "Food Supply"].map((item) => (
                 <span
-                  className="rounded-lg border border-border bg-slate-50 px-3 py-3 text-xs font-bold text-primary"
+                  className="rounded-lg border border-border bg-muted px-3 py-3 text-xs font-bold text-foreground"
                   key={item}
                 >
                   {item}
@@ -403,8 +403,8 @@ export function PublicHomePage() {
 
       {/* How it works */}
       <section className="mx-auto mb-12 max-w-[1448px] px-6">
-        <div className="rounded-xl border border-border/80 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-extrabold text-primary">How it works</h2>
+        <div className="rounded-xl border border-border/80 bg-surface p-8 shadow-sm">
+          <h2 className="text-xl font-extrabold text-foreground">How it works</h2>
           <p className="mt-1 text-sm text-muted-foreground font-medium">
             Simple steps to find your perfect hostel
           </p>
@@ -440,11 +440,11 @@ export function PublicHomePage() {
               ].map((item, index) => (
                 <div key={item.step} className="flex items-center gap-4 w-full">
                   <div className="flex items-center gap-4 flex-1">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-brand-teal border border-border">
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted text-brand-teal border border-border">
                       <item.icon className="size-5" />
                     </span>
                     <div className="space-y-0.5">
-                      <p className="font-extrabold text-sm text-primary">
+                      <p className="font-extrabold text-sm text-foreground">
                         {item.step}. {item.title}
                       </p>
                       <p className="text-[11px] leading-normal text-muted-foreground max-w-[160px] font-medium">
@@ -469,7 +469,7 @@ export function PublicHomePage() {
               </span>
               <div className="flex-1 space-y-3">
                 <div>
-                  <p className="font-extrabold text-sm text-primary">
+                  <p className="font-extrabold text-sm text-foreground">
                     Are you a Service Provider?
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground leading-relaxed font-medium">
@@ -505,7 +505,7 @@ export function PublicHomePage() {
         </div>
       </div>
 
-      <footer className="border-t border-border bg-white">
+      <footer className="border-t border-border bg-surface">
         <div className="mx-auto grid max-w-[1448px] gap-10 px-6 py-10 lg:grid-cols-[1.2fr_2fr_0.9fr]">
           <div>
             <Link
@@ -524,7 +524,7 @@ export function PublicHomePage() {
           <div className="grid gap-8 sm:grid-cols-3">
             {footerGroups.map((group) => (
               <div key={group.title}>
-                <p className="text-sm font-extrabold text-primary">{group.title}</p>
+                <p className="text-sm font-extrabold text-foreground">{group.title}</p>
                 <div className="mt-4 space-y-3">
                   {group.links.map(([label, href]) => (
                     <Link
@@ -541,7 +541,7 @@ export function PublicHomePage() {
           </div>
 
           <div>
-            <p className="text-sm font-extrabold text-primary">Contact</p>
+            <p className="text-sm font-extrabold text-foreground">Contact</p>
             <div className="mt-4 space-y-3 text-sm font-medium text-muted-foreground">
               <a className="block transition hover:text-brand-teal" href="tel:015971234">
                 01-5971234
@@ -560,10 +560,10 @@ export function PublicHomePage() {
           <div className="mx-auto flex max-w-[1448px] flex-col gap-3 px-6 py-5 text-xs font-medium text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>Copyright 2026 HostelHub. All rights reserved.</p>
             <div className="flex gap-4">
-              <Link className="hover:text-brand-teal" href="/#privacy">
+              <Link className="hover:text-brand-teal" href="/privacy">
                 Privacy
               </Link>
-              <Link className="hover:text-brand-teal" href="/#terms">
+              <Link className="hover:text-brand-teal" href="/terms">
                 Terms
               </Link>
             </div>

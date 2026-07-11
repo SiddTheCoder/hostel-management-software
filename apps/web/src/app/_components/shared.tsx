@@ -264,7 +264,7 @@ export function SectionCard({
       {title ? (
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-primary">{title}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{title}</h2>
             {description ? (
               <p className="mt-1 text-sm text-muted-foreground">{description}</p>
             ) : null}
@@ -299,7 +299,7 @@ export function MetricCard({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-primary">{value}</p>
+          <p className="mt-3 text-2xl font-bold text-foreground">{value}</p>
         </div>
         <span className={cn("rounded-lg p-3", toneStyles[tone].icon)}>
           <Icon className="size-5" />
@@ -347,7 +347,7 @@ export function TableView({
               <td className="px-4 py-4 text-right">
                 <button
                   aria-label="Row actions"
-                  className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
+                  className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                   type="button"
                 >
                   <MoreVertical className="size-4" />
@@ -377,7 +377,7 @@ export function FormField({
   type?: string;
 }) {
   return (
-    <label className="block text-sm font-semibold text-primary">
+    <label className="block text-sm font-semibold text-foreground">
       {label}
       <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
         {Icon ? <Icon className="size-4 text-muted-foreground" /> : null}
@@ -507,7 +507,7 @@ export function Breadcrumbs({ items }: { items: { label: string; href?: string }
               {item.label}
             </Link>
           ) : (
-            <span className="text-primary font-bold">{item.label}</span>
+            <span className="text-foreground font-bold">{item.label}</span>
           )}
         </span>
       ))}
@@ -539,7 +539,7 @@ export function HostelCard({ hostel }: { hostel: HostelSummary }) {
           </div>
           <button
             aria-label="Save hostel"
-            className="absolute right-3 top-3 inline-flex size-8 items-center justify-center rounded-full bg-white/85 text-muted-foreground transition hover:text-danger hover:bg-white"
+            className="absolute right-3 top-3 inline-flex size-8 items-center justify-center rounded-full bg-surface/85 text-muted-foreground transition hover:text-danger hover:bg-surface"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -553,12 +553,12 @@ export function HostelCard({ hostel }: { hostel: HostelSummary }) {
           <div className="space-y-1">
             <div className="flex items-start justify-between gap-2">
               <h3
-                className="font-bold text-sm text-primary group-hover:text-brand-teal transition line-clamp-1"
+                className="font-bold text-sm text-foreground group-hover:text-brand-teal transition line-clamp-1"
                 title={hostel.name}
               >
                 {hostel.name}
               </h3>
-              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-primary shrink-0">
+              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-foreground shrink-0">
                 <Star className="size-3.5 fill-warning text-warning" />
                 {hostel.rating}{" "}
                 <span className="text-[10px] font-normal text-muted-foreground">
@@ -572,7 +572,7 @@ export function HostelCard({ hostel }: { hostel: HostelSummary }) {
           </div>
 
           <div className="space-y-2.5">
-            <p className="font-extrabold text-sm text-primary">
+            <p className="font-extrabold text-sm text-foreground">
               {formatMoney(hostel.price)}{" "}
               <span className="text-[10px] font-normal text-muted-foreground">
                 / month
@@ -630,7 +630,7 @@ export function HostelListCard({ hostel }: { hostel: HostelSummary }) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <Link href={`/hostels/${hostel.slug}`}>
-                <h3 className="text-base font-bold text-primary group-hover:text-brand-teal transition truncate">
+                <h3 className="text-base font-bold text-foreground group-hover:text-brand-teal transition truncate">
                   {hostel.name}
                 </h3>
               </Link>
@@ -638,7 +638,7 @@ export function HostelListCard({ hostel }: { hostel: HostelSummary }) {
                 <MapPin className="size-3.5" /> {hostel.area}, {hostel.city}
               </p>
             </div>
-            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-primary shrink-0">
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-foreground shrink-0">
               <Star className="size-3.5 fill-warning text-warning" />
               {hostel.rating}{" "}
               <span className="text-[10px] font-normal text-muted-foreground">
@@ -652,7 +652,7 @@ export function HostelListCard({ hostel }: { hostel: HostelSummary }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-2.5 mt-2">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-extrabold text-primary">
+            <span className="text-base font-extrabold text-foreground">
               {formatMoney(hostel.price)}
             </span>
             <span className="text-[10px] font-normal text-muted-foreground">/ month</span>

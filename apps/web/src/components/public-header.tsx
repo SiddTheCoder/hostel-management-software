@@ -49,11 +49,7 @@ function hasDashboard(role: Role) {
 }
 
 function dashboardHrefForRole(role: Role) {
-  if (role === Role.PUBLIC_USER || role === Role.SERVICE_PROVIDER) {
-    return "/hostels";
-  }
-
-  return landingPathForRole(role) ?? "/hostels";
+  return landingPathForRole(role) ?? "/";
 }
 
 const navItems = [
@@ -137,7 +133,7 @@ export function PublicHeader({ active }: PublicHeaderProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300",
         scrolled ? "bg-surface/80 backdrop-blur-lg" : "bg-transparent",
       )}
     >
@@ -148,7 +144,7 @@ export function PublicHeader({ active }: PublicHeaderProps) {
           </span>
         </Link>
 
-        <nav className="hidden h-full items-center gap-6 text-sm font-medium text-primary md:flex">
+        <nav className="hidden h-full items-center gap-6 text-sm font-medium text-foreground md:flex">
           {navItems.map((item) => (
             <Link
               key={item.id}
@@ -177,7 +173,7 @@ export function PublicHeader({ active }: PublicHeaderProps) {
               <div ref={menuRef} className="relative">
                 <button
                   onClick={() => setMenuOpen((o) => !o)}
-                  className="flex items-center gap-2 rounded-full p-1 pr-3 text-sm font-medium text-primary transition hover:bg-muted"
+                  className="flex items-center gap-2 rounded-full p-1 pr-3 text-sm font-semibold text-foreground transition-colors duration-200 bg-surface/70 backdrop-blur-md hover:bg-surface/85"
                 >
                   {user.image ? (
                     <Image
@@ -189,15 +185,15 @@ export function PublicHeader({ active }: PublicHeaderProps) {
                     />
                   ) : (
                     <span className="flex size-8 items-center justify-center rounded-full bg-brand-teal/10 text-sm font-semibold text-brand-teal">
-                      {(user.email ?? user.name).charAt(0).toUpperCase()}
+                      {(user.name || user.email || "U").charAt(0).toUpperCase()}
                     </span>
                   )}
-                  <span className="hidden md:inline text-muted-foreground">{user.email ?? user.name}</span>
+                  <span className="hidden md:inline text-muted-foreground">{user.name || user.email}</span>
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-border bg-surface p-1 shadow-lg">
                     <div className="border-b border-border px-3 py-2">
-                      <p className="truncate text-sm font-medium text-primary">{user.name}</p>
+                      <p className="truncate text-sm font-medium text-foreground">{user.name || user.email}</p>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <button
@@ -214,12 +210,12 @@ export function PublicHeader({ active }: PublicHeaderProps) {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-primary transition hover:bg-muted"
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
                 >
                   Sign In
                 </Link>
                 <Link
-                  href="/register"
+                  href="/signup"
                   className="rounded-lg bg-brand-teal px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-110"
                 >
                   Sign Up

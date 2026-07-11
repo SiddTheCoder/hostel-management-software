@@ -241,7 +241,7 @@ export function PublicHostelRegistrationLandingPage() {
               For Hostel Owners & Operators
             </motion.div>
             <motion.h1
-              className="text-4xl font-extrabold leading-tight text-primary md:text-6xl md:leading-[1.12]"
+              className="text-4xl font-extrabold leading-tight text-foreground md:text-6xl md:leading-[1.12]"
               variants={fadeUp}
               custom={1}
             >
@@ -275,7 +275,7 @@ export function PublicHostelRegistrationLandingPage() {
               </Link>
               <Link
                 href="/hostels"
-                className="inline-flex h-13 items-center gap-1 rounded-xl border border-border px-7 text-sm font-semibold text-primary transition hover:bg-muted md:h-14 md:text-base md:px-8"
+                className="inline-flex h-13 items-center gap-1 rounded-xl border border-border px-7 text-sm font-semibold text-foreground transition hover:bg-muted md:h-14 md:text-base md:px-8"
               >
                 Browse Hostels
                 <ChevronRight className="size-4" />
@@ -302,7 +302,7 @@ export function PublicHostelRegistrationLandingPage() {
                   <div className={`flex size-24 items-center justify-center rounded-2xl ${heroSlides[currentSlide].accent}/10`}>
                     <SlideIcon className={`size-12 ${heroSlides[currentSlide].accent.replace("bg-", "text-")}`} />
                   </div>
-                  <p className="text-xl font-bold text-primary md:text-2xl">
+                  <p className="text-xl font-bold text-foreground md:text-2xl">
                     {heroSlides[currentSlide].label}
                   </p>
                   <p className="max-w-md text-sm text-muted-foreground">
@@ -354,7 +354,7 @@ export function PublicHostelRegistrationLandingPage() {
             >
               {stats.map((stat) => (
                 <motion.div key={stat.label} className="text-center" variants={fadeUp}>
-                  <p className="text-3xl font-extrabold text-primary md:text-4xl">{stat.value}</p>
+                  <p className="text-3xl font-extrabold text-foreground md:text-4xl">{stat.value}</p>
                   <p className="mt-1 text-xs font-semibold text-muted-foreground md:text-sm">{stat.label}</p>
                 </motion.div>
               ))}
@@ -371,7 +371,7 @@ export function PublicHostelRegistrationLandingPage() {
             viewport={{ once: true, margin: "-80px" }}
             variants={stagger}
           >
-            <motion.h2 className="text-3xl font-bold text-primary md:text-4xl" variants={fadeUp}>
+            <motion.h2 className="text-3xl font-bold text-foreground md:text-4xl" variants={fadeUp}>
               Everything you need to run your hostel
             </motion.h2>
             <motion.p
@@ -412,7 +412,7 @@ export function PublicHostelRegistrationLandingPage() {
                     >
                       <feature.icon className="size-5" />
                     </span>
-                    <h3 className="text-2xl font-bold text-primary">{feature.title}</h3>
+                    <h3 className="text-2xl font-bold text-foreground">{feature.title}</h3>
                     <p className="text-base leading-relaxed text-muted-foreground">
                       {feature.description}
                     </p>
@@ -445,7 +445,7 @@ export function PublicHostelRegistrationLandingPage() {
                         <div className={`flex size-20 items-center justify-center rounded-2xl ${slideMeta.accent}/10`}>
                           <SlideFeatureIcon className={`size-10 ${slideMeta.accent.replace("bg-", "text-")}`} />
                         </div>
-                        <p className="text-lg font-bold text-primary">{slideMeta.label}</p>
+                        <p className="text-lg font-bold text-foreground">{slideMeta.label}</p>
                         <p className="max-w-xs text-sm text-muted-foreground">
                           {feature.description.slice(0, 100)}...
                         </p>
@@ -469,7 +469,7 @@ export function PublicHostelRegistrationLandingPage() {
               variants={stagger}
             >
               <motion.h2
-                className="text-3xl font-bold text-primary md:text-4xl"
+                className="text-3xl font-bold text-foreground md:text-4xl"
                 variants={fadeUp}
               >
                 Ready to bring your hostel online?
@@ -496,7 +496,7 @@ export function PublicHostelRegistrationLandingPage() {
                 </Link>
                 <Link
                   href="/service-providers/register"
-                  className="inline-flex h-13 items-center gap-1 rounded-xl border border-border px-7 text-sm font-semibold text-primary transition hover:bg-muted md:h-14 md:text-base md:px-8"
+                  className="inline-flex h-13 items-center gap-1 rounded-xl border border-border px-7 text-sm font-semibold text-foreground transition hover:bg-muted md:h-14 md:text-base md:px-8"
                 >
                   Register as Service Provider
                   <ChevronRight className="size-4" />

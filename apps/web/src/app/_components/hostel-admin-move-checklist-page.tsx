@@ -106,7 +106,7 @@ export const HostelAdminMoveChecklistPage = memo(function HostelAdminMoveCheckli
         title="Move-In/Move-Out"
       />
       <Message value={message} />
-      <label className="grid max-w-md gap-2 text-sm font-semibold text-primary">
+      <label className="grid max-w-md gap-2 text-sm font-semibold text-foreground">
         Resident
         <select
           className="h-11 rounded-md border border-border bg-background px-3 text-sm font-normal outline-none focus:border-role-admin"
@@ -129,7 +129,7 @@ export const HostelAdminMoveChecklistPage = memo(function HostelAdminMoveCheckli
             <TextArea label="Room condition" name="roomCondition" />
             <TextArea label="Bed condition" name="bedCondition" />
             <Input label="Items provided" name="itemsProvided" />
-            <label className="flex items-center gap-2 text-sm text-primary">
+            <label className="flex items-center gap-2 text-sm text-foreground">
               <input name="rulesAccepted" type="checkbox" />
               Rules accepted
             </label>

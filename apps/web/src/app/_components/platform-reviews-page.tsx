@@ -54,7 +54,7 @@ export const PlatformReviewsPageContent = memo(function PlatformReviewsPageConte
           {reviews.map((review) => (
             <div className="rounded-lg border border-border p-4" key={review.id}>
               <div className="flex items-start justify-between gap-3">
-                <p className="font-semibold text-primary">
+                <p className="font-semibold text-foreground">
                   {review.overallRating}/5 review
                 </p>
                 <StatusBadge>{review.status}</StatusBadge>

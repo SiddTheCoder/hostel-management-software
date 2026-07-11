@@ -148,7 +148,7 @@ export const ResidentFoodPageContent = memo(function ResidentFoodPageContent() {
             {menus.map((menu) => (
               <div className="rounded-lg border border-border p-4" key={menu.id}>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-semibold text-primary">{menu.mealType}</p>
+                  <p className="font-semibold text-foreground">{menu.mealType}</p>
                   <span className="text-xs text-muted-foreground">{menu.timing}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -170,7 +170,7 @@ export const ResidentFoodPageContent = memo(function ResidentFoodPageContent() {
                     src={`/api/v1/files/${photo.photoAssetId}/url?variant=THUMBNAIL`}
                   />
                 ) : null}
-                <p className="font-semibold text-primary">{photo.mealType}</p>
+                <p className="font-semibold text-foreground">{photo.mealType}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{photo.caption}</p>
               </div>
             ))}
@@ -197,7 +197,7 @@ export const ResidentFoodPageContent = memo(function ResidentFoodPageContent() {
               </Select>
               <Input label="Rating" name="rating" required type="number" />
               <TextArea label="Comment" name="comment" />
-              <label className="flex items-center gap-2 text-sm text-primary">
+              <label className="flex items-center gap-2 text-sm text-foreground">
                 <input name="isAnonymous" type="checkbox" />
                 Anonymous
               </label>
@@ -210,7 +210,7 @@ export const ResidentFoodPageContent = memo(function ResidentFoodPageContent() {
           <Panel title="Upload Photo">
             <form className="grid gap-3" onSubmit={handlePhoto}>
               <div className="grid gap-2">
-                <label className="text-sm font-semibold text-primary">Photo</label>
+                <label className="text-sm font-semibold text-foreground">Photo</label>
                 <input
                   accept="image/jpeg,image/png,image/webp"
                   className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-resident file:px-3 file:text-xs file:font-semibold file:text-white"

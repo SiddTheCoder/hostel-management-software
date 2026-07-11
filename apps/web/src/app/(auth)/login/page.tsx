@@ -7,12 +7,9 @@ export default function LoginPage() {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
   return (
-    <AuthShell
-      subtitle="Sign in with your email and password, or continue with Google."
-      title="Login to HostelHub"
-    >
+    <AuthShell mode="login">
       <Suspense
-        fallback={<p className="mt-10 text-sm text-muted-foreground">Loading login...</p>}
+        fallback={<p className="mt-6 text-sm text-muted-foreground">Loading login...</p>}
       >
         <LoginForm googleClientId={googleClientId} />
       </Suspense>

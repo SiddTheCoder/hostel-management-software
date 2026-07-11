@@ -24,11 +24,11 @@ export function PortalPlaceholderPage({
   return (
     <div className="mx-auto max-w-[960px] space-y-6">
       <div className="flex items-start gap-3">
-        <span className="rounded-lg bg-muted p-3 text-primary">
+        <span className="rounded-lg bg-muted p-3 text-foreground">
           <Icon className="size-5" />
         </span>
         <div>
-          <h1 className="font-heading text-3xl font-bold text-primary">{title}</h1>
+          <h1 className="font-heading text-3xl font-bold text-foreground">{title}</h1>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
@@ -37,7 +37,7 @@ export function PortalPlaceholderPage({
         <div className="grid gap-3 sm:grid-cols-2">
           {items.map((item) => (
             <div className="rounded-md border border-border bg-background p-4" key={item}>
-              <p className="text-sm font-semibold text-primary">{item}</p>
+              <p className="text-sm font-semibold text-foreground">{item}</p>
             </div>
           ))}
         </div>
@@ -50,7 +50,7 @@ export function PortalPlaceholderPage({
               className={
                 index === 0
                   ? "inline-flex h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"
-                  : "inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-primary"
+                  : "inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground"
               }
               href={action.href}
               key={action.href}

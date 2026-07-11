@@ -186,7 +186,7 @@ export const HostelAdminComplaintsPage = memo(function HostelAdminComplaintsPage
             <p className="text-xs font-semibold uppercase text-muted-foreground">
               {label}
             </p>
-            <p className="mt-2 text-2xl font-bold text-primary">{value}</p>
+            <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
           </Panel>
         ))}
       </div>
@@ -204,7 +204,7 @@ export const HostelAdminComplaintsPage = memo(function HostelAdminComplaintsPage
             <div className="rounded-lg border border-border p-4" key={complaint.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-primary">{complaint.title}</p>
+                  <p className="font-semibold text-foreground">{complaint.title}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {complaint.description}
                   </p>
@@ -230,7 +230,7 @@ export const HostelAdminComplaintsPage = memo(function HostelAdminComplaintsPage
               </div>
 
               {complaint.adminResponse ? (
-                <div className="mt-4 rounded-md bg-muted p-3 text-sm text-primary">
+                <div className="mt-4 rounded-md bg-muted p-3 text-sm text-foreground">
                   {complaint.adminResponse}
                 </div>
               ) : null}

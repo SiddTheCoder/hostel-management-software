@@ -158,13 +158,13 @@ export function ServiceProviderRegistrationPage() {
           title="Provider Details"
         >
           {message ? (
-            <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-primary">
+            <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-foreground">
               {message}
             </div>
           ) : null}
           <form onSubmit={submit}>
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Full Name
                 <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
                   <UserRound className="size-4 text-muted-foreground" />
@@ -176,7 +176,7 @@ export function ServiceProviderRegistrationPage() {
                   />
                 </span>
               </label>
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Phone
                 <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
                   <Phone className="size-4 text-muted-foreground" />
@@ -188,7 +188,7 @@ export function ServiceProviderRegistrationPage() {
                   />
                 </span>
               </label>
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Category
                 <select
                   className="mt-2 h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal"
@@ -214,7 +214,7 @@ export function ServiceProviderRegistrationPage() {
                   ))}
                 </select>
               </label>
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Area
                 <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
                   <MapPin className="size-4 text-muted-foreground" />
@@ -228,7 +228,7 @@ export function ServiceProviderRegistrationPage() {
               </label>
               <FormField icon={MapPin} label="City" placeholder="Kathmandu" />
               <input name="city" type="hidden" value="Kathmandu" />
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Availability
                 <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm transition focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15">
                   <CalendarDays className="size-4 text-muted-foreground" />
@@ -239,7 +239,7 @@ export function ServiceProviderRegistrationPage() {
                   />
                 </span>
               </label>
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Experience
                 <input
                   className="mt-2 h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal"
@@ -247,7 +247,7 @@ export function ServiceProviderRegistrationPage() {
                   placeholder="5+ years serving hostels"
                 />
               </label>
-              <label className="block text-sm font-semibold text-primary">
+              <label className="block text-sm font-semibold text-foreground">
                 Document URL
                 <input
                   className="mt-2 h-12 w-full rounded-lg border border-border bg-surface px-3 text-sm font-normal outline-none focus:border-brand-teal"
@@ -258,7 +258,7 @@ export function ServiceProviderRegistrationPage() {
               </label>
               <input name="documentType" type="hidden" value="PROFILE_DOCUMENT" />
             </div>
-            <label className="mt-4 block text-sm font-semibold text-primary">
+            <label className="mt-4 block text-sm font-semibold text-foreground">
               Description
               <textarea
                 className="mt-2 min-h-28 w-full rounded-lg border border-border bg-surface p-3 text-sm outline-none focus:border-brand-teal"

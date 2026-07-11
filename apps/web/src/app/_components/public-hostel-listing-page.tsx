@@ -167,7 +167,7 @@ export function PublicHostelListingPage() {
           <span className="text-xs font-bold text-brand-teal uppercase tracking-wider">
             Discover Places
           </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-primary mt-1">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mt-1">
             Browse Hostels in Nepal
           </h1>
           <p className="mt-2 text-xs md:text-sm text-muted-foreground max-w-xl leading-relaxed">
@@ -181,21 +181,21 @@ export function PublicHostelListingPage() {
       <div className="mx-auto max-w-[1448px] px-6 py-6">
         {/* Breadcrumbs */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6">
-          <Link href="/" className="hover:text-primary transition font-medium">
+          <Link href="/" className="hover:text-foreground transition font-medium">
             Home
           </Link>
           <ChevronRight className="size-3 text-muted-foreground/60" />
-          <span className="text-primary font-semibold">Hostels</span>
+          <span className="text-foreground font-semibold">Hostels</span>
         </div>
 
         {/* Main Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
           {/* Left Sidebar Filter Column */}
           <aside className="space-y-6 lg:sticky lg:top-24">
-            <div className="bg-white rounded-xl border border-border/80 p-5 shadow-sm space-y-6">
+            <div className="bg-surface rounded-xl border border-border/80 p-5 shadow-sm space-y-6">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
-                <h3 className="font-bold text-sm text-primary flex items-center gap-1.5">
+                <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5">
                   <Filter className="size-4 text-brand-teal" /> Filters
                 </h3>
                 <button
@@ -220,7 +220,7 @@ export function PublicHostelListingPage() {
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   Search
                 </p>
-                <div className="relative flex items-center rounded-lg border border-border bg-slate-50 px-3 py-2 focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
+                <div className="relative flex items-center rounded-lg border border-border bg-muted px-3 py-2 focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
                   <Search className="size-4 text-muted-foreground shrink-0" />
                   <input
                     className="ml-2 w-full bg-transparent text-xs outline-none placeholder:text-muted-foreground"
@@ -247,7 +247,7 @@ export function PublicHostelListingPage() {
                           "flex items-center justify-between w-full text-left px-2 py-1.5 rounded-md text-xs font-semibold transition",
                           active
                             ? "bg-brand-teal-soft/30 text-brand-teal"
-                            : "text-primary hover:bg-slate-50",
+                            : "text-foreground hover:bg-muted",
                         )}
                       >
                         <span>{areaName}</span>
@@ -285,7 +285,7 @@ export function PublicHostelListingPage() {
                     return (
                       <label
                         key={budgetRange}
-                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-primary"
+                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-foreground"
                       >
                         <input
                           type="radio"
@@ -312,7 +312,7 @@ export function PublicHostelListingPage() {
                     return (
                       <label
                         key={typeVal}
-                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-primary"
+                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-foreground"
                       >
                         <input
                           type="radio"
@@ -340,7 +340,7 @@ export function PublicHostelListingPage() {
                       return (
                         <label
                           key={roomVal}
-                          className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-primary"
+                          className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-foreground"
                         >
                           <input
                             type="radio"
@@ -368,7 +368,7 @@ export function PublicHostelListingPage() {
                     return (
                       <label
                         key={foodVal}
-                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-primary"
+                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-foreground"
                       >
                         <input
                           type="radio"
@@ -403,7 +403,7 @@ export function PublicHostelListingPage() {
                     return (
                       <label
                         key={facVal}
-                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-primary"
+                        className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-foreground"
                       >
                         <input
                           type="radio"
@@ -424,9 +424,9 @@ export function PublicHostelListingPage() {
           {/* Right Listings Column */}
           <main className="space-y-5">
             {/* Top Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white rounded-xl border border-border/80 p-4 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-surface rounded-xl border border-border/80 p-4 shadow-sm">
               <div className="space-y-0.5">
-                <h3 className="font-bold text-sm text-primary">Showing Hostels</h3>
+                <h3 className="font-bold text-sm text-foreground">Showing Hostels</h3>
                 <p className="text-[11px] text-muted-foreground font-semibold">
                   {loadState === "loading"
                     ? "Loading published hostels..."
@@ -445,7 +445,7 @@ export function PublicHostelListingPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-slate-50 border border-border rounded-lg text-xs font-bold text-primary py-1.5 px-3 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/15 transition cursor-pointer"
+                    className="bg-muted border border-border rounded-lg text-xs font-bold text-foreground py-1.5 px-3 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/15 transition cursor-pointer"
                   >
                     {[
                       "Recommended",
@@ -468,7 +468,7 @@ export function PublicHostelListingPage() {
                       "size-8 rounded-lg flex items-center justify-center border transition",
                       viewMode === "grid"
                         ? "border-brand-teal bg-brand-teal-soft/10 text-brand-teal"
-                        : "border-border text-muted-foreground hover:bg-slate-50",
+                        : "border-border text-muted-foreground hover:bg-muted",
                     )}
                   >
                     <Grid2X2 className="size-4" />
@@ -479,7 +479,7 @@ export function PublicHostelListingPage() {
                       "size-8 rounded-lg flex items-center justify-center border transition",
                       viewMode === "list"
                         ? "border-brand-teal bg-brand-teal-soft/10 text-brand-teal"
-                        : "border-border text-muted-foreground hover:bg-slate-50",
+                        : "border-border text-muted-foreground hover:bg-muted",
                     )}
                   >
                     <List className="size-4" />
@@ -505,9 +505,9 @@ export function PublicHostelListingPage() {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-20 rounded-xl border border-dashed border-border bg-slate-50/50">
+              <div className="text-center py-20 rounded-xl border border-dashed border-border bg-muted/50">
                 <AlertIcon className="mx-auto size-10 text-muted-foreground" />
-                <p className="mt-4 font-bold text-primary">
+                <p className="mt-4 font-bold text-foreground">
                   No results match your filters
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto leading-relaxed">

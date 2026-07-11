@@ -153,7 +153,7 @@ export const HostelAdminFoodPage = memo(function HostelAdminFoodPage() {
               <div className="rounded-lg border border-border p-4" key={menu.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-primary">
+                    <p className="font-semibold text-foreground">
                       {menu.mealType.replace("_", " ")}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -162,7 +162,7 @@ export const HostelAdminFoodPage = memo(function HostelAdminFoodPage() {
                   </div>
                   <StatusBadge>{menu.dayOfWeek}</StatusBadge>
                 </div>
-                <p className="mt-3 text-sm text-primary">{menu.items.join(", ")}</p>
+                <p className="mt-3 text-sm text-foreground">{menu.items.join(", ")}</p>
                 {menu.specialNotes ? (
                   <p className="mt-2 text-xs text-muted-foreground">
                     {menu.specialNotes}
@@ -214,7 +214,7 @@ export const HostelAdminFoodPage = memo(function HostelAdminFoodPage() {
           <Panel title="Upload Photo">
             <form className="grid gap-3" onSubmit={handlePhotoUpload}>
               <div className="grid gap-2">
-                <label className="text-sm font-semibold text-primary">Photo</label>
+                <label className="text-sm font-semibold text-foreground">Photo</label>
                 <input
                   accept="image/jpeg,image/png,image/webp"
                   className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-admin file:px-3 file:text-xs file:font-semibold file:text-white"

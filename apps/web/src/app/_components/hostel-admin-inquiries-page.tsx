@@ -83,7 +83,7 @@ export const HostelAdminInquiriesPageContent = memo(function HostelAdminInquirie
             <div className="rounded-lg border border-border p-4" key={inquiry.id}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-primary">{inquiry.name}</p>
+                  <p className="font-semibold text-foreground">{inquiry.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {inquiry.phone} {inquiry.email}
                   </p>
@@ -101,7 +101,7 @@ export const HostelAdminInquiriesPageContent = memo(function HostelAdminInquirie
                     : "-"}
                 </span>
               </div>
-              <p className="mt-3 text-sm text-primary">{inquiry.message}</p>
+              <p className="mt-3 text-sm text-foreground">{inquiry.message}</p>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <form
                   className="flex gap-2"

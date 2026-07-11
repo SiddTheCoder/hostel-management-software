@@ -63,7 +63,7 @@ export const ResidentSOSPageContent = memo(function ResidentSOSPageContent() {
       <Panel title="Emergency Alert">
         <form className="grid gap-3" onSubmit={trigger}>
           <TextArea label="Message" name="message" />
-          <label className="flex items-center gap-2 text-sm text-primary">
+          <label className="flex items-center gap-2 text-sm text-foreground">
             <input name="guardianAlertEnabled" type="checkbox" />
             Alert guardian if enabled
           </label>
@@ -77,7 +77,7 @@ export const ResidentSOSPageContent = memo(function ResidentSOSPageContent() {
         <div className="grid gap-3 md:grid-cols-2">
           {contacts.map((contact) => (
             <div className="rounded-lg border border-border p-4" key={contact.id}>
-              <p className="font-semibold text-primary">{contact.name}</p>
+              <p className="font-semibold text-foreground">{contact.name}</p>
               <p className="text-sm text-muted-foreground">
                 {contact.relation} / {contact.phone}
               </p>

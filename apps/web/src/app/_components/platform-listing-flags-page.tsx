@@ -101,7 +101,7 @@ export const PlatformListingFlagsPageContent = React.memo(
               <div className="rounded-lg border border-border p-4" key={flag.id}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-primary">{flag.reason}</p>
+                    <p className="font-semibold text-foreground">{flag.reason}</p>
                     <p className="text-sm text-muted-foreground">
                       Hostel {flag.hostelId} / Matches {flag.matchedHostelIds.length}
                     </p>

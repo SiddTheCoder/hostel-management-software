@@ -145,14 +145,14 @@ export function PublicPricingPage() {
     <PublicShell active="pricing">
       <section className="mx-auto max-w-[1240px] px-6 py-12 text-center space-y-12">
         <div className="space-y-4">
-          <h1 className="text-4xl font-extrabold text-primary leading-tight">
+          <h1 className="text-4xl font-extrabold text-foreground leading-tight">
             Choose the Right Plan for Your Hostel
           </h1>
           <p className="mx-auto max-w-2xl text-muted-foreground text-sm">
             Simple, transparent pricing built to support hostels of all sizes across
             Nepal.
           </p>
-          <div className="flex flex-wrap justify-center gap-6 text-xs font-semibold text-primary pt-2">
+          <div className="flex flex-wrap justify-center gap-6 text-xs font-semibold text-foreground pt-2">
             <span className="flex items-center gap-1.5">
               <Check className="size-4 text-brand-teal" /> No setup fees
             </span>
@@ -183,12 +183,12 @@ export function PublicPricingPage() {
               <div className="p-6 text-left flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-primary">{plan.name}</h3>
+                    <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground min-h-[36px]">
                     {plan.desc}
                   </p>
-                  <p className="mt-5 text-3xl font-extrabold text-primary">
+                  <p className="mt-5 text-3xl font-extrabold text-foreground">
                     NPR {plan.price}{" "}
                     <span className="text-xs font-normal text-muted-foreground">
                       / month
@@ -227,11 +227,11 @@ export function PublicPricingPage() {
 
         {/* Feature comparison table */}
         <div className="space-y-6 pt-10 text-left">
-          <h3 className="text-xl font-bold text-primary">Compare Plans</h3>
+          <h3 className="text-xl font-bold text-foreground">Compare Plans</h3>
           <div className="border border-border rounded-xl bg-surface overflow-hidden shadow-sm">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-border text-primary font-bold">
+                <tr className="bg-muted border-b border-border text-foreground font-bold">
                   <th className="p-4 w-[40%]">Features & Modules</th>
                   <th className="p-4">Starter</th>
                   <th className="p-4">Growth</th>
@@ -251,8 +251,8 @@ export function PublicPricingPage() {
                   ["Custom Branding & Subdomains", false, false, true],
                   ["Priority Onboarding & Multi-warden Roles", false, true, true],
                 ].map(([label, s, g, e]) => (
-                  <tr key={label as string} className="hover:bg-slate-50/50">
-                    <td className="p-4 font-medium text-primary">{label as string}</td>
+                  <tr key={label as string} className="hover:bg-muted/50">
+                    <td className="p-4 font-medium text-foreground">{label as string}</td>
                     <td className="p-4">
                       {s ? <Check className="size-4.5 text-brand-teal" /> : "-"}
                     </td>
@@ -271,7 +271,7 @@ export function PublicPricingPage() {
 
         {/* Frequently Asked Questions */}
         <div className="space-y-6 pt-10 text-left max-w-3xl mx-auto">
-          <h3 className="text-xl font-bold text-primary text-center">
+          <h3 className="text-xl font-bold text-foreground text-center">
             Frequently Asked Questions
           </h3>
           <div className="space-y-3">
@@ -282,7 +282,7 @@ export function PublicPricingPage() {
               >
                 <button
                   onClick={() => setOpenFaqIdx(openFaqIdx === idx ? null : idx)}
-                  className="w-full flex items-center justify-between p-4 font-semibold text-primary text-sm hover:bg-slate-50/50 transition text-left"
+                  className="w-full flex items-center justify-between p-4 font-semibold text-foreground text-sm hover:bg-muted/50 transition text-left"
                 >
                   <span>{faq.q}</span>
                   {openFaqIdx === idx ? (
@@ -292,7 +292,7 @@ export function PublicPricingPage() {
                   )}
                 </button>
                 {openFaqIdx === idx && (
-                  <div className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3 bg-slate-50/30">
+                  <div className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3 bg-muted/30">
                     {faq.a}
                   </div>
                 )}
@@ -304,7 +304,7 @@ export function PublicPricingPage() {
         {/* Bottom CTA Card */}
         <div className="rounded-xl border border-brand-teal/20 bg-brand-teal/5 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 text-left">
           <div>
-            <h4 className="font-bold text-lg text-primary">
+            <h4 className="font-bold text-lg text-foreground">
               Ready to grow your hostel with HostelHub?
             </h4>
             <p className="text-xs text-muted-foreground mt-1 max-w-xl">

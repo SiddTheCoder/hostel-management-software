@@ -261,7 +261,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
                       key={resident.id}
                       onClick={() => setSelectedResidentId(resident.id)}
                     >
-                      <td className="py-3 font-semibold text-primary">
+                      <td className="py-3 font-semibold text-foreground">
                         <div className="flex flex-wrap items-center gap-2">
                           <span>
                             {resident.firstName} {resident.lastName}
@@ -324,7 +324,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
             {selectedResident ? (
               <div className="space-y-4">
                 <div>
-                  <p className="text-lg font-bold text-primary">
+                  <p className="text-lg font-bold text-foreground">
                     {selectedResident.firstName} {selectedResident.lastName}
                   </p>
                   {selectedResident.isDemoData ? (
@@ -338,14 +338,14 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
                 </div>
                 {activationCode ? (
                   <div className="rounded-lg border border-role-admin/30 bg-role-admin-soft/50 p-4">
-                    <p className="text-sm font-semibold text-primary">Activation Code</p>
+                    <p className="text-sm font-semibold text-foreground">Activation Code</p>
                     <p className="mt-2 font-mono text-2xl font-bold tracking-widest text-role-admin">
                       {activationCode}
                     </p>
                   </div>
                 ) : null}
                 <form className="grid gap-3" onSubmit={handleAddGuardian}>
-                  <h3 className="text-sm font-bold text-primary">Guardian</h3>
+                  <h3 className="text-sm font-bold text-foreground">Guardian</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Input label="First name" name="firstName" required />
                     <Input label="Last name" name="lastName" required />
@@ -353,7 +353,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
                   <Input label="Phone" name="phone" required />
                   <Input label="Relation" name="relation" required />
                   <Input label="Email" name="email" type="email" />
-                  <label className="flex items-center gap-2 text-sm text-primary">
+                  <label className="flex items-center gap-2 text-sm text-foreground">
                     <input name="isPrimary" type="checkbox" />
                     Primary guardian
                   </label>
@@ -362,11 +362,11 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
                   </button>
                 </form>
                 <form className="grid gap-3" onSubmit={handleAddEmergencyContact}>
-                  <h3 className="text-sm font-bold text-primary">Emergency Contact</h3>
+                  <h3 className="text-sm font-bold text-foreground">Emergency Contact</h3>
                   <Input label="Name" name="name" required />
                   <Input label="Phone" name="phone" required />
                   <Input label="Relation" name="relation" required />
-                  <label className="flex items-center gap-2 text-sm text-primary">
+                  <label className="flex items-center gap-2 text-sm text-foreground">
                     <input name="isPrimary" type="checkbox" />
                     Primary contact
                   </label>

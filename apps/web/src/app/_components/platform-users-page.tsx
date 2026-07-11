@@ -57,7 +57,7 @@ export const PlatformUsersPageContent = memo(function PlatformUsersPageContent()
                 <tr key={user.id}>
                   <td className="py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-primary">{user.name}</span>
+                      <span className="font-semibold text-foreground">{user.name}</span>
                       {user.isDemoData ? (
                         <DemoDataBadge label={user.demoDataLabel} />
                       ) : null}

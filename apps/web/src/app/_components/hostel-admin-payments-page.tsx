@@ -169,7 +169,7 @@ export const HostelAdminPaymentsPage = memo(function HostelAdminPaymentsPage() {
 
                     return (
                       <tr key={payment.id}>
-                        <td className="py-3 font-semibold text-primary">
+                        <td className="py-3 font-semibold text-foreground">
                           {resident
                             ? `${resident.firstName} ${resident.lastName}`
                             : payment.residentId}
@@ -233,7 +233,7 @@ export const HostelAdminPaymentsPage = memo(function HostelAdminPaymentsPage() {
               ) : null}
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-primary">
+                  <p className="font-semibold text-foreground">
                     {residentById.get(proof.residentId)?.firstName ?? "Resident"} proof
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">

@@ -112,7 +112,7 @@ export function PublicInquiryPage() {
     return (
       <PublicShell active="browse">
         <div className="mx-auto max-w-[900px] px-6 py-16 text-center">
-          <h1 className="text-2xl font-bold text-primary">Hostel unavailable</h1>
+          <h1 className="text-2xl font-bold text-foreground">Hostel unavailable</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {message || "This hostel is not accepting public inquiries right now."}
           </p>
@@ -180,7 +180,7 @@ export function PublicInquiryPage() {
                 </div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary">{hostel.name}</h1>
+                <h1 className="text-xl font-bold text-foreground">{hostel.name}</h1>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <MapPin className="size-3 text-brand-teal" /> {hostelSummary.address}
                 </p>
@@ -196,7 +196,7 @@ export function PublicInquiryPage() {
               </div>
 
               <div className="border-t border-border/50 pt-3 flex justify-between items-center">
-                <p className="text-sm font-bold text-primary">
+                <p className="text-sm font-bold text-foreground">
                   {formatMoney(hostelSummary.price)}{" "}
                   <span className="text-xs font-normal text-muted-foreground">
                     / month
@@ -204,7 +204,7 @@ export function PublicInquiryPage() {
                 </p>
                 <button
                   onClick={() => alert("Image gallery view coming soon!")}
-                  className="rounded border border-border px-2 py-1 text-[10px] font-semibold text-muted-foreground hover:bg-slate-50 transition"
+                  className="rounded border border-border px-2 py-1 text-[10px] font-semibold text-muted-foreground hover:bg-muted transition"
                 >
                   View Photos
                 </button>
@@ -212,7 +212,7 @@ export function PublicInquiryPage() {
 
               {/* Room select radio cards */}
               <div className="border-t border-border/50 pt-4 space-y-2">
-                <p className="text-xs font-bold text-primary">Select Room Type</p>
+                <p className="text-xs font-bold text-foreground">Select Room Type</p>
                 {roomOptions.map((room) => (
                   <button
                     key={room.id}
@@ -221,7 +221,7 @@ export function PublicInquiryPage() {
                       "w-full text-left rounded-lg border p-3 flex justify-between items-center transition",
                       selectedRoomType === room.id
                         ? "border-brand-teal bg-brand-teal/5 text-brand-teal ring-1 ring-brand-teal"
-                        : "border-border bg-surface text-primary hover:bg-slate-50",
+                        : "border-border bg-surface text-foreground hover:bg-muted",
                     )}
                   >
                     <div>
@@ -239,7 +239,7 @@ export function PublicInquiryPage() {
                       )}
                     >
                       {selectedRoomType === room.id && (
-                        <div className="size-1.5 rounded-full bg-white" />
+                        <div className="size-1.5 rounded-full bg-surface" />
                       )}
                     </div>
                   </button>
@@ -268,7 +268,7 @@ export function PublicInquiryPage() {
               </div>
 
               <div className="border-t border-border/50 pt-3 text-[11px] text-muted-foreground space-y-1.5">
-                <p className="font-semibold text-primary">About This Hostel</p>
+                <p className="font-semibold text-foreground">About This Hostel</p>
                 <p className="leading-relaxed">
                   Clean, safe and student-friendly environment. Fully furnished rooms with
                   published facilities, transparent pricing, and hostel-managed follow-up.
@@ -302,7 +302,7 @@ export function PublicInquiryPage() {
                   <CheckCircle2 className="size-10" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-primary">
+                  <h3 className="text-xl font-bold text-foreground">
                     Inquiry Submitted Successfully!
                   </h3>
                   <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
@@ -336,10 +336,10 @@ export function PublicInquiryPage() {
                     required
                   />
                   <div>
-                    <label className="block text-sm font-semibold text-primary">
+                    <label className="block text-sm font-semibold text-foreground">
                       Phone Number *
                       <span className="mt-2 flex h-12 items-center gap-2 rounded-lg border border-border bg-surface px-3 shadow-sm focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
-                        <select className="bg-transparent text-xs font-semibold text-primary border-none outline-none cursor-pointer">
+                        <select className="bg-transparent text-xs font-semibold text-foreground border-none outline-none cursor-pointer">
                           <option>NP (+977)</option>
                           <option>IN (+91)</option>
                         </select>
@@ -363,10 +363,10 @@ export function PublicInquiryPage() {
                     type="email"
                   />
                   <div>
-                    <label className="block text-sm font-semibold text-primary">
+                    <label className="block text-sm font-semibold text-foreground">
                       Gender *
                       <select
-                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
+                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-foreground"
                         name="gender"
                         required
                       >
@@ -378,13 +378,13 @@ export function PublicInquiryPage() {
                     </label>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-primary">
+                    <label className="block text-sm font-semibold text-foreground">
                       Preferred Room Type *
                       <select
                         name="preferredRoomType"
                         value={selectedRoomType}
                         onChange={(e) => setSelectedRoomType(e.target.value)}
-                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
+                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-foreground"
                       >
                         {roomOptions.map((room) => (
                           <option key={room.id} value={room.id}>
@@ -395,7 +395,7 @@ export function PublicInquiryPage() {
                     </label>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-primary">
+                    <label className="block text-sm font-semibold text-foreground">
                       Expected Move-in Date *
                       <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-border bg-surface px-3 shadow-sm focus-within:border-brand-teal transition">
                         <Calendar className="size-4 text-muted-foreground" />
@@ -409,10 +409,10 @@ export function PublicInquiryPage() {
                     </label>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-primary">
+                    <label className="block text-sm font-semibold text-foreground">
                       Your Budget (Monthly) *
                       <select
-                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-primary"
+                        className="mt-2 flex h-12 w-full items-center rounded-lg border border-border bg-surface px-3 shadow-sm outline-none focus:border-brand-teal cursor-pointer text-sm font-normal text-foreground"
                         name="budgetRange"
                         required
                       >
@@ -425,7 +425,7 @@ export function PublicInquiryPage() {
                   </div>
                 </div>
 
-                <label className="block text-sm font-semibold text-primary">
+                <label className="block text-sm font-semibold text-foreground">
                   Additional Notes (Optional)
                   <textarea
                     maxLength={300}

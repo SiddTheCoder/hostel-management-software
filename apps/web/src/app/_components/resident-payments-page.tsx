@@ -137,7 +137,7 @@ export const ResidentPaymentsPageContent = memo(function ResidentPaymentsPageCon
                 <div className="rounded-lg border border-border p-4" key={payment.id}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-primary">{payment.month}</p>
+                      <p className="font-semibold text-foreground">{payment.month}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Due {new Date(payment.dueDate).toLocaleDateString()}
                       </p>
@@ -167,7 +167,7 @@ export const ResidentPaymentsPageContent = memo(function ResidentPaymentsPageCon
                 ))}
             </Select>
             <div className="grid gap-2">
-              <label className="text-sm font-semibold text-primary">Proof Image</label>
+              <label className="text-sm font-semibold text-foreground">Proof Image</label>
               <input
                 accept="image/jpeg,image/png,image/webp"
                 className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-resident file:px-3 file:text-xs file:font-semibold file:text-white"

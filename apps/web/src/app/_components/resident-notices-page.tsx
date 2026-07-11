@@ -75,7 +75,7 @@ export const ResidentNoticesPageContent = memo(function ResidentNoticesPageConte
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-primary">{notice.title}</p>
+                    <p className="font-semibold text-foreground">{notice.title}</p>
                     {notice.isUrgent ? <StatusBadge>URGENT</StatusBadge> : null}
                     <StatusBadge>{notice.category}</StatusBadge>
                   </div>

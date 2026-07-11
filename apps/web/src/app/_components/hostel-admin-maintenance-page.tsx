@@ -122,7 +122,7 @@ export const HostelAdminMaintenancePageContent = React.memo(
                 <div className="rounded-lg border border-border p-4" key={request.id}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-primary">{request.title}</p>
+                      <p className="font-semibold text-foreground">{request.title}</p>
                       <p className="text-sm text-muted-foreground">
                         {request.category.replaceAll("_", " ")} / {request.priority}
                       </p>

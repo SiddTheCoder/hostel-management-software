@@ -62,7 +62,7 @@ export const HostelAdminSOSAlertsPage = memo(function HostelAdminSOSAlertsPage()
             <div className="rounded-lg border border-border p-4" key={alert.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-primary">
+                  <p className="font-semibold text-foreground">
                     Resident {alert.residentId}
                   </p>
                   <p className="text-sm text-muted-foreground">{alert.message}</p>

@@ -78,7 +78,7 @@ export const HostelAdminNightStatusPage = memo(function HostelAdminNightStatusPa
             <div className="rounded-lg border border-border p-4" key={row.resident.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-primary">
+                  <p className="font-semibold text-foreground">
                     {row.resident.firstName} {row.resident.lastName}
                   </p>
                   <p className="text-sm text-muted-foreground">{row.resident.phone}</p>

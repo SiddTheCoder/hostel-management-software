@@ -52,7 +52,7 @@ export const HostelAdminServiceProvidersPageContent = React.memo(
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {providers.map((provider) => (
               <div className="rounded-lg border border-border p-4" key={provider.id}>
-                <p className="font-semibold text-primary">{provider.fullName}</p>
+                <p className="font-semibold text-foreground">{provider.fullName}</p>
                 <p className="text-sm text-muted-foreground">
                   {provider.category.replaceAll("_", " ")} / {provider.area}
                 </p>

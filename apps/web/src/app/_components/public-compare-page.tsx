@@ -87,7 +87,7 @@ export function PublicComparePage() {
       <section className="mx-auto max-w-[1360px] px-6 py-8">
         <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-primary">Compare Hostels</h1>
+            <h1 className="text-3xl font-bold text-foreground">Compare Hostels</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Compare verified hostels side by side and choose the best place that fits
               your needs.
@@ -105,14 +105,14 @@ export function PublicComparePage() {
 
         <div className="flex gap-4 mb-4">
           <Link
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition"
             href="/hostels"
           >
             &larr; Back to Hostels
           </Link>
         </div>
         {message ? (
-          <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-primary">
+          <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-foreground">
             {message}
           </div>
         ) : null}
@@ -134,9 +134,9 @@ export function PublicComparePage() {
               }}
             >
               {/* Left Criteria column */}
-              <div className="border-r border-border bg-slate-50/50">
-                <div className="h-44 flex items-center px-5 border-b border-border bg-slate-50">
-                  <span className="font-bold text-sm text-primary uppercase tracking-wider">
+              <div className="border-r border-border bg-muted/50">
+                <div className="h-44 flex items-center px-5 border-b border-border bg-muted">
+                  <span className="font-bold text-sm text-foreground uppercase tracking-wider">
                     Comparison Criteria
                   </span>
                 </div>
@@ -159,7 +159,7 @@ export function PublicComparePage() {
                   {/* Delete header button */}
                   <button
                     onClick={() => removeHostel(hostel.id)}
-                    className="absolute right-3 top-3 z-20 size-7 bg-white/90 hover:bg-red-50 hover:text-danger rounded-full border border-border flex items-center justify-center text-muted-foreground transition shadow-sm"
+                    className="absolute right-3 top-3 z-20 size-7 bg-surface/90 hover:bg-red-50 hover:text-danger rounded-full border border-border flex items-center justify-center text-muted-foreground transition shadow-sm"
                     title="Remove from comparison"
                   >
                     <X className="size-3.5" />
@@ -171,7 +171,7 @@ export function PublicComparePage() {
                       className="absolute inset-0 h-32 bg-cover bg-center opacity-90"
                       style={{ backgroundImage: `url("${hostel.image}")` }}
                     />
-                    <div className="absolute inset-0 h-32 bg-gradient-to-t from-white via-white/50 to-transparent" />
+                    <div className="absolute inset-0 h-32 bg-gradient-to-t from-surface via-surface/50 to-transparent" />
                     <div className="relative z-10 pt-24">
                       <StatusPill
                         tone="success"
@@ -180,7 +180,7 @@ export function PublicComparePage() {
                         Verified
                       </StatusPill>
                       <h2
-                        className="font-bold text-sm text-primary truncate"
+                        className="font-bold text-sm text-foreground truncate"
                         title={hostel.name}
                       >
                         {hostel.name}
@@ -189,7 +189,7 @@ export function PublicComparePage() {
                   </div>
 
                   {/* Criteria Values rows */}
-                  <div className="divide-y divide-border/60 text-xs text-primary">
+                  <div className="divide-y divide-border/60 text-xs text-foreground">
                     {/* Name */}
                     <div className="h-14 flex items-center px-5 font-semibold truncate bg-surface">
                       {hostel.name}
@@ -246,7 +246,7 @@ export function PublicComparePage() {
                   </div>
 
                   {/* Action buttons */}
-                  <div className="h-20 flex flex-col justify-center px-4 bg-slate-50 gap-1.5 border-t border-border">
+                  <div className="h-20 flex flex-col justify-center px-4 bg-muted gap-1.5 border-t border-border">
                     <Link
                       className="w-full text-center py-2 rounded-md bg-brand-teal text-white text-[11px] font-bold shadow hover:brightness-105 transition flex items-center justify-center gap-1"
                       href={`/inquiry?hostel=${hostel.slug}`}
@@ -273,7 +273,7 @@ export function PublicComparePage() {
               <PhoneCall className="size-6" />
             </div>
             <div>
-              <p className="font-bold text-sm text-primary">
+              <p className="font-bold text-sm text-foreground">
                 Need help choosing the right hostel?
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">

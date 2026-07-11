@@ -5,6 +5,21 @@ import { ACCESS_TOKEN_COOKIE } from "@/lib/auth-cookies";
 import { landingPathForRole, protectedRouteRuleForPath } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
 
+/* ── Route aliases (merged from old middleware.ts) ── */
+const routeAliases: Record<string, string> = {
+  "/signin": "/login",
+  "/log-in": "/login",
+  "/sign-up": "/signup",
+  "/register": "/signup",
+  "/term": "/terms",
+  "/tnc": "/terms",
+  "/privacy-policy": "/privacy",
+  "/data-policy": "/privacy",
+  "/hostel": "/hostels",
+  "/pricings": "/pricing",
+  "/faq": "/pricing",
+};
+
 function accessSecret() {
   const secret = process.env.JWT_ACCESS_SECRET;
 
@@ -31,6 +46,18 @@ function redirectToLogin(request: NextRequest, error?: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  /* 1. Route alias redirects */
+  const aliasTarget = routeAliases[pathname];
+
+  if (aliasTarget) {
+    const url = request.nextUrl.clone();
+    url.pathname = aliasTarget;
+    return NextResponse.redirect(url, { status: 308 });
+  }
+
+  /* 2. Skip auth in development / UI-preview mode */
   if (
     process.env.NODE_ENV === "development" ||
     process.env.NEXT_PUBLIC_UI_PREVIEW === "true"
@@ -38,7 +65,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const rule = protectedRouteRuleForPath(request.nextUrl.pathname);
+  /* 3. Auth guard for protected routes */
+  const rule = protectedRouteRuleForPath(pathname);
 
   if (!rule) {
     return NextResponse.next();
@@ -85,9 +113,22 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    /* Protected portals */
     "/platform/:path*",
     "/hostel-admin/:path*",
     "/resident/:path*",
     "/guardian/:path*",
+    /* Route aliases */
+    "/signin",
+    "/log-in",
+    "/sign-up",
+    "/register",
+    "/term",
+    "/tnc",
+    "/privacy-policy",
+    "/data-policy",
+    "/hostel",
+    "/pricings",
+    "/faq",
   ],
 };

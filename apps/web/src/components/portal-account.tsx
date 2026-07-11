@@ -99,7 +99,7 @@ export function PortalAccount() {
       <div className="hidden text-right sm:block">
         {isLoading ? (
           <>
-            <p className="text-sm font-semibold text-primary">Loading account</p>
+            <p className="text-sm font-semibold text-foreground">Loading account</p>
             <p className="text-xs text-muted-foreground">Checking session...</p>
           </>
         ) : error ? (
@@ -109,17 +109,17 @@ export function PortalAccount() {
           </>
         ) : user ? (
           <>
-            <p className="text-sm font-semibold text-primary">{user.name}</p>
+            <p className="text-sm font-semibold text-foreground">{user.name}</p>
             <p className="text-xs text-muted-foreground">{readableRole(user.role)}</p>
           </>
         ) : (
           <>
-            <p className="text-sm font-semibold text-primary">No account loaded</p>
+            <p className="text-sm font-semibold text-foreground">No account loaded</p>
             <p className="text-xs text-muted-foreground">Refresh or login again</p>
           </>
         )}
       </div>
-      <div className="flex size-9 items-center justify-center rounded-full border border-border bg-muted text-xs font-bold text-primary shadow-sm">
+      <div className="flex size-9 items-center justify-center rounded-full border border-border bg-muted text-xs font-bold text-foreground shadow-sm">
         {initials || "HH"}
       </div>
       <button

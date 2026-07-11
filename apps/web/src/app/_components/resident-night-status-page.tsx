@@ -60,7 +60,7 @@ export const ResidentNightStatusPageContent = memo(function ResidentNightStatusP
       <Message value={message} />
       <Panel>
         <p className="text-sm text-muted-foreground">Current status</p>
-        <p className="mt-2 text-3xl font-bold text-primary">
+        <p className="mt-2 text-3xl font-bold text-foreground">
           {status?.status ?? "NOT_VERIFIED"}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">

@@ -28,7 +28,7 @@ export function DashboardCard({
     >
       <div className="flex items-start justify-between gap-4 border-b border-border bg-muted/40 px-5 py-4 dark:bg-muted/20">
         <div>
-          <h3 className="font-heading text-lg font-semibold text-primary">{title}</h3>
+          <h3 className="font-heading text-lg font-semibold text-foreground">{title}</h3>
           {description ? (
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           ) : null}

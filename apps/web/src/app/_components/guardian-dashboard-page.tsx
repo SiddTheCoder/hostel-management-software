@@ -46,25 +46,25 @@ export const GuardianDashboardPageContent = memo(function GuardianDashboardPageC
           <div className="grid gap-4 md:grid-cols-4">
             <Panel>
               <p className="text-sm text-muted-foreground">Resident</p>
-              <p className="mt-2 text-xl font-bold text-primary">
+              <p className="mt-2 text-xl font-bold text-foreground">
                 {dashboard.resident.firstName} {dashboard.resident.lastName}
               </p>
             </Panel>
             <Panel>
               <p className="text-sm text-muted-foreground">Due</p>
-              <p className="mt-2 text-xl font-bold text-primary">
+              <p className="mt-2 text-xl font-bold text-foreground">
                 {currency(dashboard.summary.dueAmount)}
               </p>
             </Panel>
             <Panel>
               <p className="text-sm text-muted-foreground">Safety</p>
-              <p className="mt-2 text-xl font-bold text-primary">
+              <p className="mt-2 text-xl font-bold text-foreground">
                 {dashboard.safety?.status ?? "NOT_VERIFIED"}
               </p>
             </Panel>
             <Panel>
               <p className="text-sm text-muted-foreground">Hostel</p>
-              <p className="mt-2 text-xl font-bold text-primary">
+              <p className="mt-2 text-xl font-bold text-foreground">
                 {dashboard.hostel?.name ?? "-"}
               </p>
             </Panel>

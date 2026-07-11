@@ -49,7 +49,7 @@ export function Panel({
       )}
     >
       {title ? (
-        <h2 className="mb-4 font-heading text-lg font-semibold text-primary">{title}</h2>
+        <h2 className="mb-4 font-heading text-lg font-semibold text-foreground">{title}</h2>
       ) : null}
       {children}
     </section>
@@ -70,7 +70,7 @@ export function Input({
   type?: string;
 }) {
   return (
-    <label className="grid gap-2 text-sm font-semibold text-primary">
+    <label className="grid gap-2 text-sm font-semibold text-foreground">
       {label}
       <input
         className="h-11 rounded-md border border-border bg-background px-3 text-sm font-normal outline-none focus:border-role-admin"
@@ -97,7 +97,7 @@ export function Select({
   required?: boolean;
 }) {
   return (
-    <label className="grid gap-2 text-sm font-semibold text-primary">
+    <label className="grid gap-2 text-sm font-semibold text-foreground">
       {label}
       <select
         className="h-11 rounded-md border border-border bg-background px-3 text-sm font-normal outline-none focus:border-role-admin"
@@ -121,7 +121,7 @@ export function TextArea({
   name: string;
 }) {
   return (
-    <label className="grid gap-2 text-sm font-semibold text-primary">
+    <label className="grid gap-2 text-sm font-semibold text-foreground">
       {label}
       <textarea
         className="min-h-24 rounded-md border border-border bg-background px-3 py-2 text-sm font-normal outline-none focus:border-role-admin"
@@ -153,7 +153,7 @@ export function EmptyState({ label }: { label: string }) {
 export function RefreshButton({ onClick }: { onClick: () => void }) {
   return (
     <button
-      className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-semibold text-primary"
+      className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-semibold text-foreground"
       onClick={onClick}
       type="button"
     >

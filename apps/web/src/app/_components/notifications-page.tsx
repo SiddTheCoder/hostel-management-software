@@ -63,7 +63,7 @@ export const NotificationsPageContent = memo(function NotificationsPageContent()
             <div className="rounded-lg border border-border p-4" key={notification.id}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-primary">{notification.title}</p>
+                  <p className="font-semibold text-foreground">{notification.title}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {notification.body}
                   </p>

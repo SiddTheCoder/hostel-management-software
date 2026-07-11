@@ -56,6 +56,10 @@ export function landingPathForRole(role: Role | string) {
   return roleLandingPath[role as Role];
 }
 
+export function dashboardHrefForRole(role: Role) {
+  return landingPathForRole(role) ?? "/";
+}
+
 export function isSafeLocalPath(value: string) {
   return value.startsWith("/") && !value.startsWith("//");
 }

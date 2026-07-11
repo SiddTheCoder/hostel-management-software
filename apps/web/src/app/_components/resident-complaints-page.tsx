@@ -115,7 +115,7 @@ export const ResidentComplaintsPageContent = memo(function ResidentComplaintsPag
               <div className="rounded-lg border border-border p-4" key={complaint.id}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-primary">{complaint.title}</p>
+                    <p className="font-semibold text-foreground">{complaint.title}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {complaint.description}
                     </p>
@@ -142,7 +142,7 @@ export const ResidentComplaintsPageContent = memo(function ResidentComplaintsPag
                   </span>
                 </div>
                 {complaint.adminResponse ? (
-                  <div className="mt-4 rounded-md bg-muted p-3 text-sm text-primary">
+                  <div className="mt-4 rounded-md bg-muted p-3 text-sm text-foreground">
                     {complaint.adminResponse}
                   </div>
                 ) : null}
@@ -181,7 +181,7 @@ export const ResidentComplaintsPageContent = memo(function ResidentComplaintsPag
             </Select>
             <TextArea label="Description" name="description" />
             <Input label="Attachment asset ids" name="attachmentAssetIds" />
-            <label className="flex items-center gap-2 text-sm text-primary">
+            <label className="flex items-center gap-2 text-sm text-foreground">
               <input name="isAnonymous" type="checkbox" />
               Submit anonymously
             </label>

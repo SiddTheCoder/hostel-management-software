@@ -80,13 +80,13 @@ export const ResidentDashboardPageContent = memo(function ResidentDashboardPageC
             ].map(([label, value]) => (
               <Panel key={label}>
                 <p className="text-sm text-muted-foreground">{label}</p>
-                <p className="mt-2 text-2xl font-bold text-primary">{value}</p>
+                <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
               </Panel>
             ))}
           </div>
           <div className="grid gap-5 xl:grid-cols-[1fr_1fr_360px]">
             <Panel title="Hostel">
-              <p className="text-xl font-bold text-primary">
+              <p className="text-xl font-bold text-foreground">
                 {dashboard.hostel?.name ?? "Hostel"}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -104,7 +104,7 @@ export const ResidentDashboardPageContent = memo(function ResidentDashboardPageC
                 {dashboard.foodMenu.map((menu) => (
                   <div className="rounded-lg border border-border p-3" key={menu.id}>
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-semibold text-primary">{menu.mealType}</p>
+                      <p className="font-semibold text-foreground">{menu.mealType}</p>
                       <span className="text-xs text-muted-foreground">{menu.timing}</span>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
@@ -126,7 +126,7 @@ export const ResidentDashboardPageContent = memo(function ResidentDashboardPageC
 
                   return (
                     <Link
-                      className="inline-flex items-center gap-3 rounded-md border border-border px-3 py-2 text-sm font-semibold text-primary hover:bg-muted"
+                      className="inline-flex items-center gap-3 rounded-md border border-border px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted"
                       href={href as string}
                       key={href as string}
                     >
@@ -144,7 +144,7 @@ export const ResidentDashboardPageContent = memo(function ResidentDashboardPageC
               {dashboard.notices.map((notice) => (
                 <div className="rounded-lg border border-border p-4" key={notice.id}>
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-semibold text-primary">{notice.title}</p>
+                    <p className="font-semibold text-foreground">{notice.title}</p>
                     {notice.isUrgent ? <StatusBadge>URGENT</StatusBadge> : null}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{notice.content}</p>
