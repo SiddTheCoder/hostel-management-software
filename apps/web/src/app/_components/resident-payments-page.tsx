@@ -1,6 +1,13 @@
 "use client";
 
-import { ReceiptText, Upload } from "lucide-react";
+import {
+  CalendarDays,
+  Download,
+  ReceiptText,
+  ShieldCheck,
+  Upload,
+  WalletCards,
+} from "lucide-react";
 import {
   memo,
   useCallback,
@@ -14,22 +21,37 @@ import {
 import {
   currency,
   EmptyState,
-  Input,
+  Input as FormInput,
   LoadingRows,
-  Panel,
-  Select,
-  StatusBadge,
+  Select as FormSelect,
 } from "@/app/_components/shared-ui";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { browserApi } from "@/lib/browser-api";
 import {
   type LoadState,
   type Payment,
   type PaymentProof,
-  ResidentHeader,
   Message,
   field,
   optionalField,
 } from "./resident-shared";
+import {
+  DataTable,
+  EmptyInline,
+  MetricCard,
+  PortalPageHeader,
+  RoleButton,
+  SectionCard,
+  SoftBadge,
+  statusToneFromLabel,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./portal-dashboard-ui";
 
 export const ResidentPaymentsPageContent = memo(function ResidentPaymentsPageContent() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -38,6 +60,7 @@ export const ResidentPaymentsPageContent = memo(function ResidentPaymentsPageCon
   const [message, setMessage] = useState("");
   const [proofAssetId, setProofAssetId] = useState("");
   const [uploadingProof, setUploadingProof] = useState(false);
+  const [statusTab, setStatusTab] = useState("ALL");
 
   const proofByPaymentId = useMemo(
     () => new Map(proofs.map((proof) => [proof.paymentId, proof])),
@@ -85,115 +108,293 @@ export const ResidentPaymentsPageContent = memo(function ResidentPaymentsPageCon
     }
   }, []);
 
-  const handleProof = useCallback(async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const paymentId = field(form, "paymentId");
+  const handleProof = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      const paymentId = field(form, "paymentId");
 
-    if (!proofAssetId) {
-      setMessage("Please upload a proof image first.");
-      return;
-    }
+      if (!proofAssetId) {
+        setMessage("Please upload a proof image first.");
+        return;
+      }
 
-    try {
-      await browserApi(`/api/v1/resident/payments/${paymentId}/proof`, {
-        body: JSON.stringify({
-          proofImageAssetId: proofAssetId,
-          transactionCode: optionalField(form, "transactionCode"),
-        }),
-        method: "POST",
-      });
-      event.currentTarget.reset();
-      setProofAssetId("");
-      setMessage("Proof submitted.");
-      await load();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not submit proof.");
-    }
-  }, [proofAssetId, load]);
+      try {
+        await browserApi(`/api/v1/resident/payments/${paymentId}/proof`, {
+          body: JSON.stringify({
+            proofImageAssetId: proofAssetId,
+            transactionCode: optionalField(form, "transactionCode"),
+          }),
+          method: "POST",
+        });
+        event.currentTarget.reset();
+        setProofAssetId("");
+        setMessage("Proof submitted.");
+        await load();
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Could not submit proof.");
+      }
+    },
+    [proofAssetId, load],
+  );
+
+  const stats = useMemo(() => {
+    const paid = payments.filter((p) => p.status === "PAID").length;
+    const unpaid = payments.filter((p) => p.status === "UNPAID").length;
+    const partial = payments.filter((p) => p.status === "PARTIAL").length;
+    const overdue = payments.filter((p) => p.status === "OVERDUE").length;
+    const totalDue = payments.reduce(
+      (sum, p) => sum + Math.max(0, p.dueAmount - p.paidAmount),
+      0,
+    );
+    const lastPaid = payments.find((p) => p.status === "PAID");
+    const nextDue = payments.find(
+      (p) => p.status === "UNPAID" || p.status === "OVERDUE" || p.status === "PARTIAL",
+    );
+    return { lastPaid, nextDue, overdue, paid, partial, totalDue, unpaid };
+  }, [payments]);
+
+  const filteredPayments = useMemo(() => {
+    if (statusTab === "ALL") return payments;
+    return payments.filter((p) => p.status === statusTab);
+  }, [payments, statusTab]);
 
   return (
     <div className="mx-auto max-w-[1448px] space-y-6">
-      <ResidentHeader
+      <PortalPageHeader
+        breadcrumb={["Home", "Payments"]}
         description="Review monthly dues and submit payment proof."
-        icon={ReceiptText}
-        title="Payments"
+        title="My Payments"
       />
       <Message value={message} />
-      <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
-        <Panel title="Payment Records">
-          {state === "loading" ? <LoadingRows /> : null}
-          {state === "error" ? (
-            <EmptyState label="Payments could not be loaded." />
-          ) : null}
-          {state === "ready" && payments.length === 0 ? (
-            <EmptyState label="No payments." />
-          ) : null}
-          <div className="space-y-3">
-            {payments.map((payment) => {
-              const proof = proofByPaymentId.get(payment.id);
 
-              return (
-                <div className="rounded-lg border border-border p-4" key={payment.id}>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-foreground">{payment.month}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Due {new Date(payment.dueDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <StatusBadge>{payment.status}</StatusBadge>
-                  </div>
-                  <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                    <span>Due: {currency(payment.dueAmount)}</span>
-                    <span>Paid: {currency(payment.paidAmount)}</span>
-                    <span>Proof: {proof?.status ?? "Not submitted"}</span>
-                  </div>
+      <Tabs onValueChange={setStatusTab} value={statusTab}>
+        <TabsList className="h-auto flex-wrap rounded-xl bg-muted/50 p-1">
+          <TabsTrigger className="rounded-lg px-3" value="ALL">
+            All {payments.length}
+          </TabsTrigger>
+          <TabsTrigger className="rounded-lg px-3" value="PAID">
+            Paid {stats.paid}
+          </TabsTrigger>
+          <TabsTrigger className="rounded-lg px-3" value="UNPAID">
+            Unpaid {stats.unpaid}
+          </TabsTrigger>
+          <TabsTrigger className="rounded-lg px-3" value="PARTIAL">
+            Partial {stats.partial}
+          </TabsTrigger>
+          <TabsTrigger className="rounded-lg px-3" value="OVERDUE">
+            Overdue {stats.overdue}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          icon={WalletCards}
+          label="Total Due Amount"
+          tone="rose"
+          trend={stats.overdue > 0 ? `${stats.overdue} invoice(s) overdue` : "No overdue"}
+          trendDown={stats.overdue > 0}
+          value={currency(stats.totalDue)}
+        />
+        <MetricCard
+          icon={ShieldCheck}
+          label="Deposit Status"
+          tone="green"
+          trend="Recorded with hostel"
+          value="Tracked"
+        />
+        <MetricCard
+          icon={CalendarDays}
+          label="Next Due Date"
+          tone="blue"
+          trend={stats.nextDue?.month ?? "No open dues"}
+          value={
+            stats.nextDue?.dueDate
+              ? new Date(stats.nextDue.dueDate).toLocaleDateString()
+              : "—"
+          }
+        />
+        <MetricCard
+          icon={ReceiptText}
+          label="Last Payment"
+          tone="cyan"
+          trend={stats.lastPaid?.month ?? "No payments yet"}
+          value={stats.lastPaid ? currency(stats.lastPaid.paidAmount) : "—"}
+        />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_340px]">
+        <SectionCard
+          actions={
+            <Button className="h-9 gap-2 rounded-xl" type="button" variant="outline">
+              <Download className="size-4" />
+              Download Statement
+            </Button>
+          }
+          title="Payment History"
+        >
+          {state === "loading" ? <LoadingRows /> : null}
+          {state === "error" ? <EmptyState label="Payments could not be loaded." /> : null}
+          {state === "ready" && filteredPayments.length === 0 ? (
+            <EmptyInline label="No payments in this filter." />
+          ) : null}
+          {state === "ready" && filteredPayments.length > 0 ? (
+            <DataTable className="min-w-[640px]">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Month
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Amount (NPR)
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Due Date
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Paid
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Receipt
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPayments.map((payment) => {
+                  const proof = proofByPaymentId.get(payment.id);
+                  const isOpen =
+                    payment.status === "UNPAID" ||
+                    payment.status === "OVERDUE" ||
+                    payment.status === "PARTIAL";
+
+                  return (
+                    <TableRow key={payment.id}>
+                      <TableCell className="font-semibold text-foreground">
+                        {payment.month}
+                      </TableCell>
+                      <TableCell>{currency(payment.dueAmount)}</TableCell>
+                      <TableCell>
+                        <SoftBadge tone={statusToneFromLabel(payment.status)}>
+                          {payment.status.replaceAll("_", " ")}
+                        </SoftBadge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(payment.dueDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {payment.paidAmount > 0 ? currency(payment.paidAmount) : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {isOpen ? (
+                          <SoftBadge tone="amber">Pay Now</SoftBadge>
+                        ) : proof ? (
+                          <SoftBadge tone="green">View</SoftBadge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </DataTable>
+          ) : null}
+        </SectionCard>
+
+        <div className="space-y-5">
+          <SectionCard
+            description="Your payment is secure and encrypted."
+            title="Upload Payment Proof"
+          >
+            <form className="grid gap-3" onSubmit={handleProof}>
+              <FormSelect label="Payment" name="paymentId" required>
+                <option value="">Select payment</option>
+                {payments
+                  .filter((payment) => payment.status !== "PAID")
+                  .map((payment) => (
+                    <option key={payment.id} value={payment.id}>
+                      {payment.month} / {currency(payment.dueAmount)}
+                    </option>
+                  ))}
+              </FormSelect>
+
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold text-foreground">
+                  Upload Receipt / Screenshot
+                </label>
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-role-resident/40 bg-role-resident-soft/30 px-4 py-8 text-center transition hover:bg-role-resident-soft/50">
+                  <Upload className="mb-2 size-6 text-role-resident" />
+                  <span className="text-sm font-semibold text-foreground">
+                    Drag & drop or click to upload
+                  </span>
+                  <span className="mt-1 text-xs text-muted-foreground">
+                    JPG, PNG, PDF up to 5MB
+                  </span>
+                  <input
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    disabled={uploadingProof}
+                    onChange={handleProofFile}
+                    type="file"
+                  />
+                </label>
+                {uploadingProof ? (
+                  <p className="text-xs text-muted-foreground">Uploading...</p>
+                ) : proofAssetId ? (
+                  <p className="text-xs font-semibold text-emerald-600">Image uploaded.</p>
+                ) : null}
+              </div>
+
+              <input name="proofImageAssetId" type="hidden" value={proofAssetId} />
+              <FormInput label="Transaction code" name="transactionCode" />
+              <div className="grid gap-1.5">
+                <label className="text-sm font-semibold text-foreground">Notes (Optional)</label>
+                <Textarea
+                  className="min-h-20 rounded-xl"
+                  maxLength={200}
+                  name="notes"
+                  placeholder="Add any notes about this payment..."
+                />
+              </div>
+              <RoleButton
+                className="w-full"
+                disabled={uploadingProof || !proofAssetId}
+                tone="resident"
+                type="submit"
+              >
+                <Upload className="size-4" />
+                Submit Payment Proof
+              </RoleButton>
+            </form>
+          </SectionCard>
+
+          <SectionCard title="Recent Receipt">
+            {stats.lastPaid ? (
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Month</span>
+                  <span className="font-semibold">{stats.lastPaid.month}</span>
                 </div>
-              );
-            })}
-          </div>
-        </Panel>
-        <Panel title="Submit Proof">
-          <form className="grid gap-3" onSubmit={handleProof}>
-            <Select label="Payment" name="paymentId" required>
-              <option value="">Select payment</option>
-              {payments
-                .filter((payment) => payment.status !== "PAID")
-                .map((payment) => (
-                  <option key={payment.id} value={payment.id}>
-                    {payment.month} / {currency(payment.dueAmount)}
-                  </option>
-                ))}
-            </Select>
-            <div className="grid gap-2">
-              <label className="text-sm font-semibold text-foreground">Proof Image</label>
-              <input
-                accept="image/jpeg,image/png,image/webp"
-                className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm file:mr-3 file:h-8 file:rounded-md file:border-0 file:bg-role-resident file:px-3 file:text-xs file:font-semibold file:text-white"
-                disabled={uploadingProof}
-                onChange={handleProofFile}
-                required
-                type="file"
-              />
-              {uploadingProof ? (
-                <p className="text-xs text-muted-foreground">Uploading...</p>
-              ) : proofAssetId ? (
-                <p className="text-xs text-emerald-600">Image uploaded.</p>
-              ) : null}
-            </div>
-            <input name="proofImageAssetId" type="hidden" value={proofAssetId} />
-            <Input label="Transaction code" name="transactionCode" />
-            <button
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-role-resident text-sm font-semibold text-white disabled:opacity-50"
-              disabled={uploadingProof || !proofAssetId}
-              type="submit"
-            >
-              <Upload className="size-4" />
-              Submit Proof
-            </button>
-          </form>
-        </Panel>
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Amount</span>
+                  <span className="font-semibold">
+                    {currency(stats.lastPaid.paidAmount)}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Status</span>
+                  <SoftBadge tone="green">Paid</SoftBadge>
+                </div>
+              </div>
+            ) : (
+              <EmptyInline label="No receipts yet." />
+            )}
+          </SectionCard>
+        </div>
       </div>
     </div>
   );

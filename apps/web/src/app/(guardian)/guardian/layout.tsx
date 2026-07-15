@@ -23,10 +23,10 @@ export default function GuardianLayout({
     <PortalShell
       navItems={navItems}
       portalName="HostelHub"
-      searchPlaceholder="Search guardian notices..."
+      searchPlaceholder="Search notices, payments..."
       subtitle="Guardian Portal"
       tone="guardian"
-      workspaceName="Aarav Shrestha"
+      workspaceName="Guardian"
     >
       {children}
     </PortalShell>

@@ -1,17 +1,33 @@
 "use client";
 
-import { QrCode, UserPlus, Users } from "lucide-react";
+import {
+  Download,
+  MoreHorizontal,
+  Plus,
+  QrCode,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   currency,
   EmptyState,
-  Input,
+  Input as FormInput,
   LoadingRows,
-  Panel,
-  Select,
-  StatusBadge,
+  Select as FormSelect,
 } from "@/app/_components/shared-ui";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
 
@@ -19,13 +35,26 @@ import {
   DemoDataBadge,
   field,
   optionalField,
-  PageHeader,
   type LoadState,
   type Resident,
-  type RoomMapBed,
   type RoomMapFloor,
-  type RoomMapRoom,
 } from "./hostel-admin-shared";
+import {
+  DataTable,
+  EmptyInline,
+  InitialsAvatar,
+  PortalPageHeader,
+  RoleButton,
+  SearchField,
+  SectionCard,
+  SoftBadge,
+  statusToneFromLabel,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./portal-dashboard-ui";
 
 export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage() {
   const [residents, setResidents] = useState<Resident[]>([]);
@@ -34,6 +63,9 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
   const [activationCode, setActivationCode] = useState("");
   const [state, setState] = useState<LoadState>("idle");
   const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const selectedResident = residents.find(
     (resident) => resident.id === selectedResidentId,
@@ -54,10 +86,41 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
           ...bed,
           label: `${room.floorName} / Room ${room.roomNumber} / Bed ${bed.bedNumber}`,
           roomId: room.id,
+          roomNumber: room.roomNumber,
         })),
       ),
     [roomOptions],
   );
+
+  const bedById = useMemo(
+    () => new Map(bedOptions.map((bed) => [bed.id, bed])),
+    [bedOptions],
+  );
+
+  const filteredResidents = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return residents.filter((resident) => {
+      if (statusFilter !== "ALL" && resident.status !== statusFilter) {
+        return false;
+      }
+      if (!query) {
+        return true;
+      }
+      const bed = bedById.get(resident.bedId);
+      const haystack = [
+        resident.firstName,
+        resident.lastName,
+        resident.phone,
+        resident.email,
+        bed?.roomNumber,
+        bed?.bedNumber,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [bedById, residents, search, statusFilter]);
 
   const load = useCallback(async () => {
     setState("loading");
@@ -107,6 +170,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
           method: "POST",
         });
         event.currentTarget.reset();
+        setShowAddForm(false);
         setMessage("Resident created.");
         await load();
       } catch (error) {
@@ -209,176 +273,358 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
 
   return (
     <div className="mx-auto max-w-[1448px] space-y-6">
-      <PageHeader
-        action={
-          <button
-            className="inline-flex items-center gap-2 rounded-lg bg-role-admin px-4 py-2.5 text-sm font-semibold text-white"
-            onClick={handleGenerateActivation}
-            type="button"
-          >
-            <QrCode className="size-4" />
-            Generate Code
-          </button>
+      <PortalPageHeader
+        actions={
+          <>
+            <RoleButton
+              onClick={handleGenerateActivation}
+              tone="admin"
+              type="button"
+              variant="outline"
+            >
+              <QrCode className="size-4" />
+              Generate Activation Code
+            </RoleButton>
+            <RoleButton
+              onClick={() => setShowAddForm((value) => !value)}
+              tone="admin"
+              type="button"
+            >
+              <Plus className="size-4" />
+              Add Resident
+            </RoleButton>
+          </>
         }
-        description="Register residents, assign vacant beds, and manage activation contacts."
-        icon={Users}
+        description="Manage hostel residents, their details, and status."
         title="Residents"
       />
 
       {message ? (
-        <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+        <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
           {message}
         </div>
       ) : null}
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
-        <Panel title="Resident List">
-          {state === "loading" ? <LoadingRows /> : null}
-          {state === "error" ? (
-            <EmptyState label="Residents could not be loaded." />
-          ) : null}
-          {state === "ready" && residents.length === 0 ? (
-            <EmptyState label="No residents yet." />
-          ) : null}
-          {state === "ready" && residents.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-muted-foreground">
-                  <tr>
-                    <th className="py-2">Resident</th>
-                    <th>Phone</th>
-                    <th>Deposit</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {residents.map((resident) => (
-                    <tr
-                      className={cn(
-                        "cursor-pointer hover:bg-muted/40",
-                        selectedResidentId === resident.id && "bg-role-admin-soft/40",
-                      )}
-                      key={resident.id}
-                      onClick={() => setSelectedResidentId(resident.id)}
-                    >
-                      <td className="py-3 font-semibold text-foreground">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>
-                            {resident.firstName} {resident.lastName}
-                          </span>
-                          {resident.isDemoData ? (
-                            <DemoDataBadge label={resident.demoDataLabel} />
-                          ) : null}
-                        </div>
-                        <p className="text-xs font-normal text-muted-foreground">
-                          Room {resident.roomId.slice(-4)} / Bed{" "}
-                          {resident.bedId.slice(-4)}
-                        </p>
-                      </td>
-                      <td>{resident.phone}</td>
-                      <td>{currency(resident.depositAmount)}</td>
-                      <td>
-                        <StatusBadge>{resident.status}</StatusBadge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {showAddForm ? (
+        <SectionCard
+          actions={
+            <Button
+              className="size-8"
+              onClick={() => setShowAddForm(false)}
+              size="icon"
+              type="button"
+              variant="ghost"
+            >
+              <X className="size-4" />
+            </Button>
+          }
+          description="Add a new resident and assign room, plan, and details."
+          title="Register New Resident"
+        >
+          <form className="grid gap-3 md:grid-cols-2" onSubmit={handleCreateResident}>
+            <FormInput label="First name" name="firstName" required />
+            <FormInput label="Last name" name="lastName" required />
+            <FormInput label="Phone" name="phone" required />
+            <FormInput label="Email" name="email" type="email" />
+            <FormSelect label="Available bed" name="bedId" required>
+              <option value="">Select bed</option>
+              {bedOptions
+                .filter((bed) => bed.status === "AVAILABLE")
+                .map((bed) => (
+                  <option key={bed.id} value={bed.id}>
+                    {bed.label}
+                  </option>
+                ))}
+            </FormSelect>
+            <FormInput label="Move-in date" name="moveInDate" required type="date" />
+            <FormInput label="Deposit" name="depositAmount" required type="number" />
+            <div className="flex items-end">
+              <RoleButton className="w-full" tone="admin" type="submit">
+                <UserPlus className="size-4" />
+                Save Resident
+              </RoleButton>
             </div>
+          </form>
+        </SectionCard>
+      ) : null}
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
+        <SectionCard>
+          <div className="mb-4 space-y-3">
+            <SearchField
+              onChange={setSearch}
+              placeholder="Search by name, phone, room..."
+              value={search}
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Select onValueChange={setStatusFilter} value={statusFilter}>
+                <SelectTrigger className="h-10 w-[160px] rounded-xl">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All statuses</SelectItem>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  <SelectItem value="MOVED_OUT">Moved out</SelectItem>
+                </SelectContent>
+              </Select>
+              <SoftBadge tone="cyan">
+                <Users className="size-3" />
+                Total Residents: {filteredResidents.length}
+              </SoftBadge>
+              <Button className="ml-auto h-10 gap-2 rounded-xl" type="button" variant="outline">
+                <Download className="size-4" />
+                Export
+              </Button>
+            </div>
+          </div>
+
+          {state === "loading" ? <LoadingRows /> : null}
+          {state === "error" ? <EmptyState label="Residents could not be loaded." /> : null}
+          {state === "ready" && filteredResidents.length === 0 ? (
+            <EmptyInline label="No residents match your filters." />
           ) : null}
-        </Panel>
+
+          {state === "ready" && filteredResidents.length > 0 ? (
+            <DataTable className="min-w-[720px]">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-10">
+                    <span className="sr-only">Select</span>
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Resident
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Room / Bed
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Phone
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Deposit
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="w-10" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredResidents.map((resident) => {
+                  const bed = bedById.get(resident.bedId);
+                  const fullName = `${resident.firstName} ${resident.lastName}`.trim();
+                  const selected = selectedResidentId === resident.id;
+
+                  return (
+                    <TableRow
+                      className={cn(
+                        "cursor-pointer",
+                        selected && "bg-role-admin-soft/50 data-[state=selected]:bg-role-admin-soft/50",
+                      )}
+                      data-state={selected ? "selected" : undefined}
+                      key={resident.id}
+                      onClick={() => {
+                        setSelectedResidentId(resident.id);
+                        setActivationCode("");
+                      }}
+                    >
+                      <TableCell onClick={(event) => event.stopPropagation()}>
+                        <Checkbox
+                          checked={selected}
+                          onCheckedChange={() => {
+                            setSelectedResidentId(resident.id);
+                            setActivationCode("");
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <InitialsAvatar name={fullName} size="sm" tone="admin" />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-foreground">{fullName}</p>
+                            {resident.isDemoData ? (
+                              <DemoDataBadge label={resident.demoDataLabel} />
+                            ) : (
+                              <p className="text-xs text-muted-foreground">
+                                Room {bed?.roomNumber ?? "—"}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {bed
+                          ? `${bed.roomNumber} / Bed ${bed.bedNumber}`
+                          : `Room ${resident.roomId.slice(-4)} / Bed ${resident.bedId.slice(-4)}`}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{resident.phone}</TableCell>
+                      <TableCell className="font-medium text-foreground">
+                        {currency(resident.depositAmount)}
+                      </TableCell>
+                      <TableCell>
+                        <SoftBadge tone={statusToneFromLabel(resident.status)}>
+                          {resident.status.replaceAll("_", " ")}
+                        </SoftBadge>
+                      </TableCell>
+                      <TableCell>
+                        <Button className="size-8" size="icon" type="button" variant="ghost">
+                          <MoreHorizontal className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </DataTable>
+          ) : null}
+        </SectionCard>
 
         <div className="space-y-5">
-          <Panel title="Add Resident">
-            <form className="grid gap-3" onSubmit={handleCreateResident}>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input label="First name" name="firstName" required />
-                <Input label="Last name" name="lastName" required />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input label="Phone" name="phone" required />
-                <Input label="Email" name="email" type="email" />
-              </div>
-              <Select label="Available bed" name="bedId" required>
-                <option value="">Select bed</option>
-                {bedOptions
-                  .filter((bed) => bed.status === "AVAILABLE")
-                  .map((bed) => (
-                    <option key={bed.id} value={bed.id}>
-                      {bed.label}
-                    </option>
-                  ))}
-              </Select>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input label="Move-in date" name="moveInDate" required type="date" />
-                <Input label="Deposit" name="depositAmount" required type="number" />
-              </div>
-              <button className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-role-admin text-sm font-semibold text-white">
-                <UserPlus className="size-4" />
-                Add Resident
-              </button>
-            </form>
-          </Panel>
-
-          <Panel title="Selected Resident">
+          <SectionCard>
             {selectedResident ? (
               <div className="space-y-4">
-                <div>
-                  <p className="text-lg font-bold text-foreground">
-                    {selectedResident.firstName} {selectedResident.lastName}
-                  </p>
-                  {selectedResident.isDemoData ? (
-                    <div className="mt-2">
-                      <DemoDataBadge label={selectedResident.demoDataLabel} />
-                    </div>
-                  ) : null}
-                  <p className="text-sm text-muted-foreground">
-                    {selectedResident.phone}
-                  </p>
-                </div>
-                {activationCode ? (
-                  <div className="rounded-lg border border-role-admin/30 bg-role-admin-soft/50 p-4">
-                    <p className="text-sm font-semibold text-foreground">Activation Code</p>
-                    <p className="mt-2 font-mono text-2xl font-bold tracking-widest text-role-admin">
-                      {activationCode}
+                <div className="flex items-start gap-3">
+                  <InitialsAvatar
+                    name={`${selectedResident.firstName} ${selectedResident.lastName}`}
+                    size="lg"
+                    tone="admin"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-lg font-bold text-foreground">
+                      {selectedResident.firstName} {selectedResident.lastName}
                     </p>
+                    <p className="text-sm text-muted-foreground">
+                      {(() => {
+                        const bed = bedById.get(selectedResident.bedId);
+                        return bed
+                          ? `Room ${bed.roomNumber} · Bed ${bed.bedNumber}`
+                          : selectedResident.phone;
+                      })()}
+                    </p>
+                    <div className="mt-2">
+                      <SoftBadge tone={statusToneFromLabel(selectedResident.status)}>
+                        {selectedResident.status.replaceAll("_", " ")}
+                      </SoftBadge>
+                    </div>
                   </div>
-                ) : null}
-                <form className="grid gap-3" onSubmit={handleAddGuardian}>
-                  <h3 className="text-sm font-bold text-foreground">Guardian</h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Input label="First name" name="firstName" required />
-                    <Input label="Last name" name="lastName" required />
-                  </div>
-                  <Input label="Phone" name="phone" required />
-                  <Input label="Relation" name="relation" required />
-                  <Input label="Email" name="email" type="email" />
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <input name="isPrimary" type="checkbox" />
-                    Primary guardian
-                  </label>
-                  <button className="h-10 rounded-md border border-role-admin px-3 text-sm font-semibold text-role-admin">
-                    Save Guardian
-                  </button>
-                </form>
-                <form className="grid gap-3" onSubmit={handleAddEmergencyContact}>
-                  <h3 className="text-sm font-bold text-foreground">Emergency Contact</h3>
-                  <Input label="Name" name="name" required />
-                  <Input label="Phone" name="phone" required />
-                  <Input label="Relation" name="relation" required />
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <input name="isPrimary" type="checkbox" />
-                    Primary contact
-                  </label>
-                  <button className="h-10 rounded-md border border-role-admin px-3 text-sm font-semibold text-role-admin">
-                    Save Contact
-                  </button>
-                </form>
+                </div>
+
+                <Tabs defaultValue="details">
+                  <TabsList className="grid w-full grid-cols-3 rounded-xl" variant="line">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="guardian">Guardian</TabsTrigger>
+                    <TabsTrigger value="emergency">Emergency</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent className="mt-4 space-y-3" value="details">
+                    <dl className="space-y-2 rounded-xl border border-border bg-muted/15 p-3 text-sm">
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Full Name</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedResident.firstName} {selectedResident.lastName}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Phone</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedResident.phone}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Email</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedResident.email || "—"}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Deposit</dt>
+                        <dd className="font-medium text-foreground">
+                          {currency(selectedResident.depositAmount)}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Move-in</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedResident.moveInDate
+                            ? new Date(selectedResident.moveInDate).toLocaleDateString()
+                            : "—"}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-muted-foreground">Room / Bed</dt>
+                        <dd className="font-medium text-foreground">
+                          {(() => {
+                            const bed = bedById.get(selectedResident.bedId);
+                            return bed
+                              ? `${bed.roomNumber} / ${bed.bedNumber}`
+                              : "Assigned";
+                          })()}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    {activationCode ? (
+                      <div className="rounded-xl border border-role-admin/30 bg-role-admin-soft/50 p-4">
+                        <p className="text-sm font-semibold text-foreground">Activation Code</p>
+                        <p className="mt-2 font-mono text-2xl font-bold tracking-widest text-role-admin">
+                          {activationCode}
+                        </p>
+                      </div>
+                    ) : (
+                      <RoleButton
+                        className="w-full"
+                        onClick={handleGenerateActivation}
+                        tone="admin"
+                        type="button"
+                        variant="outline"
+                      >
+                        <QrCode className="size-4" />
+                        Generate Activation Code
+                      </RoleButton>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent className="mt-4" value="guardian">
+                    <form className="grid gap-3" onSubmit={handleAddGuardian}>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <FormInput label="First name" name="firstName" required />
+                        <FormInput label="Last name" name="lastName" required />
+                      </div>
+                      <FormInput label="Phone" name="phone" required />
+                      <FormInput label="Relation" name="relation" required />
+                      <FormInput label="Email" name="email" type="email" />
+                      <label className="flex items-center gap-2 text-sm text-foreground">
+                        <input name="isPrimary" type="checkbox" />
+                        Primary guardian
+                      </label>
+                      <RoleButton className="w-full" tone="admin" type="submit" variant="outline">
+                        Save Guardian
+                      </RoleButton>
+                    </form>
+                  </TabsContent>
+
+                  <TabsContent className="mt-4" value="emergency">
+                    <form className="grid gap-3" onSubmit={handleAddEmergencyContact}>
+                      <FormInput label="Name" name="name" required />
+                      <FormInput label="Phone" name="phone" required />
+                      <FormInput label="Relation" name="relation" required />
+                      <label className="flex items-center gap-2 text-sm text-foreground">
+                        <input name="isPrimary" type="checkbox" />
+                        Primary contact
+                      </label>
+                      <RoleButton className="w-full" tone="admin" type="submit" variant="outline">
+                        Save Contact
+                      </RoleButton>
+                    </form>
+                  </TabsContent>
+                </Tabs>
               </div>
             ) : (
-              <EmptyState label="Select a resident." />
+              <EmptyInline label="Select a resident to view details." />
             )}
-          </Panel>
+          </SectionCard>
         </div>
       </div>
     </div>

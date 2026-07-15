@@ -45,10 +45,10 @@ export default function HostelAdminLayout({
     <PortalShell
       navItems={navItems}
       portalName="HostelHub"
-      searchPlaceholder="Search residents, rooms..."
+      searchPlaceholder="Search residents, rooms, payments..."
       subtitle="Hostel Admin Portal"
       tone="admin"
-      workspaceName="Himalayan Scholars Hostel"
+      workspaceName="Hostel Workspace"
     >
       {children}
     </PortalShell>

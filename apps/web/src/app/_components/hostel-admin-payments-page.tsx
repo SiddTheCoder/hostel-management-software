@@ -1,37 +1,65 @@
 "use client";
 
-import { Check, CreditCard, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Clock3,
+  CreditCard,
+  Download,
+  Plus,
+  ReceiptText,
+  WalletCards,
+  X,
+} from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   currency,
   EmptyState,
-  Input,
+  Input as FormInput,
   LoadingRows,
-  Panel,
-  Select,
-  StatusBadge,
+  Select as FormSelect,
   TextArea,
 } from "@/app/_components/shared-ui";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { browserApi } from "@/lib/browser-api";
 
 import {
   field,
   optionalField,
-  PageHeader,
   type LoadState,
   type Payment,
   type PaymentProof,
   type Resident,
 } from "./hostel-admin-shared";
+import {
+  DataTable,
+  EmptyInline,
+  InitialsAvatar,
+  MetricCard,
+  PortalPageHeader,
+  RoleButton,
+  SearchField,
+  SectionCard,
+  SoftBadge,
+  statusToneFromLabel,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./portal-dashboard-ui";
 
 export const HostelAdminPaymentsPage = memo(function HostelAdminPaymentsPage() {
   const [residents, setResidents] = useState<Resident[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
   const [state, setState] = useState<LoadState>("idle");
   const [message, setMessage] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
 
   const residentById = useMemo(
     () => new Map(residents.map((resident) => [resident.id, resident])),
@@ -41,10 +69,11 @@ export const HostelAdminPaymentsPage = memo(function HostelAdminPaymentsPage() {
   const load = useCallback(async () => {
     setState("loading");
     try {
+      const statusQuery = filter !== "ALL" ? `?status=${filter}` : "";
       const [residentData, paymentData] = await Promise.all([
         browserApi<{ residents: Resident[] }>("/api/v1/hostel-admin/residents"),
         browserApi<{ payments: Payment[]; proofs: PaymentProof[] }>(
-          `/api/v1/hostel-admin/payments${filter ? `?status=${filter}` : ""}`,
+          `/api/v1/hostel-admin/payments${statusQuery}`,
         ),
       ]);
 
@@ -83,6 +112,7 @@ export const HostelAdminPaymentsPage = memo(function HostelAdminPaymentsPage() {
           method: "POST",
         });
         event.currentTarget.reset();
+        setShowCreate(false);
         setMessage("Payment record created.");
         await load();
       } catch (error) {
@@ -115,157 +145,327 @@ export const HostelAdminPaymentsPage = memo(function HostelAdminPaymentsPage() {
     [load],
   );
 
+  const filteredPayments = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return payments;
+    return payments.filter((payment) => {
+      const resident = residentById.get(payment.residentId);
+      const name = resident
+        ? `${resident.firstName} ${resident.lastName}`.toLowerCase()
+        : payment.residentId.toLowerCase();
+      return name.includes(query) || payment.month.toLowerCase().includes(query);
+    });
+  }, [payments, residentById, search]);
+
+  const stats = useMemo(() => {
+    const paid = payments.filter((p) => p.status === "PAID").length;
+    const unpaid = payments.filter((p) => p.status === "UNPAID").length;
+    const partial = payments.filter((p) => p.status === "PARTIAL").length;
+    const overdue = payments.filter((p) => p.status === "OVERDUE").length;
+    const monthlyCollection = payments.reduce((sum, p) => sum + p.paidAmount, 0);
+    const dueAmount = payments.reduce(
+      (sum, p) => sum + Math.max(0, p.dueAmount - p.paidAmount),
+      0,
+    );
+    return {
+      dueAmount,
+      monthlyCollection,
+      overdue,
+      paid,
+      partial,
+      pendingProofs: proofs.filter((p) => p.status === "PENDING").length,
+      unpaid,
+    };
+  }, [payments, proofs]);
+
+  const pendingProofs = proofs.filter((p) => p.status === "PENDING").slice(0, 6);
+
   return (
     <div className="mx-auto max-w-[1448px] space-y-6">
-      <PageHeader
-        action={
-          <select
-            className="h-11 rounded-md border border-border bg-background px-3 text-sm"
-            onChange={(event) => setFilter(event.target.value)}
-            value={filter}
-          >
-            <option value="">All statuses</option>
-            <option value="UNPAID">Unpaid</option>
-            <option value="PENDING_PROOF">Pending proof</option>
-            <option value="PAID">Paid</option>
-            <option value="PARTIAL">Partial</option>
-            <option value="OVERDUE">Overdue</option>
-          </select>
+      <PortalPageHeader
+        actions={
+          <>
+            <Button className="h-10 gap-2 rounded-xl" type="button" variant="outline">
+              <Download className="size-4" />
+              Export
+            </Button>
+            <RoleButton
+              onClick={() => setShowCreate((value) => !value)}
+              tone="admin"
+              type="button"
+            >
+              <Plus className="size-4" />
+              Record Payment
+            </RoleButton>
+          </>
         }
-        description="Create monthly fee records and review resident payment proofs."
-        icon={CreditCard}
+        description="Manage hostel fee collections, payments and approvals."
         title="Payments"
       />
+
       {message ? (
-        <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+        <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
           {message}
         </div>
       ) : null}
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
-        <Panel title="Payment Records">
-          {state === "loading" ? <LoadingRows /> : null}
-          {state === "error" ? (
-            <EmptyState label="Payments could not be loaded." />
-          ) : null}
-          {state === "ready" && payments.length === 0 ? (
-            <EmptyState label="No payment records." />
-          ) : null}
-          {state === "ready" && payments.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-muted-foreground">
-                  <tr>
-                    <th className="py-2">Resident</th>
-                    <th>Month</th>
-                    <th>Due</th>
-                    <th>Paid</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {payments.map((payment) => {
-                    const resident = residentById.get(payment.residentId);
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          icon={WalletCards}
+          label="Monthly Collection"
+          tone="blue"
+          trend="Paid amount this filter"
+          value={currency(stats.monthlyCollection)}
+        />
+        <MetricCard
+          icon={ReceiptText}
+          label="Due Amount"
+          tone="cyan"
+          trend={`${stats.unpaid + stats.overdue + stats.partial} open records`}
+          value={currency(stats.dueAmount)}
+        />
+        <MetricCard
+          icon={Clock3}
+          label="Pending Proofs"
+          tone="amber"
+          trend="Awaiting approval"
+          value={String(stats.pendingProofs)}
+        />
+        <MetricCard
+          icon={AlertTriangle}
+          label="Overdue Residents"
+          tone="rose"
+          trendDown
+          trend="Needs follow-up"
+          value={String(stats.overdue)}
+        />
+      </div>
 
-                    return (
-                      <tr key={payment.id}>
-                        <td className="py-3 font-semibold text-foreground">
-                          {resident
-                            ? `${resident.firstName} ${resident.lastName}`
-                            : payment.residentId}
-                        </td>
-                        <td>{payment.month}</td>
-                        <td>{currency(payment.dueAmount)}</td>
-                        <td>{currency(payment.paidAmount)}</td>
-                        <td>
-                          <StatusBadge>{payment.status}</StatusBadge>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-        </Panel>
-
-        <Panel title="Create Payment">
-          <form className="grid gap-3" onSubmit={handleCreatePayment}>
-            <Select label="Resident" name="residentId" required>
+      {showCreate ? (
+        <SectionCard
+          actions={
+            <Button
+              className="size-8"
+              onClick={() => setShowCreate(false)}
+              size="icon"
+              type="button"
+              variant="ghost"
+            >
+              <X className="size-4" />
+            </Button>
+          }
+          title="Create Payment Record"
+        >
+          <form className="grid gap-3 md:grid-cols-2" onSubmit={handleCreatePayment}>
+            <FormSelect label="Resident" name="residentId" required>
               <option value="">Select resident</option>
               {residents.map((resident) => (
                 <option key={resident.id} value={resident.id}>
                   {resident.firstName} {resident.lastName}
                 </option>
               ))}
-            </Select>
-            <Input label="Month" name="month" required type="month" />
-            <Input label="Due amount" name="dueAmount" required type="number" />
-            <Input label="Due date" name="dueDate" required type="date" />
-            <TextArea label="Remarks" name="remarks" />
-            <button className="h-11 rounded-md bg-role-admin text-sm font-semibold text-white">
-              Create Record
-            </button>
-          </form>
-        </Panel>
-      </div>
-
-      <Panel title="Payment Proof Review">
-        {proofs.length === 0 ? <EmptyState label="No proofs submitted." /> : null}
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {proofs.map((proof) => (
-            <div className="rounded-lg border border-border p-4" key={proof.id}>
-              {proof.proofImageAssetId ? (
-                <a
-                  href={`/api/v1/files/${proof.proofImageAssetId}/url?variant=MEDIUM`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <img
-                    alt="Payment proof"
-                    className="mb-3 h-40 w-full rounded-md object-cover"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                    }}
-                    src={`/api/v1/files/${proof.proofImageAssetId}/url?variant=THUMBNAIL`}
-                  />
-                </a>
-              ) : null}
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {residentById.get(proof.residentId)?.firstName ?? "Resident"} proof
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {proof.transactionCode}
-                  </p>
-                </div>
-                <StatusBadge>{proof.status}</StatusBadge>
-              </div>
-              {proof.status === "PENDING" ? (
-                <div className="mt-4 flex gap-2">
-                  <button
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white"
-                    onClick={() => void reviewProof(proof.id, "approve")}
-                    type="button"
-                  >
-                    <Check className="size-4" />
-                    Approve
-                  </button>
-                  <button
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white"
-                    onClick={() => void reviewProof(proof.id, "reject")}
-                    type="button"
-                  >
-                    <X className="size-4" />
-                    Reject
-                  </button>
-                </div>
-              ) : null}
+            </FormSelect>
+            <FormInput label="Month" name="month" required type="month" />
+            <FormInput label="Due amount" name="dueAmount" required type="number" />
+            <FormInput label="Due date" name="dueDate" required type="date" />
+            <div className="md:col-span-2">
+              <TextArea label="Remarks" name="remarks" />
             </div>
-          ))}
+            <div className="md:col-span-2">
+              <RoleButton className="w-full sm:w-auto" tone="admin" type="submit">
+                <CreditCard className="size-4" />
+                Create Record
+              </RoleButton>
+            </div>
+          </form>
+        </SectionCard>
+      ) : null}
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_340px]">
+        <SectionCard>
+          <Tabs
+            onValueChange={setFilter}
+            value={filter}
+          >
+            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <TabsList className="h-auto flex-wrap rounded-none bg-transparent p-0" variant="line">
+                <TabsTrigger className="rounded-none px-3 pb-2" value="ALL">
+                  All ({payments.length})
+                </TabsTrigger>
+                <TabsTrigger className="rounded-none px-3 pb-2" value="PAID">
+                  Paid ({stats.paid})
+                </TabsTrigger>
+                <TabsTrigger className="rounded-none px-3 pb-2" value="UNPAID">
+                  Unpaid ({stats.unpaid})
+                </TabsTrigger>
+                <TabsTrigger className="rounded-none px-3 pb-2" value="PARTIAL">
+                  Partial ({stats.partial})
+                </TabsTrigger>
+                <TabsTrigger className="rounded-none px-3 pb-2" value="OVERDUE">
+                  Overdue ({stats.overdue})
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <SearchField
+              className="mb-4 max-w-none"
+              onChange={setSearch}
+              placeholder="Search by resident name, room no..."
+              value={search}
+            />
+
+            <TabsContent className="mt-0" value={filter}>
+              {state === "loading" ? <LoadingRows /> : null}
+              {state === "error" ? (
+                <EmptyState label="Payments could not be loaded." />
+              ) : null}
+              {state === "ready" && filteredPayments.length === 0 ? (
+                <EmptyInline label="No payment records." />
+              ) : null}
+              {state === "ready" && filteredPayments.length > 0 ? (
+                <DataTable className="min-w-[700px]">
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Resident
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Month
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Amount (NPR)
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Paid
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Status
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Due Date
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPayments.map((payment) => {
+                      const resident = residentById.get(payment.residentId);
+                      const name = resident
+                        ? `${resident.firstName} ${resident.lastName}`
+                        : payment.residentId;
+
+                      return (
+                        <TableRow key={payment.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <InitialsAvatar name={name} size="sm" tone="admin" />
+                              <div>
+                                <p className="font-semibold text-foreground">{name}</p>
+                                {resident?.phone ? (
+                                  <p className="text-xs text-muted-foreground">
+                                    {resident.phone}
+                                  </p>
+                                ) : null}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {payment.month}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {currency(payment.dueAmount)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {currency(payment.paidAmount)}
+                          </TableCell>
+                          <TableCell>
+                            <SoftBadge tone={statusToneFromLabel(payment.status)}>
+                              {payment.status.replaceAll("_", " ")}
+                            </SoftBadge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(payment.dueDate).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </DataTable>
+              ) : null}
+            </TabsContent>
+          </Tabs>
+        </SectionCard>
+
+        <div className="space-y-5">
+          <SectionCard
+            actions={
+              <span className="text-xs font-semibold text-muted-foreground">
+                {pendingProofs.length} pending
+              </span>
+            }
+            title={`Payment Proofs (${stats.pendingProofs})`}
+          >
+            {pendingProofs.length === 0 ? (
+              <EmptyInline label="No proofs awaiting review." />
+            ) : (
+              <div className="space-y-3">
+                {pendingProofs.map((proof) => {
+                  const resident = residentById.get(proof.residentId);
+                  const name = resident
+                    ? `${resident.firstName} ${resident.lastName}`
+                    : "Resident";
+
+                  return (
+                    <div
+                      className="rounded-xl border border-border/70 bg-muted/10 p-3"
+                      key={proof.id}
+                    >
+                      <div className="flex items-start gap-3">
+                        {proof.proofImageAssetId ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            alt="Payment proof"
+                            className="size-12 rounded-lg object-cover"
+                            src={`/api/v1/files/${proof.proofImageAssetId}/url?variant=THUMBNAIL`}
+                          />
+                        ) : (
+                          <InitialsAvatar name={name} size="sm" tone="admin" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground">{name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {proof.transactionCode || "No txn code"}
+                          </p>
+                          <div className="mt-2 flex gap-2">
+                            <Button
+                              className="h-8 flex-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-600/90"
+                              onClick={() => void reviewProof(proof.id, "approve")}
+                              size="sm"
+                              type="button"
+                            >
+                              <Check className="size-3.5" />
+                              Approve
+                            </Button>
+                            <Button
+                              className="h-8 flex-1 rounded-lg"
+                              onClick={() => void reviewProof(proof.id, "reject")}
+                              size="sm"
+                              type="button"
+                              variant="destructive"
+                            >
+                              <X className="size-3.5" />
+                              Reject
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </SectionCard>
         </div>
-      </Panel>
+      </div>
     </div>
   );
 });

@@ -893,7 +893,7 @@ Unless separately agreed:
 
 ---
 
-## 23. Recommended Development Order
+## 23. Recommended Development Order 
 
 ### Phase 1 - Foundation
 

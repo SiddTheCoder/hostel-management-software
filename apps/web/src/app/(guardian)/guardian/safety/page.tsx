@@ -1,5 +1,5 @@
-import { GuardianDashboardPageContent } from "@/app/_components/guardian-dashboard-page";
+import { GuardianSafetyPageContent } from "@/app/_components/guardian-safety-page";
 
 export default function GuardianSafetyPage() {
-  return <GuardianDashboardPageContent />;
+  return <GuardianSafetyPageContent />;
 }

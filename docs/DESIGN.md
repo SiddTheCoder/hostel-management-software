@@ -1,0 +1,363 @@
+# DESIGN.md — Design System & UX Guidelines
+
+## 1. Principles
+
+- **Trustworthy, not flashy.** Students and parents are making a "where will I live" decision — the design should read as credible and calm (think: a well-run listings/booking site), not like a flashy startup landing page.
+- **Not a surveillance product.** Anywhere night-status/safety appears, the tone must be reassuring and summary-level, never map-pin-tracking-you. No red dots on a live map, no "last seen 4 minutes ago" language.
+- **Boring in the right places.** Payments, receipts, complaint status — these should look like a bank/utility dashboard: clear numbers, clear status, no ambiguity. Save personality for the public discovery pages.
+- **Mobile-first web.** Most students will browse on a phone even before the native app exists in Phase 6 — every public page and every portal must work cleanly at 375px width.
+
+## 2. Foundation
+
+Built on **shadcn/ui** + Tailwind CSS. Do not hand-roll components that shadcn/ui already provides (Button, Card, Dialog, Tabs, Table, Badge, Select, Form, Toast, etc.) — extend them with variants rather than replacing them.
+
+### Color tokens (Tailwind CSS variables, define in `globals.css`)
+
+```css
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    
+    /* Custom status colors */
+    --success: 142.1 76.2% 36.3%;
+    --warning: 47.9 95.8% 53.1%;
+    --info: 199.9 89.1% 48.4%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    /* ... dark mode tokens ... */
+  }
+}
+```
+
+### Status color mapping (use consistently everywhere)
+
+| Status type | Green (success) | Yellow (warning) | Red (destructive) | Gray (muted) |
+|---|---|---|---|---|
+| Payment | Paid | Partial / Due soon | Overdue / Unpaid | — |
+| Complaint | Resolved | In progress | Rejected | Pending |
+| Hostel verification | Verified | Pending review | Rejected | Unverified |
+| Night status | Inside Hostel | Not Verified | SOS | Outside Hostel (neutral, not alarming) |
+| Bed/Room | Available | Reserved | Under repair | Occupied |
+| Maintenance request | Completed | Scheduled/Contacted | Cancelled | Pending |
+| Service provider | Approved | Pending | Rejected | Hidden |
+
+**Important:** "Outside Hostel" is a **neutral** status, not a warning — students leaving the hostel is normal life, not a red flag. Only "SOS" gets urgent red treatment.
+
+### Typography
+
+- One sans-serif variable font: **Inter** or **Geist** for everything — headings and body. Don't mix typefaces.
+- Scale: `text-xs` (12px) → `text-sm` (14px, default body) → `text-base` (16px) → `text-lg/xl/2xl` for section headers → `text-3xl/4xl` only on the public homepage hero.
+- Numbers (fees, amounts, counts) use tabular figures (`font-variant-numeric: tabular-nums`) wherever they appear in a table/list so digits align.
+
+### Spacing
+
+Tailwind's default scale (4px base unit). 
+- Card padding: `p-4` mobile / `p-6` desktop
+- Section gaps: `gap-6` to `gap-8`
+- Don't invent custom spacing values outside the scale
+
+### Icons
+
+`lucide-react` exclusively. Common ones to standardize early:
+- `MapPin` (location)
+- `Utensils` (food)
+- `ShieldCheck` (verification)
+- `AlertTriangle` (SOS/emergency)
+- `Wrench` (maintenance)
+- `Users` (residents)
+- `Receipt` (payments)
+- `Bell` (notifications)
+- `QrCode` (QR activation)
+- `Home` (hostel/room)
+- `Bed` (bed status)
+
+---
+
+## 3. Layout Per Portal
+
+| Portal | Shell | Nav pattern |
+|---|---|---|
+| Public | Top nav + footer, full-width hero on home | Search bar prominent above the fold |
+| Superadmin | Sidebar + top bar | Sidebar sections: Dashboard, Hostels, Verification, Subscriptions, Reports, Reviews, Providers, Announcements |
+| Platform Moderator | Sidebar + top bar (fewer items than superadmin) | Dashboard, Hostels, Reviews, Providers, Reports |
+| Hostel Admin/Warden | Sidebar + top bar (warden sees fewer sidebar items, permission-gated) | Dashboard, Profile, Rooms & Beds, Residents, Payments, Food, Notices, Complaints, Night Status, Maintenance |
+| Resident (web) | Top nav with tabs or sidebar on desktop | Home, Payments, Food, Notices, Complaints, Profile |
+| Resident (mobile - Phase 6) | Bottom tab nav | Home, Payments, Food, Notices, More |
+| Guardian | Single-page simplified dashboard, no sidebar | Just the summary cards — simplest portal in the whole product |
+
+---
+
+## 4. Key Screens & Components (Build These as Shared Components)
+
+### HostelCard
+Used in: listing grid, comparison tray, search results
+
+Fields:
+- Photo (first from photos array)
+- Name
+- Price per bed (monthly)
+- Gender-type badge (boys/girls/co-living)
+- Verification badge (if verified)
+- Star rating (average overall)
+- Distance to college (if college filter active)
+
+States:
+- Default
+- Hover (subtle shadow increase)
+- Selected (for comparison - highlighted border)
+
+### VerificationBadge
+Small, consistent badge component (`ShieldCheck` icon + label) used anywhere a hostel appears.
+
+States:
+- Verified (green bg, "Verified" text)
+- Pending (yellow bg, "Pending Verification")
+- Unverified (gray bg, "Unverified")
+
+Never claim "Government Verified" — platform verification only.
+
+### StatusBadge
+Generic badge driven by the status-color mapping table above. Every status field in the product should render through this one component, not ad-hoc `<span>` colors.
+
+Props:
+- `status: string` (the raw status value)
+- `type: 'payment' | 'complaint' | 'hostel' | 'nightStatus' | 'bed' | 'maintenance' | 'provider'`
+
+Maps status to color automatically based on type.
+
+### RoomBedMap
+Visual floor → room → bed grid (source brief §7.2).
+
+Layout:
+- Floor selector (tabs or dropdown)
+- Room cards in grid
+- Each room shows bed tiles, color-coded by `BedStatus`:
+  - Available: green
+  - Occupied: gray
+  - Reserved: yellow
+  - Under Repair: red
+
+Interactions:
+- Click bed → shows resident info (if occupied) or "assign resident" action (if available)
+- Drag-and-drop to reassign resident (Phase 5 enhancement, optional)
+
+### PaymentSummaryCard
+Used on: resident dashboard, guardian dashboard (stripped-down version)
+
+Resident version shows:
+- Month
+- Amount due
+- Amount paid
+- Status badge
+- Due date
+- "Upload proof" button (if unpaid/partial)
+- "View receipt" button (if paid)
+
+Guardian version shows (if permitted):
+- Month
+- Amount due / paid
+- Status badge
+- "View receipt" link (if `accessPermissions.receipts = true`)
+- NO upload proof button
+- NO raw proof images
+
+### NightStatusIndicator
+A calm, single-word badge (Inside / Outside / Not Verified / SOS).
+
+Styling:
+- Inside: green, calm
+- Outside: gray, neutral (NOT alarming)
+- Not Verified: yellow, neutral
+- SOS: red, pulsing animation, urgent
+
+Explicitly NOT a map or timeline. Just the badge.
+
+### ComplaintThread
+Complaint + its `ComplaintUpdate` history, shown the same way in resident and hostel-admin portals (mirrored component, different permissions).
+
+Layout:
+- Original complaint at top (title, description, photo if any, timestamp, status badge)
+- Updates in timeline below (admin messages + status changes)
+- Input box at bottom for new update (admin only) or "mark as resolved" button (resident confirmation)
+
+### InquiryForm
+Short, 4 fields max: name, phone, email (optional), message (optional).
+
+No login required. Submits to `/api/public/inquiries`.
+
+Appears on every hostel detail page.
+
+### NoticeFeed
+Chronological list, filterable by `NoticeCategory`.
+
+Used in:
+- Hostel-admin portal (compose + list)
+- Resident portal (read-only list)
+- Guardian dashboard (if permitted, filtered to guardian-visible only)
+
+Urgent notices have visual prominence (red accent, "Urgent" badge).
+
+### MaintenanceRequestCard
+Hostel-admin view of a request.
+
+Shows:
+- Category icon + name
+- Description
+- Urgency badge
+- Status stepper (Pending → Contacted → Scheduled → Completed)
+- Linked room/bed (if any)
+- Linked provider (if any) with contact button
+- Cost note (informational)
+
+---
+
+## 5. States Every List/Detail View Must Handle
+
+### Loading
+Use **skeleton** (not spinner) for cards/tables. shadcn/ui provides `Skeleton` component.
+
+Example: `<Skeleton className="h-20 w-full" />`
+
+Repeat for expected number of items.
+
+### Empty
+Short, helpful copy — never just a blank white area.
+
+Examples:
+- "No complaints yet — nice!" (resident complaints list)
+- "No residents registered. Add your first resident!" (hostel admin residents list)
+- "No inquiries yet. Share your hostel link to get started." (hostel admin inquiries)
+
+Include relevant CTA button.
+
+### Error
+Show error message + "Retry" button, not just a red toast that disappears.
+
+Use shadcn/ui `Alert` component with destructive variant.
+
+### Populated
+The actual data, paginated if list exceeds pageSize.
+
+---
+
+## 6. Accessibility
+
+**Interactive Elements:**
+- All keyboard-navigable (shadcn/ui/Radix gives this by default — don't override focus outlines)
+- Minimum tap target 44x44px on mobile web for all buttons/icons
+
+**Color:**
+- Color is never the only signal for status — every `StatusBadge` also carries a text label, not just a color dot
+- Contrast meets WCAG AA (4.5:1 for body text, 3:1 for large text)
+
+**Forms:**
+- Label every field (use shadcn/ui `Form` + `FormField` components)
+- Show inline validation errors from the shared Zod schemas (RULES.md/CODING_STANDARDS.md), not just a toast
+- Error messages in red, below the field
+
+**Images:**
+- Alt text on every image (hostel photos, food photos, profile pictures)
+- Decorative images use empty alt (`alt=""`) so screen readers skip them
+
+**Focus Management:**
+- When modal opens, focus goes to first interactive element
+- When modal closes, focus returns to trigger element
+- Tab order is logical (top to bottom, left to right)
+
+---
+
+## 7. Responsive Breakpoints
+
+Use Tailwind defaults:
+- `sm`: 640px
+- `md`: 768px
+- `lg`: 1024px
+- `xl`: 1280px
+- `2xl`: 1536px
+
+**Design mobile-first:**
+- Base styles = mobile (375px width)
+- Add `md:`/`lg:` overrides for larger screens
+- Don't design desktop-first and try to squeeze it into mobile — won't work
+
+**Critical breakpoints for this app:**
+- **375px (mobile)**: Public discovery, resident dashboard, guardian dashboard
+- **768px (tablet)**: Hostel admin portal switches from bottom nav to sidebar
+- **1024px (desktop)**: Full sidebar + content layout for all admin portals
+
+---
+
+## 8. Animation & Transitions
+
+**Use sparingly:**
+- Subtle transitions on hover (shadow, border color) — 150ms duration
+- Modal/dialog fade-in — 200ms
+- Status badge changes (e.g., payment verified) — subtle scale pulse once, 300ms
+
+**Don't animate:**
+- Large page transitions
+- List item additions/removals (just appear/disappear)
+- Data loading (use skeleton, not spinner animation)
+
+**SOS alert exception:**
+- SOS status badge pulses continuously (red glow) to draw attention
+- This is the ONLY continuously animated element in the app
+
+---
+
+## 9. Dark Mode (Optional for v1, Plan Ahead)
+
+- Tailwind supports dark mode via `dark:` prefix
+- shadcn/ui components are dark-mode ready
+- If deferring dark mode to post-launch, ensure all custom CSS uses Tailwind tokens (not hardcoded hex colors) so switching is easy later
+
+---
+
+## 10. What Not To Do
+
+**Don't:**
+- Build a custom date picker, custom dropdown, or custom modal — shadcn/ui already has these
+- Introduce a second icon set alongside lucide-react
+- Use absolute positioning for layout (use Flexbox/Grid)
+- Hardcode colors (use Tailwind tokens)
+- Mix font families (one variable font for the entire app)
+- Animate everything (subtle is better)
+- Use `<div>` for buttons (use `<button>` for semantics)
+- Skip focus states (accessibility requirement)
+- Build mobile views as an afterthought (mobile-first)
+
+**Do:**
+- Reuse shadcn/ui components
+- Keep spacing consistent (Tailwind scale)
+- Use semantic HTML (`<button>`, `<nav>`, `<main>`, `<header>`, `<footer>`)
+- Test on real mobile devices (not just browser DevTools)
+- Design forms to be forgiving (auto-format phone numbers, trim whitespace, etc.)
+- Show helpful error messages ("Email is required" not just "Invalid")
+- Make CTAs obvious (primary button styling, clear labels)
+- Keep the guardian dashboard extremely simple (one page, minimal UI)
+
+---
+
+_End of DESIGN.md_

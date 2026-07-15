@@ -27,9 +27,10 @@ export default function ResidentLayout({
     <PortalShell
       navItems={navItems}
       portalName="HostelHub"
-      searchPlaceholder="Search notices, menu..."
+      searchPlaceholder="Search menu, notices, payments..."
       subtitle="Resident Portal"
       tone="resident"
+      workspaceName="Resident"
     >
       {children}
     </PortalShell>

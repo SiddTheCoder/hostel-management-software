@@ -26,9 +26,10 @@ export default function PlatformLayout({
     <PortalShell
       navItems={navItems}
       portalName="HostelHub"
-      searchPlaceholder="Search hostels, residents..."
+      searchPlaceholder="Search hostels, users, invoices..."
       subtitle="Platform Owner Portal"
       tone="platform"
+      workspaceName="Platform Owner"
     >
       {children}
     </PortalShell>
