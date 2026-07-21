@@ -1,94 +1,48 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import {
-  AlertCircle,
-  AlertCircle as AlertIcon,
   ArrowRight,
-  BadgeCheck,
-  BedDouble,
-  Bell,
-  Building2,
-  Calendar,
-  CalendarDays,
-  Check,
+  Bath,
+  BookOpen,
+  Cctv,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Download,
-  Eye,
-  FileCheck2,
-  FileText,
-  Filter,
-  Grid2X2,
-  Heart,
-  HelpCircle,
+  Droplet,
+  Headphones,
   Home,
-  KeyRound,
-  List,
   LockKeyhole,
-  Mail,
-  MapPin,
   MessageSquare,
-  Moon,
-  MoreVertical,
-  Phone,
-  PhoneCall,
-  Plus,
-  QrCode,
+  MoreHorizontal,
   Search,
-  Send,
   ShieldCheck,
-  SlidersHorizontal,
+  Shirt,
+  SquareParking,
   Star,
-  Trash2,
-  Upload,
+  Tag,
   User,
   UserRound,
   Users,
   Utensils,
   Wifi,
-  WalletCards,
-  Wrench,
-  X,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 import { checkAuthWithRefresh } from "@/lib/auth-check";
 import { landingPathForRole } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
 
-import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
+import { HostelCard, PublicShell, StatusPill, formatMoney } from "./shared";
 import {
-  AnimatedPage,
-  Breadcrumbs,
-  FormField,
-  HostelCard,
-  HostelListCard,
-  MetricCard,
-  NepalBannerGraphic,
-  PublicShell,
-  SectionCard,
-  StatusPill,
-  TableView,
-  formatMoney,
-  humanize,
-  metricIcons,
-  type AuthMode,
-  type PortalKind,
-} from "./shared";
-import {
-  DEFAULT_HOSTEL_IMAGE,
-  mapPublicHostelToSummary,
-  type PublicHostel,
-} from "./public-hostel-data";
+  CITY_OPTIONS,
+  FACILITY_STATS,
+  HOSTEL_TYPE_STATS,
+  MOCK_HOSTELS,
+  TRUST_POINTS,
+} from "./public-home-mock-data";
 
 const PUBLIC_HERO_IMAGE =
   "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=80";
@@ -102,12 +56,61 @@ const DASHBOARD_ROLES = new Set([
   Role.GUARDIAN,
 ]);
 
+const BUDGET_THRESHOLD = 8000;
+
+const HOSTEL_TYPE_ICONS: Record<string, { icon: LucideIcon; tone: string }> = {
+  boys: { icon: User, tone: "bg-emerald-50 text-emerald-600" },
+  girls: { icon: UserRound, tone: "bg-rose-50 text-rose-600" },
+  "co-living": { icon: Users, tone: "bg-role-platform-soft text-role-platform" },
+};
+
+const FACILITY_ICONS: Record<string, LucideIcon> = {
+  "Attached Bathroom": Bath,
+  CCTV: Cctv,
+  "Food Included": Utensils,
+  Generator: Zap,
+  "Hot Water": Droplet,
+  Laundry: Shirt,
+  Parking: SquareParking,
+  "Study Room": BookOpen,
+  WiFi: Wifi,
+};
+
+const TRUST_ICONS: LucideIcon[] = [ShieldCheck, Tag, LockKeyhole, Star, Users, Headphones];
+
+function SectionHeading({
+  title,
+  subtitle,
+  action,
+  actionHref,
+}: {
+  title: string;
+  subtitle: string;
+  action?: string;
+  actionHref?: string;
+}) {
+  return (
+    <div className="mb-6 flex items-end justify-between gap-4">
+      <div>
+        <h2 className="text-xl font-extrabold text-foreground">{title}</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+      </div>
+      {action && actionHref ? (
+        <Link
+          className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-brand-teal hover:underline"
+          href={actionHref}
+        >
+          {action} <ArrowRight className="size-3.5" />
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
 function PublicHomePageContent() {
   const router = useRouter();
   const [searchVal, setSearchVal] = useState("");
-  const [featuredHostels, setFeaturedHostels] = useState<
-    ReturnType<typeof mapPublicHostelToSummary>[]
-  >([]);
+  const [selectedCity, setSelectedCity] = useState(CITY_OPTIONS[0]);
 
   useEffect(() => {
     async function redirectIfDashboardRole() {
@@ -128,56 +131,21 @@ function PublicHomePageContent() {
     void redirectIfDashboardRole();
   }, [router]);
 
-  useEffect(() => {
-    async function loadFeaturedHostels() {
-      try {
-        const data = await browserApi<{ hostels: PublicHostel[] }>(
-          "/api/v1/public/hostels",
-        );
+  const featuredHostels = [...MOCK_HOSTELS]
+    .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
+    .slice(0, 4);
 
-        setFeaturedHostels(
-          data.hostels
-            .map(mapPublicHostelToSummary)
-            .filter((hostel) => hostel.verified)
-            .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
-            .slice(0, 4),
-        );
-      } catch {
-        setFeaturedHostels([]);
-      }
-    }
+  const popularHostels = MOCK_HOSTELS.filter((hostel) => hostel.city === selectedCity)
+    .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
+    .slice(0, 4);
 
-    void loadFeaturedHostels();
-  }, []);
+  const budgetHostels = MOCK_HOSTELS.filter((hostel) => hostel.price <= BUDGET_THRESHOLD)
+    .sort((a, b) => a.price - b.price)
+    .slice(0, 4);
+
+  const newlyListedHostels = MOCK_HOSTELS.filter((hostel) => hostel.isNew).slice(0, 4);
 
   const heroHostel = featuredHostels[0];
-
-  const landingLinks = [
-    {
-      desc: "Explore verified listings with pricing, rooms, reviews, and vacancy.",
-      href: "/hostels",
-      icon: Home,
-      title: "Browse Hostels",
-    },
-    {
-      desc: "Compare rent, location, facilities, food score, and ratings side by side.",
-      href: "/compare",
-      icon: Users,
-      title: "Compare Options",
-    },
-    {
-      desc: "Send your room preference directly to a verified hostel team.",
-      href: "/inquiry",
-      icon: MessageSquare,
-      title: "Send Inquiry",
-    },
-    {
-      desc: "List your hostel and manage discovery, inquiries, rooms, and trust checks.",
-      href: "/hostels/register",
-      icon: Building2,
-      title: "Register Hostel",
-    },
-  ];
 
   const footerGroups = [
     {
@@ -277,7 +245,7 @@ function PublicHomePageContent() {
               <div
                 className="size-24 rounded-lg bg-cover bg-center shrink-0 shadow-sm"
                 style={{
-                  backgroundImage: `url("${heroHostel?.image ?? DEFAULT_HOSTEL_IMAGE}")`,
+                  backgroundImage: `url("${heroHostel?.image ?? PUBLIC_HERO_IMAGE}")`,
                 }}
               />
               <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
@@ -323,119 +291,222 @@ function PublicHomePageContent() {
 
       {/* Featured verified hostels */}
       <section className="mx-auto max-w-[1448px] px-6 pb-12 pt-4">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-extrabold text-foreground">
-              Featured Verified Hostels
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Explore verified options recommended for you
-            </p>
-          </div>
-          <Link
-            className="inline-flex items-center gap-1 text-xs font-bold text-brand-teal hover:underline"
-            href="/hostels"
-          >
-            View all hostels <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
+        <SectionHeading
+          action="View all hostels"
+          actionHref="/hostels"
+          subtitle="Top-rated and verified hostels for students"
+          title="Featured Verified Hostels"
+        />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredHostels.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-              Published and verified hostels from the database will appear here.
-            </div>
-          ) : null}
           {featuredHostels.map((hostel) => (
             <HostelCard hostel={hostel} key={hostel.id} />
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1448px] px-6 pb-12">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {landingLinks.map((item) => {
-            const Icon = item.icon;
+      {/* Popular near you */}
+      <section className="bg-surface py-12">
+        <div className="mx-auto max-w-[1448px] px-6">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-extrabold text-foreground">
+                Popular in {selectedCity}
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Explore the most loved hostels in your chosen city
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {CITY_OPTIONS.map((city) => (
+                <button
+                  className={cn(
+                    "rounded-full border px-3.5 py-1.5 text-xs font-bold transition",
+                    city === selectedCity
+                      ? "border-brand-teal bg-brand-teal text-white"
+                      : "border-border bg-card text-foreground hover:border-brand-teal/40",
+                  )}
+                  key={city}
+                  onClick={() => setSelectedCity(city)}
+                  type="button"
+                >
+                  {city}
+                </button>
+              ))}
+              <Link
+                className="inline-flex items-center gap-1 pl-2 text-xs font-bold text-brand-teal hover:underline"
+                href="/hostels"
+              >
+                View all <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {popularHostels.length === 0 ? (
+              <div className="col-span-full rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                No hostels listed in {selectedCity} yet.
+              </div>
+            ) : null}
+            {popularHostels.map((hostel) => (
+              <HostelCard hostel={hostel} key={hostel.id} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Browse by hostel type */}
+      <section className="mx-auto max-w-[1448px] px-6 py-12">
+        <SectionHeading
+          action="View all types"
+          actionHref="/hostels"
+          subtitle="Find the perfect space that suits your lifestyle"
+          title="Browse by Hostel Type"
+        />
+        <div className="grid gap-4 sm:grid-cols-3">
+          {HOSTEL_TYPE_STATS.map((item) => {
+            const meta = HOSTEL_TYPE_ICONS[item.type];
+            const Icon = meta.icon;
             return (
               <Link
-                className="group rounded-xl border border-border/80 bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-teal/40 hover:shadow-md"
-                href={item.href}
-                key={item.title}
+                className="group flex items-start justify-between gap-3 rounded-xl border border-border/80 bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-teal/40 hover:shadow-md"
+                href={{ pathname: "/hostels", query: { type: item.type } }}
+                key={item.type}
               >
-                <span className="flex size-11 items-center justify-center rounded-lg bg-muted text-brand-teal ring-1 ring-border transition group-hover:bg-brand-teal group-hover:text-white">
-                  <Icon className="size-5" />
-                </span>
-                <div className="mt-5 flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <span
+                    className={cn(
+                      "flex size-12 shrink-0 items-center justify-center rounded-xl",
+                      meta.tone,
+                    )}
+                  >
+                    <Icon className="size-6" />
+                  </span>
                   <div>
-                    <h3 className="text-base font-extrabold text-foreground">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                      {item.desc}
+                    <p className="font-extrabold text-sm text-foreground">{item.label}</p>
+                    <p className="text-[11px] font-bold text-muted-foreground">
+                      {item.count}
+                    </p>
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground max-w-[180px]">
+                      {item.description}
                     </p>
                   </div>
-                  <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-brand-teal" />
                 </div>
+                <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-brand-teal" />
               </Link>
             );
           })}
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1448px] px-6 pb-12">
-        <Link
-          className="group grid overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition hover:border-brand-teal/40 hover:shadow-md lg:grid-cols-[0.78fr_1fr]"
-          href="/service-providers/register"
-        >
-          <div className="relative min-h-[260px] bg-slate-900">
-            <div
-              className="absolute inset-0 bg-cover bg-center opacity-80 transition duration-500 group-hover:scale-105"
-              style={{ backgroundImage: `url("${PUBLIC_HERO_IMAGE}")` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/40 to-brand-teal/50" />
-            <div className="relative flex h-full flex-col justify-between p-7 text-white">
-              <StatusPill className="w-fit bg-surface text-brand-teal" tone="teal">
-                Service Providers
-              </StatusPill>
-              <div>
-                <p className="text-3xl font-extrabold leading-tight">
-                  Maintenance, food, cleaning, internet, and safety partners
-                </p>
-                <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/80">
-                  Grow your local service business with verified hostel operators.
-                </p>
-              </div>
-            </div>
+      {/* Budget friendly picks */}
+      <section className="bg-surface py-12">
+        <div className="mx-auto max-w-[1448px] px-6">
+          <SectionHeading
+            action="View all"
+            actionHref="/hostels"
+            subtitle={`Great hostels under ${formatMoney(BUDGET_THRESHOLD)}/month`}
+            title="Budget-Friendly Picks"
+          />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {budgetHostels.map((hostel) => (
+              <HostelCard hostel={hostel} key={hostel.id} />
+            ))}
           </div>
-          <div className="flex flex-col justify-center p-7 lg:p-9">
-            <p className="text-xs font-bold uppercase tracking-wider text-brand-teal">
-              Provider Network
-            </p>
-            <h2 className="mt-3 text-2xl font-extrabold text-foreground">
-              Join HostelHub as a verified service provider
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Service providers can register once, showcase availability, and receive
-              hostel maintenance or operations leads from one dedicated page.
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {["Cleaning", "Maintenance", "Food Supply"].map((item) => (
-                <span
-                  className="rounded-lg border border-border bg-muted px-3 py-3 text-xs font-bold text-foreground"
-                  key={item}
+        </div>
+      </section>
+
+      {/* Newly listed */}
+      <section className="mx-auto max-w-[1448px] px-6 py-12">
+        <SectionHeading
+          action="View all"
+          actionHref="/hostels"
+          subtitle="Recently added hostels"
+          title="Newly Listed"
+        />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {newlyListedHostels.map((hostel) => (
+            <HostelCard hostel={hostel} key={hostel.id} />
+          ))}
+        </div>
+      </section>
+
+      {/* Browse by facility */}
+      <section className="bg-surface py-12">
+        <div className="mx-auto max-w-[1448px] px-6">
+          <SectionHeading
+            action="View all facilities"
+            actionHref="/hostels"
+            subtitle="Find hostels with the facilities you need"
+            title="Browse by Facility"
+          />
+          <div className="flex flex-wrap gap-3">
+            {FACILITY_STATS.map((facility) => {
+              const Icon = FACILITY_ICONS[facility.label] ?? Wifi;
+              return (
+                <Link
+                  className="flex min-w-[120px] flex-1 items-center gap-3 rounded-xl border border-border/80 bg-card px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-teal/40 hover:shadow-md"
+                  href={{ pathname: "/hostels", query: { facility: facility.label } }}
+                  key={facility.label}
                 >
-                  {item}
-                </span>
-              ))}
-            </div>
-            <span className="mt-7 inline-flex w-fit items-center gap-2 rounded-lg bg-brand-teal px-5 py-3 text-sm font-bold text-white transition group-hover:brightness-105">
-              Open provider page <ArrowRight className="size-4" />
-            </span>
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-teal-soft/40 text-brand-teal">
+                    <Icon className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{facility.label}</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground">
+                      {facility.count}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+            <Link
+              className="flex size-[52px] shrink-0 items-center justify-center rounded-xl border border-border/80 bg-card text-muted-foreground shadow-sm transition hover:border-brand-teal/40 hover:text-brand-teal"
+              href="/hostels"
+            >
+              <MoreHorizontal className="size-5" />
+            </Link>
           </div>
-        </Link>
+        </div>
+      </section>
+
+      {/* Why students trust HostelHub */}
+      <section className="bg-muted/40 py-14">
+        <div className="mx-auto max-w-[1448px] px-6 text-center">
+          <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-brand-teal text-white">
+            <ShieldCheck className="size-6" />
+          </span>
+          <h2 className="mt-4 font-heading text-2xl font-extrabold text-foreground sm:text-3xl">
+            Why students trust HostelHub
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We prioritise your safety, comfort, and peace of mind.
+          </p>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {TRUST_POINTS.map((point, index) => {
+              const Icon = TRUST_ICONS[index];
+              return (
+                <div
+                  className="rounded-xl border border-border/80 bg-card p-5 text-left shadow-sm"
+                  key={point.title}
+                >
+                  <span className="flex size-11 items-center justify-center rounded-full bg-brand-teal-soft/40 text-brand-teal">
+                    <Icon className="size-5" />
+                  </span>
+                  <p className="mt-4 text-sm font-extrabold text-foreground">
+                    {point.title}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                    {point.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* How it works */}
-      <section className="mx-auto mb-12 max-w-[1448px] px-6">
+      <section className="mx-auto mb-12 mt-12 max-w-[1448px] px-6">
         <div className="rounded-xl border border-border/80 bg-surface p-8 shadow-sm">
           <h2 className="text-xl font-extrabold text-foreground">How it works</h2>
           <p className="mt-1 text-sm text-muted-foreground font-medium">
