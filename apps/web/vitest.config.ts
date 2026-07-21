@@ -8,6 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(dirname, "src"),
+      "@hostel/db": path.resolve(dirname, "../../packages/db/src"),
+      "@hostel/shared": path.resolve(dirname, "../../packages/shared/src"),
     },
   },
   test: {

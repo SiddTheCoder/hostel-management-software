@@ -7,7 +7,7 @@ import { existsSync } from "fs";
 import { loadApiPrincipal } from "@/lib/api-auth";
 import { handleRouteError, successResponse, errorResponse } from "@/lib/api-response";
 import { generateFileKey, getR2Client } from "@/lib/r2";
-import { FileAssetModel } from "@/models/FileAsset";
+import { FileAssetModel } from "@hostel/db/models/FileAsset";
 
 export const runtime = "nodejs";
 

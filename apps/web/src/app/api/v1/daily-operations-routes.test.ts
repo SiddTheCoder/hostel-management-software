@@ -160,7 +160,7 @@ const guardianPrincipal = {
 
 const platformPrincipal = {
   hostelIds: [],
-  role: Role.PLATFORM_OWNER,
+  role: Role.SUPERADMIN,
   sessionId: "session-4",
   userId,
 };

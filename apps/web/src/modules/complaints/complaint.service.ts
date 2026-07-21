@@ -4,10 +4,10 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { ComplaintAttachmentModel } from "@/models/ComplaintAttachment";
-import { ComplaintModel } from "@/models/Complaint";
-import { ComplaintUpdateModel } from "@/models/ComplaintUpdate";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { ComplaintAttachmentModel } from "@hostel/db/models/ComplaintAttachment";
+import { ComplaintModel } from "@hostel/db/models/Complaint";
+import { ComplaintUpdateModel } from "@hostel/db/models/ComplaintUpdate";
 import {
   findCurrentResident,
   normalizeObjectId,

@@ -64,6 +64,30 @@ vi.mock("@/modules/hostels/hostel.service", () => ({
   unpublishPlatformHostel: routeMocks.unpublishPlatformHostel,
 }));
 
+vi.mock("@/modules/hostels/hostel-inquiry.service", () => ({
+  addHostelAdminInquiryNote: routeMocks.addHostelAdminInquiryNote,
+  listHostelAdminInquiries: routeMocks.listHostelAdminInquiries,
+  updateHostelAdminInquiryStatus: routeMocks.updateHostelAdminInquiryStatus,
+}));
+
+vi.mock("@/modules/hostels/hostel-profile.service", () => ({
+  addHostelAdminProfilePhoto: routeMocks.addHostelAdminProfilePhoto,
+  deleteHostelAdminProfilePhoto: routeMocks.deleteHostelAdminProfilePhoto,
+  getHostelAdminProfile: routeMocks.getHostelAdminProfile,
+  updateHostelAdminProfile: routeMocks.updateHostelAdminProfile,
+}));
+
+vi.mock("@/modules/hostels/hostel-spatial.service", () => ({
+  createHostelAdminBed: routeMocks.createHostelAdminBed,
+  createHostelAdminFloor: routeMocks.createHostelAdminFloor,
+  createHostelAdminRoom: routeMocks.createHostelAdminRoom,
+  getHostelAdminRoomMap: routeMocks.getHostelAdminRoomMap,
+  listHostelAdminFloors: routeMocks.listHostelAdminFloors,
+  listHostelAdminRooms: routeMocks.listHostelAdminRooms,
+  updateHostelAdminBed: routeMocks.updateHostelAdminBed,
+  updateHostelAdminRoom: routeMocks.updateHostelAdminRoom,
+}));
+
 import * as adminBedDetailRoute from "@/app/api/v1/hostel-admin/beds/[id]/route";
 import * as adminBedsRoute from "@/app/api/v1/hostel-admin/beds/route";
 import * as adminFloorsRoute from "@/app/api/v1/hostel-admin/floors/route";
@@ -88,7 +112,7 @@ import * as publicHostelsRoute from "@/app/api/v1/public/hostels/route";
 
 const principal = {
   hostelIds: [],
-  role: "PLATFORM_OWNER",
+  role: "SUPERADMIN",
   sessionId: "session-1",
   userId: "64f0f0f0f0f0f0f0f0f0f0f1",
 };

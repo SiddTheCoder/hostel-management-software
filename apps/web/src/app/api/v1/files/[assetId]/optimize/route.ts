@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { loadApiPrincipal } from "@/lib/api-auth";
 import { handleRouteError, successResponse, errorResponse } from "@/lib/api-response";
 import { optimizeImage } from "@/lib/image-optimizer";
-import { FileAssetModel } from "@/models/FileAsset";
+import { FileAssetModel } from "@hostel/db/models/FileAsset";
 
 export const runtime = "nodejs";
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     if (
       fileAsset.ownerId?.toString() !== principal.userId &&
-      principal.role !== "PLATFORM_OWNER"
+      principal.role !== "SUPERADMIN"
     ) {
       return errorResponse("Access denied", "FORBIDDEN", 403);
     }

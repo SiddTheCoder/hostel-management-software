@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useCallback, useState, useEffect, useRef, type FormEvent } from "react";
+import { Suspense, useCallback, useState, useEffect, useRef, type FormEvent } from "react";
 
 import { destinationForRole } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
@@ -80,6 +80,14 @@ async function authRequest<T>(path: string, body: unknown) {
 }
 
 export function SignupForm({ googleClientId }: SignupFormProps) {
+  return (
+    <Suspense fallback={null}>
+      <SignupFormContent googleClientId={googleClientId} />
+    </Suspense>
+  );
+}
+
+function SignupFormContent({ googleClientId }: SignupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -263,7 +271,7 @@ export function SignupForm({ googleClientId }: SignupFormProps) {
         password,
       });
 
-      redirectAfterAuth(Role.PUBLIC_USER);
+      redirectAfterAuth(Role.PUBLIC);
     } catch (signupError) {
       setError(
         signupError instanceof Error

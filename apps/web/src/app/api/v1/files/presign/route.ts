@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { loadApiPrincipal } from "@/lib/api-auth";
 import { handleRouteError, successResponse, errorResponse } from "@/lib/api-response";
 import { validateFileAssetMetadata } from "@/lib/file-assets";
-import { FileAssetModel } from "@/models/FileAsset";
+import { FileAssetModel } from "@hostel/db/models/FileAsset";
 import { getPresignedUploadUrl, generateFileKey } from "@/lib/r2";
 
 export const runtime = "nodejs";

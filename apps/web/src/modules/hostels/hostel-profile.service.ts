@@ -1,5 +1,5 @@
 import { connectToDatabase } from "@/lib/db";
-import { HostelModel } from "@/models/Hostel";
+import { HostelModel } from "@hostel/db/models/Hostel";
 import type {
   hostelAdminProfileQuerySchema,
   hostelAdminProfileUpdateSchema,
@@ -13,6 +13,7 @@ import {
   serializeHostel,
   auditHostelAction,
   definedUpdate,
+  type HostelRecord,
 } from "@/modules/hostels/hostel.service";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import type { z } from "zod";

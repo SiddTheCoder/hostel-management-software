@@ -3,10 +3,10 @@ import type { z } from "zod";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { AuditLogModel } from "@/models/AuditLog";
-import { ServiceProviderApplicationModel } from "@/models/ServiceProviderApplication";
-import { ServiceProviderDocumentModel } from "@/models/ServiceProviderDocument";
-import { ServiceProviderModel } from "@/models/ServiceProvider";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { ServiceProviderApplicationModel } from "@hostel/db/models/ServiceProviderApplication";
+import { ServiceProviderDocumentModel } from "@hostel/db/models/ServiceProviderDocument";
+import { ServiceProviderModel } from "@hostel/db/models/ServiceProvider";
 import type {
   hostelAdminServiceProviderListQuerySchema,
   platformServiceProviderListQuerySchema,

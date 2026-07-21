@@ -4,12 +4,12 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { InquiryModel } from "@/models/Inquiry";
-import { ReferralCodeModel } from "@/models/ReferralCode";
-import { ReferralModel } from "@/models/Referral";
-import { ReferralRewardModel } from "@/models/ReferralReward";
-import { ResidentModel } from "@/models/Resident";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { InquiryModel } from "@hostel/db/models/Inquiry";
+import { ReferralCodeModel } from "@hostel/db/models/ReferralCode";
+import { ReferralModel } from "@hostel/db/models/Referral";
+import { ReferralRewardModel } from "@hostel/db/models/ReferralReward";
+import { ResidentModel } from "@hostel/db/models/Resident";
 import {
   findCurrentResident,
   normalizeObjectId,

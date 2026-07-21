@@ -39,7 +39,7 @@ await mongoose.connect(process.env.MONGODB_URI, {
 
 const passwordHash = await bcrypt.hash(password, 12);
 const user = await User.findOneAndUpdate(
-  { email, role: "PLATFORM_OWNER" },
+  { email, role: "SUPERADMIN" },
   {
     $set: {
       isDeleted: false,
@@ -57,7 +57,7 @@ const user = await User.findOneAndUpdate(
 await mongoose.disconnect();
 
 if (!user) {
-  throw new Error("No PLATFORM_OWNER account matched ADMIN_RECOVERY_EMAIL.");
+  throw new Error("No SUPERADMIN account matched ADMIN_RECOVERY_EMAIL.");
 }
 
 console.log("Platform owner recovery complete:");

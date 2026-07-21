@@ -58,7 +58,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { Suspense, useMemo, useState, type FormEvent, type ReactNode } from "react";
 
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
@@ -81,7 +81,7 @@ import {
   type PortalKind,
 } from "./shared";
 
-export function ServiceProviderRegistrationPage() {
+function ServiceProviderRegistrationPageContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -276,5 +276,13 @@ export function ServiceProviderRegistrationPage() {
         </SectionCard>
       </section>
     </PublicShell>
+  );
+}
+
+export function ServiceProviderRegistrationPage() {
+  return (
+    <Suspense fallback={null}>
+      <ServiceProviderRegistrationPageContent />
+    </Suspense>
   );
 }

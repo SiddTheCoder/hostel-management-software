@@ -2,9 +2,9 @@ import { Types } from "mongoose";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { AuditLogModel } from "@/models/AuditLog";
-import { InquiryModel } from "@/models/Inquiry";
-import { InquiryNoteModel } from "@/models/InquiryNote";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { InquiryModel } from "@hostel/db/models/Inquiry";
+import { InquiryNoteModel } from "@hostel/db/models/InquiryNote";
 import type {
   hostelAdminInquiryListQuerySchema,
   hostelAdminInquiryStatusSchema,

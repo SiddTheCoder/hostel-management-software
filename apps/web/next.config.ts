@@ -11,6 +11,10 @@ const { loadEnvConfig } = require("@next/env") as typeof import("@next/env");
 loadEnvConfig(repoRoot);
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@hostel/db", "@hostel/shared"],
+  turbopack: {
+    root: repoRoot,
+  },
   env: {
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

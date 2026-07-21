@@ -5,14 +5,16 @@ export type Principal = {
   userId: string;
 };
 
-export const HOSTEL_STAFF_ROLES = [Role.HOSTEL_OWNER, Role.HOSTEL_ADMIN, Role.WARDEN];
+export const HOSTEL_STAFF_ROLES = [Role.HOSTEL_ADMIN, Role.WARDEN];
+
+export const PLATFORM_ROLES = [Role.SUPERADMIN, Role.PLATFORM_MODERATOR];
 
 export const AUTHENTICATED_ROLES = [
-  Role.PLATFORM_OWNER,
+  ...PLATFORM_ROLES,
   ...HOSTEL_STAFF_ROLES,
+  Role.COOK,
   Role.RESIDENT,
   Role.GUARDIAN,
-  Role.SERVICE_PROVIDER,
 ];
 
 export class PermissionError extends Error {

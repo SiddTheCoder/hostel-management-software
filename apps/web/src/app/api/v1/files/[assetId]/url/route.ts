@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { loadApiPrincipal } from "@/lib/api-auth";
 import { handleRouteError, errorResponse } from "@/lib/api-response";
 import { getPresignedReadUrl } from "@/lib/r2";
-import { FileAssetModel } from "@/models/FileAsset";
+import { FileAssetModel } from "@hostel/db/models/FileAsset";
 
 export const runtime = "nodejs";
 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
         fileAsset.ownerId?.toString() !== principal.userId &&
         fileAsset.hostelId &&
         !principal.hostelIds.includes(fileAsset.hostelId.toString()) &&
-        principal.role !== "PLATFORM_OWNER"
+        principal.role !== "SUPERADMIN"
       ) {
         return errorResponse("Access denied", "FORBIDDEN", 403);
       }

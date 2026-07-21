@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,7 @@ function budgetQuery(value: string) {
   return {};
 }
 
-export function PublicHostelListingPage() {
+function PublicHostelListingPageContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams ? searchParams.get("search") || "" : "";
 
@@ -551,5 +551,13 @@ export function PublicHostelListingPage() {
         </div>
       </div>
     </PublicShell>
+  );
+}
+
+export function PublicHostelListingPage() {
+  return (
+    <Suspense fallback={null}>
+      <PublicHostelListingPageContent />
+    </Suspense>
   );
 }

@@ -23,13 +23,13 @@ vi.mock("@/lib/db", () => ({
   connectToDatabase: serviceMocks.connectToDatabase,
 }));
 
-vi.mock("@/models/AuditLog", () => ({
+vi.mock("@hostel/db/models/AuditLog", () => ({
   AuditLogModel: {
     create: serviceMocks.auditCreate,
   },
 }));
 
-vi.mock("@/models/Bed", () => ({
+vi.mock("@hostel/db/models/Bed", () => ({
   BedModel: {
     countDocuments: serviceMocks.bedCountDocuments,
     findOne: serviceMocks.bedFindOne,
@@ -37,19 +37,19 @@ vi.mock("@/models/Bed", () => ({
   },
 }));
 
-vi.mock("@/models/EmergencyContact", () => ({
+vi.mock("@hostel/db/models/EmergencyContact", () => ({
   EmergencyContactModel: {
     create: serviceMocks.emergencyContactCreate,
   },
 }));
 
-vi.mock("@/models/Guardian", () => ({
+vi.mock("@hostel/db/models/Guardian", () => ({
   GuardianModel: {
     create: serviceMocks.guardianCreate,
   },
 }));
 
-vi.mock("@/models/Resident", () => ({
+vi.mock("@hostel/db/models/Resident", () => ({
   ResidentModel: {
     create: serviceMocks.residentCreate,
     find: serviceMocks.residentFind,
@@ -58,7 +58,7 @@ vi.mock("@/models/Resident", () => ({
   },
 }));
 
-vi.mock("@/models/Room", () => ({
+vi.mock("@hostel/db/models/Room", () => ({
   RoomModel: {
     findOne: serviceMocks.roomFindOne,
     updateOne: serviceMocks.roomUpdateOne,

@@ -1,4 +1,52 @@
-# hostel-management-software
+# Multi-Hostel SaaS Platform
+
+Multi-tenant hostel management platform for Nepal — public hostel discovery, hostel admin operations, resident portal, guardian view, and platform-owner administration. Built per the canonical spec in [`docs/`](docs/README.md).
+
+## Monorepo Layout
+
+```
+apps/web          Next.js (App Router) — web app + REST API route handlers
+apps/mobile       React Native + Expo (Phase 6)
+packages/db       Mongoose connection, models, seed & migration scripts
+packages/shared   Shared enums/roles, Zod schemas, email sender + templates
+docs/             Canonical project documentation (read docs/README.md first)
+```
+
+Workspaces are managed with npm workspaces + Turborepo (`turbo.json`).
+
+## Local Setup
+
+```bash
+# 1. Install dependencies (root — installs all workspaces)
+npm install
+
+# 2. Configure environment
+#    Copy .env.example to .env at the repo root and fill in values.
+#    Minimum for local dev: MONGODB_URI, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET,
+#    SEED_SUPERADMIN_EMAIL, SEED_SUPERADMIN_PASSWORD.
+
+# 3. Seed the initial SUPERADMIN account
+npm run db:seed
+
+# 4. Run the web app
+npm run web:dev     # http://localhost:3000
+```
+
+## Common Commands
+
+| Command | What it does |
+|---|---|
+| `npm run web:dev` | Start the Next.js dev server |
+| `npm run web:build` | Production build |
+| `npm run web:test` | Run the vitest suite |
+| `npm run web:lint` | ESLint |
+| `npm --prefix apps/web run typecheck` | TypeScript check |
+| `npm run db:seed` | Seed/refresh the SUPERADMIN account |
+| `node --experimental-transform-types packages/db/src/migrate-roles.ts` | One-shot legacy→canonical role migration |
+
+## Documentation
+
+All product/architecture rules live in [`docs/`](docs/README.md) — read in the order listed there (`PRD.md` → `ARCHITECTURE.md` → `PHASES.md` → `RULES.md` → `MEMORY.md`). The current build phase and running project state are tracked in [`docs/MEMORY.md`](docs/MEMORY.md).
 
 ## Agent Context
 

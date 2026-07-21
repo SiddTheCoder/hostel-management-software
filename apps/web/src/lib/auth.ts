@@ -120,6 +120,45 @@ async function verifyToken(
   return payload as AuthTokenPayload;
 }
 
+export type PurposeTokenPurpose = "verify-email" | "password-reset";
+
+export type PurposeTokenPayload = JWTPayload & {
+  tokenType: PurposeTokenPurpose;
+  tokenVersion?: number;
+};
+
+/**
+ * Single-purpose tokens for email links (verification, password reset).
+ * Signed with the access secret but a distinct tokenType, so they can never
+ * be replayed as access/refresh tokens.
+ */
+export async function signPurposeToken(input: {
+  userId: string;
+  purpose: PurposeTokenPurpose;
+  ttlSeconds: number;
+  tokenVersion?: number;
+}) {
+  return new SignJWT({
+    tokenType: input.purpose,
+    ...(input.tokenVersion !== undefined ? { tokenVersion: input.tokenVersion } : {}),
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(input.userId)
+    .setIssuedAt()
+    .setExpirationTime(`${input.ttlSeconds}s`)
+    .sign(jwtSecret("JWT_ACCESS_SECRET"));
+}
+
+export async function verifyPurposeToken(token: string, purpose: PurposeTokenPurpose) {
+  const { payload } = await jwtVerify(token, jwtSecret("JWT_ACCESS_SECRET"));
+
+  if (payload.tokenType !== purpose || !payload.sub) {
+    throw new Error("Invalid token.");
+  }
+
+  return payload as PurposeTokenPayload;
+}
+
 export function getBearerToken(authorizationHeader: string | null) {
   if (!authorizationHeader?.startsWith("Bearer ")) {
     return null;

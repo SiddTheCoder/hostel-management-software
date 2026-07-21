@@ -4,9 +4,9 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { NoticeModel } from "@/models/Notice";
-import { NoticeReadStatusModel } from "@/models/NoticeReadStatus";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { NoticeModel } from "@hostel/db/models/Notice";
+import { NoticeReadStatusModel } from "@hostel/db/models/NoticeReadStatus";
 import {
   findCurrentResident,
   normalizeObjectId,

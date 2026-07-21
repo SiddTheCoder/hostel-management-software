@@ -13,7 +13,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
@@ -40,7 +40,7 @@ function slugifyRoom(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export function PublicInquiryPage() {
+function PublicInquiryPageContent() {
   const searchParams = useSearchParams();
   const hostelSlug = searchParams
     ? searchParams.get("hostel") || "green-view-hostel"
@@ -470,5 +470,13 @@ export function PublicInquiryPage() {
         </div>
       </section>
     </PublicShell>
+  );
+}
+
+export function PublicInquiryPage() {
+  return (
+    <Suspense fallback={null}>
+      <PublicInquiryPageContent />
+    </Suspense>
   );
 }

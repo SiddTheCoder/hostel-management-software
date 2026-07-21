@@ -7,7 +7,7 @@ import { existsSync } from "fs";
 import { handleRouteError, successResponse, errorResponse } from "@/lib/api-response";
 import { rateLimitPublicForm } from "@/lib/rate-limit";
 import { generateFileKey, getR2Client } from "@/lib/r2";
-import { FileAssetModel } from "@/models/FileAsset";
+import { FileAssetModel } from "@hostel/db/models/FileAsset";
 
 export const runtime = "nodejs";
 

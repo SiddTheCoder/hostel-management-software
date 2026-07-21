@@ -7,10 +7,10 @@ import { hashToken } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { Role } from "@/lib/roles";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { QRActivationModel } from "@/models/QRActivation";
-import { ResidentModel } from "@/models/Resident";
-import { UserModel } from "@/models/User";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { QRActivationModel } from "@hostel/db/models/QRActivation";
+import { ResidentModel } from "@hostel/db/models/Resident";
+import { UserModel } from "@hostel/db/models/User";
 import { issueSessionForUser } from "@/modules/auth/auth.service";
 import {
   normalizeObjectId,

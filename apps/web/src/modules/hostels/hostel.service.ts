@@ -4,14 +4,19 @@ import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { Role } from "@/lib/roles";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { HostelApplicationModel } from "@/models/HostelApplication";
-import { HostelDocumentModel } from "@/models/HostelDocument";
-import { HostelModel } from "@/models/Hostel";
-import { HostelVerificationModel } from "@/models/HostelVerification";
-import { InquiryModel } from "@/models/Inquiry";
-import { RatingReviewModel } from "@/models/RatingReview";
-import { UserModel } from "@/models/User";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { HostelApplicationModel } from "@hostel/db/models/HostelApplication";
+import { HostelDocumentModel } from "@hostel/db/models/HostelDocument";
+import { HostelModel } from "@hostel/db/models/Hostel";
+import { HostelVerificationModel } from "@hostel/db/models/HostelVerification";
+import { InquiryModel } from "@hostel/db/models/Inquiry";
+import { RatingReviewModel } from "@hostel/db/models/RatingReview";
+import { UserModel } from "@hostel/db/models/User";
+import { registerOrUpgradeUserByEmail } from "@/modules/users/user.service";
+import { sendEmail } from "@hostel/shared/email/sender";
+import { hostelApprovedEmail } from "@hostel/shared/email/templates/hostel/hostel-approved";
+import { hostelRejectedEmail } from "@hostel/shared/email/templates/hostel/hostel-rejected";
+import { hostelSubmissionReceivedEmail } from "@hostel/shared/email/templates/hostel/submission-received";
 import type {
   hostelRejectSchema,
   platformHostelCreateSchema,
@@ -33,7 +38,7 @@ type PublicHostelListQuery = z.infer<typeof publicHostelListQuerySchema>;
 type PublicHostelCompareQuery = z.infer<typeof publicHostelCompareQuerySchema>;
 type PublicInquiryCreateInput = z.infer<typeof publicInquiryCreateSchema>;
 
-type HostelRecord = {
+export type HostelRecord = {
   _id: Types.ObjectId;
   capacitySummary?: {
     totalBeds?: number;
@@ -366,7 +371,10 @@ async function findOrCreatePublicHostelOwner(
   }).lean<UserOwnerRecord | null>();
 
   if (existingUser) {
-    if (existingUser.role !== Role.HOSTEL_OWNER) {
+    // PUBLIC accounts are upgraded to HOSTEL_ADMIN at approval time
+    // (ARCHITECTURE.md §3.2); existing HOSTEL_ADMIN owners can register
+    // additional hostels. Any other role is a conflict.
+    if (existingUser.role !== Role.HOSTEL_ADMIN && existingUser.role !== Role.PUBLIC) {
       throw new HostelServiceError(
         "This contact already belongs to another account role.",
         "HOSTEL_OWNER_CONTACT_CONFLICT",
@@ -381,11 +389,41 @@ async function findOrCreatePublicHostelOwner(
     email: applicant.email,
     name: applicant.name,
     phone: applicant.phone,
-    role: Role.HOSTEL_OWNER,
+    role: Role.PUBLIC,
     status: "INVITED",
   });
 
   return user._id as Types.ObjectId;
+}
+
+function appLoginUrl() {
+  const base =
+    process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  return `${base}/login`;
+}
+
+async function resolveHostelOwner(hostelId: Types.ObjectId | string) {
+  const hostel = await HostelModel.findOne({ _id: hostelId })
+    .select("ownerId name")
+    .lean<{ ownerId?: Types.ObjectId; name?: string } | null>();
+
+  if (!hostel?.ownerId) {
+    return null;
+  }
+
+  const owner = await UserModel.findOne({
+    _id: hostel.ownerId,
+    isDeleted: { $ne: true },
+  }).lean<{ _id: Types.ObjectId; email?: string; name?: string } | null>();
+
+  if (!owner?.email) {
+    return null;
+  }
+
+  return {
+    hostelName: hostel.name ?? "your hostel",
+    owner: { id: owner._id, email: owner.email, name: owner.name },
+  };
 }
 
 export async function createPlatformHostelApplication(
@@ -550,6 +588,16 @@ export async function registerPublicHostelApplication(
     },
   });
 
+  if (input.applicant.email) {
+    await sendEmail({
+      to: input.applicant.email,
+      ...hostelSubmissionReceivedEmail({
+        hostelName: input.name,
+        ownerName: input.applicant.name,
+      }),
+    });
+  }
+
   const createdHostel = await findHostelByIdOrThrow(hostel._id.toString());
   const createdApplication = await HostelApplicationModel.findById(
     application._id,
@@ -695,6 +743,49 @@ export async function approvePlatformHostel(hostelId: string, principal: ApiPrin
     },
   );
 
+  // Account upgrade (ARCHITECTURE.md §3.2): PUBLIC owner -> HOSTEL_ADMIN,
+  // then the approval email carries credentials only for accounts that never
+  // had a password (new/Google-only owners get a temporary one).
+  const ownerInfo = await resolveHostelOwner(objectId);
+
+  if (ownerInfo) {
+    const upgrade = await registerOrUpgradeUserByEmail({
+      email: ownerInfo.owner.email,
+      hostelId: hostelId,
+      hostelName: ownerInfo.hostelName,
+      name: ownerInfo.owner.name,
+      performedBy: principal.userId,
+      role: Role.HOSTEL_ADMIN,
+      sendEmailNotification: false,
+    });
+
+    await UserModel.updateOne(
+      { _id: ownerInfo.owner.id },
+      {
+        $set: {
+          emailVerified: true,
+          status: "ACTIVE",
+        },
+      },
+    );
+
+    await sendEmail({
+      to: ownerInfo.owner.email,
+      ...hostelApprovedEmail({
+        hostelName: ownerInfo.hostelName,
+        loginUrl: appLoginUrl(),
+        ...(upgrade.temporaryPassword
+          ? {
+              credentials: {
+                email: ownerInfo.owner.email,
+                temporaryPassword: upgrade.temporaryPassword,
+              },
+            }
+          : {}),
+      }),
+    });
+  }
+
   return result;
 }
 
@@ -738,6 +829,18 @@ export async function rejectPlatformHostel(
     },
     { upsert: true },
   );
+
+  const ownerInfo = await resolveHostelOwner(objectId);
+
+  if (ownerInfo) {
+    await sendEmail({
+      to: ownerInfo.owner.email,
+      ...hostelRejectedEmail({
+        hostelName: ownerInfo.hostelName,
+        reason: input.reason,
+      }),
+    });
+  }
 
   return result;
 }

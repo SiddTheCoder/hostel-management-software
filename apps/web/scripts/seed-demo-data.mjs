@@ -136,7 +136,7 @@ async function upsertHostelOwner(index) {
     email: `hostelowner${index + 1}@gmail.com`,
     name: `Demo Hostel Owner ${index + 1}`,
     phone: `98000030${index + 1}`,
-    role: "HOSTEL_OWNER",
+    role: "HOSTEL_ADMIN",
   });
 }
 
@@ -159,7 +159,7 @@ const platformOwner = await upsertUser({
   email: "superadmin@gmail.com",
   name: "Super Admin",
   phone: "9800000000",
-  role: "PLATFORM_OWNER",
+  role: "SUPERADMIN",
 });
 
 const hostelAdmin = await upsertUser({
@@ -237,7 +237,7 @@ for (const [index, hostelInput] of hostels.entries()) {
         createdBy: platformOwner._id,
         hostelId: hostel._id,
         isDeleted: false,
-        role: "HOSTEL_OWNER",
+        role: "HOSTEL_ADMIN",
         status: "ACTIVE",
         updatedBy: platformOwner._id,
         userId: hostelOwner._id,

@@ -36,13 +36,13 @@ vi.mock("@/lib/db", () => ({
   connectToDatabase: serviceMocks.connectToDatabase,
 }));
 
-vi.mock("@/models/AuditLog", () => ({
+vi.mock("@hostel/db/models/AuditLog", () => ({
   AuditLogModel: {
     create: serviceMocks.auditCreate,
   },
 }));
 
-vi.mock("@/models/Bed", () => ({
+vi.mock("@hostel/db/models/Bed", () => ({
   BedModel: {
     countDocuments: serviceMocks.bedCountDocuments,
     find: serviceMocks.bedFind,
@@ -51,7 +51,7 @@ vi.mock("@/models/Bed", () => ({
   },
 }));
 
-vi.mock("@/models/Floor", () => ({
+vi.mock("@hostel/db/models/Floor", () => ({
   FloorModel: {
     create: serviceMocks.floorCreate,
     find: serviceMocks.floorFind,
@@ -59,7 +59,7 @@ vi.mock("@/models/Floor", () => ({
   },
 }));
 
-vi.mock("@/models/Hostel", () => ({
+vi.mock("@hostel/db/models/Hostel", () => ({
   HostelModel: {
     create: serviceMocks.hostelCreate,
     exists: serviceMocks.hostelExists,
@@ -70,7 +70,7 @@ vi.mock("@/models/Hostel", () => ({
   },
 }));
 
-vi.mock("@/models/HostelApplication", () => ({
+vi.mock("@hostel/db/models/HostelApplication", () => ({
   HostelApplicationModel: {
     create: vi.fn(),
     findById: vi.fn(),
@@ -79,21 +79,21 @@ vi.mock("@/models/HostelApplication", () => ({
   },
 }));
 
-vi.mock("@/models/HostelDocument", () => ({
+vi.mock("@hostel/db/models/HostelDocument", () => ({
   HostelDocumentModel: {
     insertMany: vi.fn(),
     updateMany: vi.fn(),
   },
 }));
 
-vi.mock("@/models/HostelVerification", () => ({
+vi.mock("@hostel/db/models/HostelVerification", () => ({
   HostelVerificationModel: {
     create: vi.fn(),
     findOneAndUpdate: vi.fn(),
   },
 }));
 
-vi.mock("@/models/Inquiry", () => ({
+vi.mock("@hostel/db/models/Inquiry", () => ({
   InquiryModel: {
     create: serviceMocks.inquiryCreate,
     find: serviceMocks.inquiryFind,
@@ -102,13 +102,13 @@ vi.mock("@/models/Inquiry", () => ({
   },
 }));
 
-vi.mock("@/models/InquiryNote", () => ({
+vi.mock("@hostel/db/models/InquiryNote", () => ({
   InquiryNoteModel: {
     create: serviceMocks.inquiryNoteCreate,
   },
 }));
 
-vi.mock("@/models/Room", () => ({
+vi.mock("@hostel/db/models/Room", () => ({
   RoomModel: {
     countDocuments: serviceMocks.roomCountDocuments,
     create: serviceMocks.roomCreate,

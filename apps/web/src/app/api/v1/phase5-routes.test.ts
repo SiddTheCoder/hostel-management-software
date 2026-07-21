@@ -125,7 +125,7 @@ const residentPrincipal = {
 
 const platformPrincipal = {
   hostelIds: [],
-  role: Role.PLATFORM_OWNER,
+  role: Role.SUPERADMIN,
   sessionId: "session-3",
   userId,
 };

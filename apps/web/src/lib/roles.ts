@@ -1,12 +1,1 @@
-export enum Role {
-  PLATFORM_OWNER = "PLATFORM_OWNER",
-  HOSTEL_OWNER = "HOSTEL_OWNER",
-  HOSTEL_ADMIN = "HOSTEL_ADMIN",
-  WARDEN = "WARDEN",
-  RESIDENT = "RESIDENT",
-  GUARDIAN = "GUARDIAN",
-  SERVICE_PROVIDER = "SERVICE_PROVIDER",
-  PUBLIC_USER = "PUBLIC_USER",
-}
-
-export const ROLE_VALUES = Object.values(Role);
+export { Role, ROLE_VALUES, LEGACY_ROLE_MAP } from "@hostel/shared/types/roles";

@@ -12,23 +12,30 @@ loadEnvConfig(repoRoot);
 
 const DEFAULT_DEV_PASSWORD = "admin";
 const isProduction = process.env.NODE_ENV === "production";
-const email = (process.env.SEED_PLATFORM_OWNER_EMAIL ?? "superadmin@gmail.com")
+const email = (
+  process.env.SEED_SUPERADMIN_EMAIL ??
+  process.env.SEED_PLATFORM_OWNER_EMAIL ??
+  "superadmin@gmail.com"
+)
   .trim()
   .toLowerCase();
 const phone = process.env.SEED_PLATFORM_OWNER_PHONE?.trim();
 const name = (process.env.SEED_PLATFORM_OWNER_NAME ?? "Super Admin").trim();
-const password = process.env.SEED_PLATFORM_OWNER_PASSWORD ?? DEFAULT_DEV_PASSWORD;
+const password =
+  process.env.SEED_SUPERADMIN_PASSWORD ??
+  process.env.SEED_PLATFORM_OWNER_PASSWORD ??
+  DEFAULT_DEV_PASSWORD;
 
 if (!process.env.MONGODB_URI) {
   throw new Error("MONGODB_URI is required to seed the platform owner.");
 }
 
 if (!email) {
-  throw new Error("SEED_PLATFORM_OWNER_EMAIL is required.");
+  throw new Error("SEED_SUPERADMIN_EMAIL is required.");
 }
 
 if (!password) {
-  throw new Error("SEED_PLATFORM_OWNER_PASSWORD is required.");
+  throw new Error("SEED_SUPERADMIN_PASSWORD is required.");
 }
 
 if (isProduction && password === DEFAULT_DEV_PASSWORD) {
@@ -71,7 +78,7 @@ const update = {
     isDeleted: false,
     name,
     passwordHash,
-    role: "PLATFORM_OWNER",
+    role: "SUPERADMIN",
     status: "ACTIVE",
   },
   $setOnInsert: {

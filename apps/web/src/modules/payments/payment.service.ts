@@ -4,11 +4,11 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { PaymentModel } from "@/models/Payment";
-import { PaymentProofModel } from "@/models/PaymentProof";
-import { ReceiptModel } from "@/models/Receipt";
-import { ResidentModel } from "@/models/Resident";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { PaymentModel } from "@hostel/db/models/Payment";
+import { PaymentProofModel } from "@hostel/db/models/PaymentProof";
+import { ReceiptModel } from "@hostel/db/models/Receipt";
+import { ResidentModel } from "@hostel/db/models/Resident";
 import {
   findCurrentResident,
   normalizeObjectId,

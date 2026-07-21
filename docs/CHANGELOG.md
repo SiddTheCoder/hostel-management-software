@@ -16,6 +16,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) — sections per 
 
 ---
 
+## [0.3.0] - 2026-07-20 — Phase 1 alignment (in progress, ~90%)
+
+### Added
+- Monorepo workspace per FOLDER_STRUCTURE.md: root npm workspaces + `turbo.json`; real `packages/db` (61 models migrated from `apps/web`, `connection.ts`, `seed.ts` for SUPERADMIN, `migrate-roles.ts`) and `packages/shared` (canonical Role/enums, auth Zod schemas, Resend `sendEmail()`, 7 Phase 1 email templates).
+- Docs-standard auth API at `/api/auth/*`: signup with email-verification link (+ `/verify-email` page), resend-verification, login (verified-email gate, `redirectPath`, `mustChangePassword`, rate limiting), google, refresh, logout, me, change-password, forgot/reset-password with session revocation.
+- Account upgrade mechanism (ARCHITECTURE §3.2) `registerOrUpgradeUserByEmail()` with AuditLog entries + credential/upgrade emails; wired into hostel approval (PUBLIC owner → HOSTEL_ADMIN with temp credentials when needed).
+- Phase 1 emails wired: submission-received, hostel-approved, hostel-rejected.
+- `.env.example` at repo root; README rewritten with monorepo setup.
+
+### Changed
+- Roles aligned to DATABASE.md: `PLATFORM_OWNER→SUPERADMIN`, `HOSTEL_OWNER→HOSTEL_ADMIN`, `PUBLIC_USER→PUBLIC`, removed `SERVICE_PROVIDER` role, added `PLATFORM_MODERATOR`/`COOK`. User model gains `emailVerified`, `authProvider`, `googleId`, `mustChangePassword`, `tokenVersion`.
+- Public hostel registration now creates the owner as `PUBLIC`; upgrade happens at approval time.
+
+### Fixed
+- 10 pre-existing test failures (stale mocks); suite now 91/91 green. Pre-existing type errors and the `portal-shell` lint error. Several `useSearchParams()`-without-Suspense prerender crashes (build verification still pending — see MEMORY.md resume point).
+
+### Known deviations
+- npm workspaces instead of pnpm; legacy `/api/v1/*` routes retained; response envelope `{ success, message, data|errorCode }`; `.ts` email templates; Google ID-token flow. Details in MEMORY.md.
+
+---
+
 ## [0.2.0] - 2026-07-14 (Late)
 
 ### Added

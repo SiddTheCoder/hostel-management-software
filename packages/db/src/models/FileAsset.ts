@@ -1,6 +1,6 @@
 import { Schema, model, models } from "mongoose";
 
-import { validateFileAssetMetadata } from "@/lib/file-assets";
+import { validateFileAssetMetadata } from "@hostel/shared/utils/file-assets";
 
 const variantSchema = new Schema(
   {

@@ -40,42 +40,44 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 
 **Goal:** Have a running, multi-tenant, role-aware backend + platform-owner portal that can approve hostels. Core auth system with account upgrade mechanism working end-to-end.
 
+> **Status note (2026-07-20):** Phase 1 alignment largely complete on top of the pre-existing codebase — see MEMORY.md "Completed Work" for what was done, the deviations from this doc (npm workspaces instead of pnpm, `/api/v1` legacy routes kept alongside new `/api/auth/*`, response envelope shape), and the short list of remaining Phase 1 items.
+
 ### 1.1 Deliverables
 
 **Project & Infrastructure**
-- ☐ Turborepo monorepo set up: `apps/web`, `packages/db`, `packages/shared`
-- ☐ TypeScript strict mode enabled everywhere
-- ☐ ESLint + Prettier configured
-- ☐ `.env.example` committed; real `.env` gitignored
-- ☐ README with local setup instructions
+- ☑ Turborepo monorepo set up: `apps/web`, `packages/db`, `packages/shared`
+- ☑ TypeScript strict mode enabled everywhere
+- ☑ ESLint + Prettier configured
+- ☑ `.env.example` committed; real `.env` gitignored
+- ☑ README with local setup instructions
 
 **Database & Models**
-- ☐ MongoDB Atlas account created and database provisioned
-- ☐ Mongoose connection setup in `packages/db/src/connection.ts`
+- ☑ MongoDB Atlas account created and database provisioned
+- ☑ Mongoose connection setup in `packages/db/src/connection.ts`
 - ☐ All Mongoose models from DATABASE.md created in `packages/db/src/models/`
-- ☐ Seed script (`packages/db/src/seed.ts`) creates initial SUPERADMIN account
+- ☑ Seed script (`packages/db/src/seed.ts`) creates initial SUPERADMIN account
 - ☐ All indexes from DATABASE.md created
 
 **Auth System (CRITICAL - Build Exactly Per ARCHITECTURE.md §3)**
-- ☐ Email/password signup with email verification (sends verification email via Resend)
-- ☐ Email verification endpoint (`POST /api/auth/verify-email`)
-- ☐ Google OAuth integration (consent flow + callback handler)
-- ☐ Unified login endpoint (`POST /api/auth/login`) - works for all roles
-- ☐ JWT access + refresh token system (httpOnly cookies for web, Bearer tokens for future mobile)
-- ☐ Session middleware (`getSession()` helper) extracts user from token
-- ☐ **Account upgrade mechanism** (ARCHITECTURE.md §3.2) - when admin registers someone by email:
+- ☑ Email/password signup with email verification (sends verification email via Resend)
+- ☑ Email verification endpoint (`POST /api/auth/verify-email`)
+- ☑ Google OAuth integration (consent flow + callback handler)
+- ☑ Unified login endpoint (`POST /api/auth/login`) - works for all roles
+- ☑ JWT access + refresh token system (httpOnly cookies for web, Bearer tokens for future mobile)
+- ☑ Session middleware (`getSession()` helper) extracts user from token
+- ☑ **Account upgrade mechanism** (ARCHITECTURE.md §3.2) - when admin registers someone by email:
   - Check if email exists as PUBLIC account
   - If yes: upgrade in place (change role, link profile, keep credentials)
   - If no: create new account with temp password
   - Never create duplicate User documents
-- ☐ Role-based route guards (`requireRole()`, `requireHostelAccess()`)
-- ☐ Password reset flow (request + reset endpoints)
-- ☐ Change password endpoint (forced on first login if `mustChangePassword = true`)
+- ☑ Role-based route guards (`requireRole()`, `requireHostelAccess()`)
+- ☑ Password reset flow (request + reset endpoints)
+- ☑ Change password endpoint (forced on first login if `mustChangePassword = true`)
 
 **Email Infrastructure**
-- ☐ Resend account created and API key configured
-- ☐ Email sending helper (`sendEmail()`) in `packages/shared/src/email/sender.ts`
-- ☐ Email templates created in `packages/shared/src/email-templates/`:
+- ☑ Resend account created and API key configured
+- ☑ Email sending helper (`sendEmail()`) in `packages/shared/src/email/sender.ts`
+- ☑ Email templates created in `packages/shared/src/email-templates/`:
   - `auth/verification.tsx` - email verification
   - `auth/credentials-issued.tsx` - admin-issued credentials
   - `auth/password-reset.tsx` - password reset
@@ -87,44 +89,44 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 
 **File Storage**
 - ☐ Cloudflare R2 bucket created
-- ☐ R2 upload helper with pre-signed URLs (`POST /api/uploads/sign`)
-- ☐ File validation (content type, max size) before signing
+- ☑ R2 upload helper with pre-signed URLs (`POST /api/uploads/sign`)
+- ☑ File validation (content type, max size) before signing
 
 **Hostel Owner Registration Flow**
-- ☐ Public "Register Your Hostel" page
-- ☐ Multi-step form: owner info → hostel details → documents upload
-- ☐ Creates PUBLIC account first (if not logged in), then creates pending Hostel
-- ☐ Uploads owner documents (citizenship, ownership proof) to R2
-- ☐ Sends "submission received" email
-- ☐ Creates hostel with `status: PENDING`
+- ☑ Public "Register Your Hostel" page
+- ☑ Multi-step form: owner info → hostel details → documents upload
+- ☑ Creates PUBLIC account first (if not logged in), then creates pending Hostel
+- ☑ Uploads owner documents (citizenship, ownership proof) to R2
+- ☑ Sends "submission received" email
+- ☑ Creates hostel with `status: PENDING`
 
 **Platform Owner Portal**
-- ☐ Login page (uses unified `/login` endpoint)
-- ☐ Dashboard with stats: pending hostels, total hostels, total residents
-- ☐ **Hostel approval queue** - list of pending hostels with owner info + documents
-- ☐ Document viewer (opens R2 URLs securely)
-- ☐ **Approve hostel** action:
+- ☑ Login page (uses unified `/login` endpoint)
+- ☑ Dashboard with stats: pending hostels, total hostels, total residents
+- ☑ **Hostel approval queue** - list of pending hostels with owner info + documents
+- ☑ Document viewer (opens R2 URLs securely)
+- ☑ **Approve hostel** action:
   - Updates `Hostel.status = APPROVED`
   - Triggers account upgrade for owner (PUBLIC → HOSTEL_ADMIN)
   - Sends "hostel approved" email with credentials
   - Creates AuditLog entry
-- ☐ **Reject hostel** action:
+- ☑ **Reject hostel** action:
   - Updates `Hostel.status = REJECTED`
   - Sends rejection email with reason
   - Creates AuditLog entry
-- ☐ View hostel details page
+- ☑ View hostel details page
 - ☐ Audit log viewer (read-only)
 
 **Shared Components (shadcn/ui)**
-- ☐ Install and configure shadcn/ui + Tailwind
-- ☐ Create base components: Button, Input, Card, Badge, Dialog, Table, Form
-- ☐ Set up Tailwind design tokens per DESIGN.md
-- ☐ Set up lucide-react icons
+- ☑ Install and configure shadcn/ui + Tailwind
+- ☑ Create base components: Button, Input, Card, Badge, Dialog, Table, Form
+- ☑ Set up Tailwind design tokens per DESIGN.md
+- ☑ Set up lucide-react icons
 
 **API Contracts**
 - ☐ All Phase 1 endpoints from API.md implemented
 - ☐ Standard response envelope (`{ success, data/error }`) used everywhere
-- ☐ Zod validation on all request bodies
+- ☑ Zod validation on all request bodies
 - ☐ Error codes from API.md §1.2 implemented
 
 ### 1.2 Acceptance Tests
@@ -162,10 +164,10 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 - ☐ Email delivery is logged for debugging
 
 **Security**
-- ☐ Passwords are hashed with bcrypt (never stored plain text)
-- ☐ JWT secrets are loaded from environment variables
-- ☐ Refresh tokens are httpOnly, secure, SameSite=Lax cookies
-- ☐ Rate limiting on `/api/auth/login` (max 5 attempts per 15 min per IP)
+- ☑ Passwords are hashed with bcrypt (never stored plain text)
+- ☑ JWT secrets are loaded from environment variables
+- ☑ Refresh tokens are httpOnly, secure, SameSite=Lax cookies
+- ☑ Rate limiting on `/api/auth/login` (max 5 attempts per 15 min per IP)
 - ☐ No sensitive data in client-side bundles (check with bundle analyzer)
 
 ### 1.3 Phase 1 Definition of Done

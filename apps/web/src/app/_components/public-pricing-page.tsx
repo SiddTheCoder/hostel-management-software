@@ -58,7 +58,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { Suspense, useMemo, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -80,7 +80,7 @@ import {
   type PortalKind,
 } from "./shared";
 
-export function PublicPricingPage() {
+function PublicPricingPageContent() {
   const plans = [
     {
       name: "Starter",
@@ -322,5 +322,13 @@ export function PublicPricingPage() {
         </div>
       </section>
     </PublicShell>
+  );
+}
+
+export function PublicPricingPage() {
+  return (
+    <Suspense fallback={null}>
+      <PublicPricingPageContent />
+    </Suspense>
   );
 }

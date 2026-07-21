@@ -36,8 +36,8 @@ type MeResponse =
     };
 
 const DASHBOARD_ROLES = new Set([
-  Role.PLATFORM_OWNER,
-  Role.HOSTEL_OWNER,
+  Role.SUPERADMIN,
+  Role.PLATFORM_MODERATOR,
   Role.HOSTEL_ADMIN,
   Role.WARDEN,
   Role.RESIDENT,

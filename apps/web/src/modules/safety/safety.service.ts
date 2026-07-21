@@ -4,14 +4,14 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { EmergencyContactModel } from "@/models/EmergencyContact";
-import { IncidentLogModel } from "@/models/IncidentLog";
-import { ManualStatusOverrideModel } from "@/models/ManualStatusOverride";
-import { NightStatusLogModel } from "@/models/NightStatusLog";
-import { NightStatusModel } from "@/models/NightStatus";
-import { ResidentModel } from "@/models/Resident";
-import { SOSAlertModel } from "@/models/SOSAlert";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { EmergencyContactModel } from "@hostel/db/models/EmergencyContact";
+import { IncidentLogModel } from "@hostel/db/models/IncidentLog";
+import { ManualStatusOverrideModel } from "@hostel/db/models/ManualStatusOverride";
+import { NightStatusLogModel } from "@hostel/db/models/NightStatusLog";
+import { NightStatusModel } from "@hostel/db/models/NightStatus";
+import { ResidentModel } from "@hostel/db/models/Resident";
+import { SOSAlertModel } from "@hostel/db/models/SOSAlert";
 import {
   findCurrentResident,
   normalizeObjectId,

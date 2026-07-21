@@ -3,8 +3,8 @@ import type { z } from "zod";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { DeviceTokenModel } from "@/models/DeviceToken";
-import { NotificationModel } from "@/models/Notification";
+import { DeviceTokenModel } from "@hostel/db/models/DeviceToken";
+import { NotificationModel } from "@hostel/db/models/Notification";
 import { normalizeObjectId } from "@/modules/residents/resident-access";
 import type { deviceTokenSaveSchema } from "@/modules/notifications/notification.validation";
 

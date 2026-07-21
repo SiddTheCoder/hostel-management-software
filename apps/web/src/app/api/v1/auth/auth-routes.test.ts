@@ -51,7 +51,7 @@ function authSession() {
       id: "user-1",
       name: "Public User",
       phone: null,
-      role: Role.PUBLIC_USER,
+      role: Role.PUBLIC,
       status: "ACTIVE",
     },
   };
@@ -124,7 +124,7 @@ describe("phase 1 auth routes", () => {
     expect(response.status).toBe(201);
     expect(payload.success).toBe(true);
     expect(payload.data.refreshToken).toBe("refresh-token");
-    expect(payload.data.user.role).toBe(Role.PUBLIC_USER);
+    expect(payload.data.user.role).toBe(Role.PUBLIC);
   });
 
   it("returns configured service errors from Google auth", async () => {

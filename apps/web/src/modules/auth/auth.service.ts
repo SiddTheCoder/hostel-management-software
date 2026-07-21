@@ -5,17 +5,31 @@ import {
   hashToken,
   refreshTokenExpiresAt,
   signAccessToken,
+  signPurposeToken,
   signRefreshToken,
   verifyAccessToken,
+  verifyPurposeToken,
   verifyRefreshToken,
 } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { Role } from "@/lib/roles";
-import { OAuthAccountModel } from "@/models/OAuthAccount";
-import { OtpChallengeModel } from "@/models/OtpChallenge";
-import { SessionModel } from "@/models/Session";
-import { UserModel } from "@/models/User";
+import { landingPathForRole } from "@/lib/route-access";
+import { sendEmail } from "@hostel/shared/email/sender";
+import { verificationEmail } from "@hostel/shared/email/templates/auth/verification";
+import { passwordResetEmail } from "@hostel/shared/email/templates/auth/password-reset";
+import type {
+  ChangePasswordInput,
+  ForgotPasswordInput,
+  ResendVerificationInput,
+  ResetPasswordInput,
+  SignupInput,
+  VerifyEmailInput,
+} from "@hostel/shared/schemas/auth.schema";
+import { OAuthAccountModel } from "@hostel/db/models/OAuthAccount";
+import { OtpChallengeModel } from "@hostel/db/models/OtpChallenge";
+import { SessionModel } from "@hostel/db/models/Session";
+import { UserModel } from "@hostel/db/models/User";
 import type {
   GoogleAuthInput,
   LoginInput,
@@ -46,8 +60,11 @@ const GOOGLE_JWKS = createRemoteJWKSet(
 function publicUser(user: {
   _id: unknown;
   email?: string | null;
+  emailVerified?: boolean | null;
+  emailVerifiedAt?: Date | null;
   hostelIds?: unknown[];
   image?: string | null;
+  mustChangePassword?: boolean | null;
   name: string;
   phone?: string | null;
   role: Role;
@@ -56,11 +73,14 @@ function publicUser(user: {
   return {
     id: String(user._id),
     email: user.email ?? null,
+    emailVerified: Boolean(user.emailVerified || user.emailVerifiedAt),
     hostelIds: (user.hostelIds ?? []).map((hostelId) => String(hostelId)),
     image: user.image ?? null,
+    mustChangePassword: Boolean(user.mustChangePassword),
     name: user.name,
     phone: user.phone ?? null,
     role: user.role,
+    redirectPath: landingPathForRole(user.role) ?? "/",
     status: user.status,
   };
 }
@@ -417,7 +437,7 @@ export async function registerPublicAccount(
     emailVerifiedAt: challenge.channel === "email" ? now : undefined,
     name: input.name,
     passwordHash: await hashPassword(input.password),
-    role: Role.PUBLIC_USER,
+    role: Role.PUBLIC,
     status: "ACTIVE",
   });
 
@@ -522,16 +542,38 @@ export async function authenticateWithGoogle(
 
   if (!user) {
     user = await UserModel.create({
+      authProvider: "GOOGLE",
       email: googleAccount.email,
+      emailVerified: true,
       emailVerifiedAt: new Date(),
+      googleId: googleAccount.providerAccountId,
       image: googleAccount.picture,
       name: googleAccount.name,
-      role: Role.PUBLIC_USER,
+      role: Role.PUBLIC,
       status: "ACTIVE",
     });
-  } else if (googleAccount.picture && !user.get("image")) {
-    user.set("image", googleAccount.picture);
-    await user.save();
+  } else {
+    let changed = false;
+
+    if (googleAccount.picture && !user.get("image")) {
+      user.set("image", googleAccount.picture);
+      changed = true;
+    }
+
+    if (!user.get("googleId")) {
+      user.set("googleId", googleAccount.providerAccountId);
+      changed = true;
+    }
+
+    if (!user.get("emailVerified") && !user.get("emailVerifiedAt")) {
+      user.set("emailVerified", true);
+      user.set("emailVerifiedAt", new Date());
+      changed = true;
+    }
+
+    if (changed) {
+      await user.save();
+    }
   }
 
   if (!linkedAccount) {
@@ -564,6 +606,14 @@ export async function login(input: LoginInput, context?: RequestContext) {
 
   if (!passwordMatches) {
     throw new AuthServiceError("Invalid credentials.", "INVALID_CREDENTIALS");
+  }
+
+  if (!user.emailVerified && !user.emailVerifiedAt) {
+    throw new AuthServiceError(
+      "Email is not verified. Check your inbox for the verification link.",
+      "EMAIL_NOT_VERIFIED",
+      403,
+    );
   }
 
   user.lastLoginAt = new Date();
@@ -645,4 +695,247 @@ export async function logout(refreshToken: string) {
     { refreshTokenHash: hashToken(refreshToken), revokedAt: null },
     { $set: { revokedAt: new Date() } },
   );
+}
+
+// --- Phase 1 email-verification + password flows (ARCHITECTURE.md §3.1) ---
+
+const VERIFY_EMAIL_TTL_HOURS = 24;
+const PASSWORD_RESET_TTL_MINUTES = 60;
+
+function appBaseUrl() {
+  return (
+    process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  );
+}
+
+async function revokeAllSessions(userId: unknown) {
+  await SessionModel.updateMany(
+    { userId, revokedAt: null },
+    { $set: { revokedAt: new Date() } },
+  );
+}
+
+async function dispatchVerificationEmail(user: { _id: unknown; email?: string | null }) {
+  if (!user.email) {
+    return;
+  }
+
+  const token = await signPurposeToken({
+    userId: String(user._id),
+    purpose: "verify-email",
+    ttlSeconds: VERIFY_EMAIL_TTL_HOURS * 60 * 60,
+  });
+  const verifyUrl = `${appBaseUrl()}/verify-email?token=${encodeURIComponent(token)}`;
+
+  await sendEmail({
+    to: user.email,
+    ...verificationEmail({ verifyUrl, expiresInHours: VERIFY_EMAIL_TTL_HOURS }),
+  });
+}
+
+/**
+ * Docs-standard signup (API.md §2): creates a PUBLIC account with
+ * emailVerified=false and sends a verification link. No session is issued —
+ * the user logs in after verifying.
+ */
+export async function signupWithEmailVerification(input: SignupInput) {
+  await connectToDatabase();
+
+  const email = normalizeEmail(input.email);
+
+  if (!email) {
+    throw new AuthServiceError("Email is required.", "EMAIL_REQUIRED", 400);
+  }
+
+  const existingUser = await UserModel.findOne({ email, isDeleted: { $ne: true } });
+
+  if (existingUser) {
+    throw new AuthServiceError(
+      "An account already exists for this email.",
+      "ACCOUNT_ALREADY_EXISTS",
+      409,
+    );
+  }
+
+  const user = await UserModel.create({
+    authProvider: "LOCAL",
+    email,
+    emailVerified: false,
+    name: input.name,
+    passwordHash: await hashPassword(input.password),
+    role: Role.PUBLIC,
+    status: "ACTIVE",
+  });
+
+  await dispatchVerificationEmail(user);
+
+  return { email, userId: String(user._id) };
+}
+
+export async function verifyEmailWithToken(input: VerifyEmailInput) {
+  await connectToDatabase();
+
+  let payload;
+
+  try {
+    payload = await verifyPurposeToken(input.token, "verify-email");
+  } catch {
+    throw new AuthServiceError(
+      "Verification link is invalid or expired.",
+      "VERIFICATION_TOKEN_INVALID",
+      400,
+    );
+  }
+
+  const user = await UserModel.findOne({ _id: payload.sub, isDeleted: { $ne: true } });
+
+  if (!user) {
+    throw new AuthServiceError("Account no longer exists.", "USER_INACTIVE", 401);
+  }
+
+  if (!user.emailVerified) {
+    user.emailVerified = true;
+    user.emailVerifiedAt ??= new Date();
+    await user.save();
+  }
+
+  return { verified: true };
+}
+
+/** Always returns success — never reveals whether the email exists. */
+export async function resendVerificationEmail(input: ResendVerificationInput) {
+  await connectToDatabase();
+
+  const email = normalizeEmail(input.email);
+  const user = email
+    ? await UserModel.findOne({ email, isDeleted: { $ne: true } })
+    : null;
+
+  if (user && !user.emailVerified && !user.emailVerifiedAt) {
+    await dispatchVerificationEmail(user);
+  }
+
+  return { requested: true };
+}
+
+/** Always returns success — never reveals whether the email exists. */
+export async function requestPasswordReset(input: ForgotPasswordInput) {
+  await connectToDatabase();
+
+  const email = normalizeEmail(input.email);
+  const user = email
+    ? await UserModel.findOne({ email, isDeleted: { $ne: true }, status: "ACTIVE" })
+    : null;
+
+  if (user?.email) {
+    const token = await signPurposeToken({
+      userId: String(user._id),
+      purpose: "password-reset",
+      ttlSeconds: PASSWORD_RESET_TTL_MINUTES * 60,
+      tokenVersion: user.tokenVersion ?? 0,
+    });
+    const resetUrl = `${appBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+
+    await sendEmail({
+      to: user.email,
+      ...passwordResetEmail({ resetUrl, expiresInMinutes: PASSWORD_RESET_TTL_MINUTES }),
+    });
+  }
+
+  return { requested: true };
+}
+
+export async function resetPasswordWithToken(input: ResetPasswordInput) {
+  await connectToDatabase();
+
+  let payload;
+
+  try {
+    payload = await verifyPurposeToken(input.token, "password-reset");
+  } catch {
+    throw new AuthServiceError(
+      "Reset link is invalid or expired.",
+      "RESET_TOKEN_INVALID",
+      400,
+    );
+  }
+
+  const user = await UserModel.findOne({
+    _id: payload.sub,
+    isDeleted: { $ne: true },
+  }).select("+passwordHash");
+
+  if (!user) {
+    throw new AuthServiceError("Account no longer exists.", "USER_INACTIVE", 401);
+  }
+
+  if ((user.tokenVersion ?? 0) !== (payload.tokenVersion ?? 0)) {
+    throw new AuthServiceError(
+      "Reset link is no longer valid.",
+      "RESET_TOKEN_STALE",
+      400,
+    );
+  }
+
+  user.passwordHash = await hashPassword(input.newPassword);
+  user.mustChangePassword = false;
+  user.tokenVersion = (user.tokenVersion ?? 0) + 1;
+  await user.save();
+  await revokeAllSessions(user._id);
+
+  return { reset: true };
+}
+
+/**
+ * Change password for the authenticated user. `currentPassword` is required
+ * unless the account is flagged `mustChangePassword` (admin-issued temp
+ * password, API.md §2). Revokes every session and issues a fresh one so the
+ * caller stays logged in.
+ */
+export async function changePassword(
+  userId: string,
+  input: ChangePasswordInput,
+  context?: RequestContext,
+) {
+  await connectToDatabase();
+
+  const user = await UserModel.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+    status: "ACTIVE",
+  }).select("+passwordHash");
+
+  if (!user) {
+    throw new AuthServiceError("User no longer has access.", "USER_INACTIVE", 401);
+  }
+
+  if (!user.mustChangePassword) {
+    if (!input.currentPassword) {
+      throw new AuthServiceError(
+        "Current password is required.",
+        "CURRENT_PASSWORD_REQUIRED",
+        400,
+      );
+    }
+
+    const currentMatches =
+      user.passwordHash &&
+      (await verifyPassword(input.currentPassword, user.passwordHash));
+
+    if (!currentMatches) {
+      throw new AuthServiceError(
+        "Current password is incorrect.",
+        "INVALID_CREDENTIALS",
+        401,
+      );
+    }
+  }
+
+  user.passwordHash = await hashPassword(input.newPassword);
+  user.mustChangePassword = false;
+  user.tokenVersion = (user.tokenVersion ?? 0) + 1;
+  await user.save();
+  await revokeAllSessions(user._id);
+
+  return issueSessionForUser(user, context);
 }

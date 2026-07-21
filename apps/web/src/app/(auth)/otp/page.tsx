@@ -11,9 +11,17 @@ import {
   ShieldCheck 
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef, type FormEvent } from "react";
+import { Suspense, useState, useEffect, useRef, type FormEvent } from "react";
 
 export default function OtpPage() {
+  return (
+    <Suspense fallback={null}>
+      <OtpPageContent />
+    </Suspense>
+  );
+}
+
+function OtpPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   

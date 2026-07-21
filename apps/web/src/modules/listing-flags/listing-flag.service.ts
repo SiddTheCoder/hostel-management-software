@@ -3,10 +3,10 @@ import type { z } from "zod";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { AuditLogModel } from "@/models/AuditLog";
-import { DuplicateCheckResultModel } from "@/models/DuplicateCheckResult";
-import { HostelModel } from "@/models/Hostel";
-import { ListingFlagModel } from "@/models/ListingFlag";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { DuplicateCheckResultModel } from "@hostel/db/models/DuplicateCheckResult";
+import { HostelModel } from "@hostel/db/models/Hostel";
+import { ListingFlagModel } from "@hostel/db/models/ListingFlag";
 import type {
   listingFlagListQuerySchema,
   listingFlagResolveSchema,

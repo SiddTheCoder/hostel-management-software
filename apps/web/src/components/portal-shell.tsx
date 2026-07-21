@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { PortalAccount } from "@/components/portal-account";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -202,10 +202,14 @@ export function PortalShell({
   const styles = toneStyles[tone];
   const plan = planCopy[tone];
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [navPathname, setNavPathname] = useState(pathname);
 
-  useEffect(() => {
+  // Close the mobile nav on navigation (state reset during render, per
+  // react.dev "adjusting state when props change" — avoids an effect).
+  if (navPathname !== pathname) {
+    setNavPathname(pathname);
     setMobileNavOpen(false);
-  }, [pathname]);
+  }
 
   const roleLabel = workspaceName ?? subtitle;
 

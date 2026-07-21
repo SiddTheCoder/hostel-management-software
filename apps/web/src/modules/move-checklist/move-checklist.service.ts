@@ -4,15 +4,15 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { BedModel } from "@/models/Bed";
-import { DepositRefundModel } from "@/models/DepositRefund";
-import { MoveInChecklistModel } from "@/models/MoveInChecklist";
-import { MoveOutChecklistModel } from "@/models/MoveOutChecklist";
-import { PaymentModel } from "@/models/Payment";
-import { ProvidedItemModel } from "@/models/ProvidedItem";
-import { ResidentModel } from "@/models/Resident";
-import { RoomModel } from "@/models/Room";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { BedModel } from "@hostel/db/models/Bed";
+import { DepositRefundModel } from "@hostel/db/models/DepositRefund";
+import { MoveInChecklistModel } from "@hostel/db/models/MoveInChecklist";
+import { MoveOutChecklistModel } from "@hostel/db/models/MoveOutChecklist";
+import { PaymentModel } from "@hostel/db/models/Payment";
+import { ProvidedItemModel } from "@hostel/db/models/ProvidedItem";
+import { ResidentModel } from "@hostel/db/models/Resident";
+import { RoomModel } from "@hostel/db/models/Room";
 import {
   normalizeObjectId,
   serializeResidentSummary,

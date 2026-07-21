@@ -11,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState, type FormEvent } from "react";
+import { Suspense, useCallback, useState, type FormEvent } from "react";
 
 import { destinationForRole } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
@@ -44,6 +44,14 @@ const DEMO_ACCOUNTS: Record<
 
 /* ─────────────────────── Component ─────────────────── */
 export function LoginForm({ googleClientId }: { googleClientId: string }) {
+  return (
+    <Suspense fallback={null}>
+      <LoginFormContent googleClientId={googleClientId} />
+    </Suspense>
+  );
+}
+
+function LoginFormContent({ googleClientId }: { googleClientId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

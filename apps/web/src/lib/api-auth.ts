@@ -83,7 +83,7 @@ export function assertApiRoles(principal: ApiPrincipal, roles: Role[]) {
 export async function requirePlatformPrincipal(request: NextRequest) {
   const principal = await requireApiPrincipal(request);
 
-  assertApiRoles(principal, [Role.PLATFORM_OWNER]);
+  assertApiRoles(principal, [Role.SUPERADMIN]);
 
   return principal;
 }
@@ -114,7 +114,7 @@ export async function requireHostelScopedPrincipal(
 ) {
   const principal = await requireApiPrincipal(request);
 
-  assertApiRoles(principal, [Role.PLATFORM_OWNER, ...HOSTEL_STAFF_ROLES]);
+  assertApiRoles(principal, [Role.SUPERADMIN, ...HOSTEL_STAFF_ROLES]);
   assertHostelScopedApiAccess(principal, hostelId);
 
   return principal;

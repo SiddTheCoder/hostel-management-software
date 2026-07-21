@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
-import { ResidentModel } from "@/models/Resident";
+import { ResidentModel } from "@hostel/db/models/Resident";
 
 export type ResidentStatus = "PENDING" | "ACTIVE" | "SUSPENDED" | "MOVED_OUT";
 

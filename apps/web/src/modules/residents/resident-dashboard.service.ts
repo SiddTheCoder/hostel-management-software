@@ -2,14 +2,14 @@ import { Types } from "mongoose";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { BedModel } from "@/models/Bed";
-import { EmergencyContactModel } from "@/models/EmergencyContact";
-import { FoodMenuModel } from "@/models/FoodMenu";
-import { GuardianModel } from "@/models/Guardian";
-import { HostelModel } from "@/models/Hostel";
-import { NoticeModel } from "@/models/Notice";
-import { PaymentModel } from "@/models/Payment";
-import { RoomModel } from "@/models/Room";
+import { BedModel } from "@hostel/db/models/Bed";
+import { EmergencyContactModel } from "@hostel/db/models/EmergencyContact";
+import { FoodMenuModel } from "@hostel/db/models/FoodMenu";
+import { GuardianModel } from "@hostel/db/models/Guardian";
+import { HostelModel } from "@hostel/db/models/Hostel";
+import { NoticeModel } from "@hostel/db/models/Notice";
+import { PaymentModel } from "@hostel/db/models/Payment";
+import { RoomModel } from "@hostel/db/models/Room";
 import {
   findCurrentResident,
   serializeResidentSummary,

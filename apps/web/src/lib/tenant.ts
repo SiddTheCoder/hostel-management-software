@@ -12,7 +12,7 @@ export class TenantAccessError extends Error {
 }
 
 export function canAccessHostel(principal: TenantPrincipal, hostelId: string) {
-  if (principal.role === Role.PLATFORM_OWNER) {
+  if (principal.role === Role.SUPERADMIN) {
     return true;
   }
 
@@ -34,7 +34,7 @@ export function hostelScopedFilter(
     return { hostelId: requestedHostelId };
   }
 
-  if (principal.role === Role.PLATFORM_OWNER) {
+  if (principal.role === Role.SUPERADMIN) {
     return {};
   }
 

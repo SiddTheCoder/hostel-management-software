@@ -3,9 +3,9 @@ import type { z } from "zod";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { AuditLogModel } from "@/models/AuditLog";
-import { RatingReviewModel } from "@/models/RatingReview";
-import { ReviewModerationLogModel } from "@/models/ReviewModerationLog";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { RatingReviewModel } from "@hostel/db/models/RatingReview";
+import { ReviewModerationLogModel } from "@hostel/db/models/ReviewModerationLog";
 import {
   findCurrentResident,
   normalizeObjectId,

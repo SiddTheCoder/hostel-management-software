@@ -58,7 +58,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { Suspense, useMemo, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -84,6 +84,14 @@ const AUTH_HERO_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAD0NmbtkszFG87IhrLCwa2eHWDmk4NxOgpfoid2_zjZOx8uWA_hMcSeKmVOMRSjh6cGCyLc1Z9nGlZcL0Ki792qNxyaYBty13f2J3WQOuXIX_srJKrKQdS6r3NM_RDpDB3vErb3M4AXliIEEDa0efsPzIkws2iSLR5sBqDWjn4m6sUtt9ldLyN6Qa-ajl1zvazFY7UZ_2dAjeEU277a2C041A_ZzYl0_2dfHrJqKF0tb0-ivW1NlN_H88HwOtS1kTCG90Xs6WE0dc";
 
 export function AuthExperiencePage({ mode }: { mode: AuthMode }) {
+  return (
+    <Suspense fallback={null}>
+      <AuthExperiencePageContent mode={mode} />
+    </Suspense>
+  );
+}
+
+function AuthExperiencePageContent({ mode }: { mode: AuthMode }) {
   const content = {
     activation: {
       title: "Activate Resident Access",

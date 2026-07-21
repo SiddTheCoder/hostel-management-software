@@ -1,6 +1,6 @@
 import { Schema, model, models } from "mongoose";
 
-import { ROLE_VALUES } from "@/lib/roles";
+import { ROLE_VALUES } from "@hostel/shared/types/roles";
 
 const rolePermissionSchema = new Schema(
   {

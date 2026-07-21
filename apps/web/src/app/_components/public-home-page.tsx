@@ -58,7 +58,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 
 import { checkAuthWithRefresh } from "@/lib/auth-check";
 import { landingPathForRole } from "@/lib/route-access";
@@ -94,15 +94,15 @@ const PUBLIC_HERO_IMAGE =
   "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=80";
 
 const DASHBOARD_ROLES = new Set([
-  Role.PLATFORM_OWNER,
-  Role.HOSTEL_OWNER,
+  Role.SUPERADMIN,
+  Role.PLATFORM_MODERATOR,
   Role.HOSTEL_ADMIN,
   Role.WARDEN,
   Role.RESIDENT,
   Role.GUARDIAN,
 ]);
 
-export function PublicHomePage() {
+function PublicHomePageContent() {
   const router = useRouter();
   const [searchVal, setSearchVal] = useState("");
   const [featuredHostels, setFeaturedHostels] = useState<
@@ -604,5 +604,13 @@ export function PublicHomePage() {
         </div>
       </footer>
     </PublicShell>
+  );
+}
+
+export function PublicHomePage() {
+  return (
+    <Suspense fallback={null}>
+      <PublicHomePageContent />
+    </Suspense>
   );
 }

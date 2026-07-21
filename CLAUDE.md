@@ -1,4 +1,4 @@
-## graphify - READ THIS FIRST
+## graphify - READ THIS FIRST then docs folder PHASES.md
 
 This project uses a Graphify knowledge graph at `graphify-out/`. Treat that folder as the canonical fast-context map for the codebase.
 
@@ -16,7 +16,7 @@ This project uses a Graphify knowledge graph at `graphify-out/`. Treat that fold
 - Do not re-read files already summarized by the graph unless implementation details are needed.
 
 ### Keeping the graph fresh
-- Run `graphify update .` after uncommitted code changes when the user asks about current structure.
+- Run `graphify update .` after uncommitted code changes when the user asks about current structure but dont run auto only when user ask for this..
 - Prefer git hooks with `graphify hook install` for normal commit/checkout updates.
 - This repo also has a pre-push hook that runs `graphify update .` before code is pushed.
 - Keep `graphify-out/` committed with the code after the first graph is generated; do not add it to `.gitignore`.

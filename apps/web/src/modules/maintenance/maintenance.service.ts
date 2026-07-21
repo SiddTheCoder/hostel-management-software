@@ -4,13 +4,13 @@ import type { z } from "zod";
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
 import { assertHostelAccess } from "@/lib/tenant";
-import { AuditLogModel } from "@/models/AuditLog";
-import { BedModel } from "@/models/Bed";
-import { MaintenanceCommentModel } from "@/models/MaintenanceComment";
-import { MaintenanceHistoryModel } from "@/models/MaintenanceHistory";
-import { MaintenanceRequestModel } from "@/models/MaintenanceRequest";
-import { RoomModel } from "@/models/Room";
-import { ServiceProviderModel } from "@/models/ServiceProvider";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { BedModel } from "@hostel/db/models/Bed";
+import { MaintenanceCommentModel } from "@hostel/db/models/MaintenanceComment";
+import { MaintenanceHistoryModel } from "@hostel/db/models/MaintenanceHistory";
+import { MaintenanceRequestModel } from "@hostel/db/models/MaintenanceRequest";
+import { RoomModel } from "@hostel/db/models/Room";
+import { ServiceProviderModel } from "@hostel/db/models/ServiceProvider";
 import type {
   maintenanceCommentCreateSchema,
   maintenanceRequestCreateSchema,

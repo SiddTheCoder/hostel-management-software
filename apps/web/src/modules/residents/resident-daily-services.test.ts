@@ -49,7 +49,7 @@ vi.mock("@/lib/db", () => ({
   connectToDatabase: serviceMocks.connectToDatabase,
 }));
 
-vi.mock("@/models/AuditLog", () => ({
+vi.mock("@hostel/db/models/AuditLog", () => ({
   AuditLogModel: {
     create: serviceMocks.auditCreate,
   },
@@ -59,7 +59,7 @@ vi.mock("@/modules/auth/auth.service", () => ({
   issueSessionForUser: serviceMocks.issueSessionForUser,
 }));
 
-vi.mock("@/models/QRActivation", () => ({
+vi.mock("@hostel/db/models/QRActivation", () => ({
   QRActivationModel: {
     create: serviceMocks.qrActivationCreate,
     findOne: serviceMocks.qrActivationFindOne,
@@ -68,20 +68,20 @@ vi.mock("@/models/QRActivation", () => ({
   },
 }));
 
-vi.mock("@/models/Resident", () => ({
+vi.mock("@hostel/db/models/Resident", () => ({
   ResidentModel: {
     findOne: serviceMocks.residentFindOne,
     findOneAndUpdate: serviceMocks.residentFindOneAndUpdate,
   },
 }));
 
-vi.mock("@/models/User", () => ({
+vi.mock("@hostel/db/models/User", () => ({
   UserModel: {
     findOneAndUpdate: serviceMocks.userFindOneAndUpdate,
   },
 }));
 
-vi.mock("@/models/Payment", () => ({
+vi.mock("@hostel/db/models/Payment", () => ({
   PaymentModel: {
     create: serviceMocks.paymentCreate,
     find: serviceMocks.paymentFind,
@@ -90,7 +90,7 @@ vi.mock("@/models/Payment", () => ({
   },
 }));
 
-vi.mock("@/models/PaymentProof", () => ({
+vi.mock("@hostel/db/models/PaymentProof", () => ({
   PaymentProofModel: {
     create: serviceMocks.paymentProofCreate,
     find: serviceMocks.paymentProofFind,
@@ -99,14 +99,14 @@ vi.mock("@/models/PaymentProof", () => ({
   },
 }));
 
-vi.mock("@/models/Receipt", () => ({
+vi.mock("@hostel/db/models/Receipt", () => ({
   ReceiptModel: {
     create: serviceMocks.receiptCreate,
     findOne: serviceMocks.receiptFindOne,
   },
 }));
 
-vi.mock("@/models/FoodMenu", () => ({
+vi.mock("@hostel/db/models/FoodMenu", () => ({
   FoodMenuModel: {
     create: serviceMocks.foodMenuCreate,
     exists: serviceMocks.foodMenuExists,
@@ -116,20 +116,20 @@ vi.mock("@/models/FoodMenu", () => ({
   },
 }));
 
-vi.mock("@/models/FoodPhoto", () => ({
+vi.mock("@hostel/db/models/FoodPhoto", () => ({
   FoodPhotoModel: {
     create: serviceMocks.foodPhotoCreate,
     find: serviceMocks.foodPhotoFind,
   },
 }));
 
-vi.mock("@/models/FoodFeedback", () => ({
+vi.mock("@hostel/db/models/FoodFeedback", () => ({
   FoodFeedbackModel: {
     create: serviceMocks.foodFeedbackCreate,
   },
 }));
 
-vi.mock("@/models/Notice", () => ({
+vi.mock("@hostel/db/models/Notice", () => ({
   NoticeModel: {
     create: serviceMocks.noticeCreate,
     find: serviceMocks.noticeFind,
@@ -138,38 +138,38 @@ vi.mock("@/models/Notice", () => ({
   },
 }));
 
-vi.mock("@/models/NoticeReadStatus", () => ({
+vi.mock("@hostel/db/models/NoticeReadStatus", () => ({
   NoticeReadStatusModel: {
     find: serviceMocks.noticeReadFind,
     findOneAndUpdate: serviceMocks.noticeReadFindOneAndUpdate,
   },
 }));
 
-vi.mock("@/models/Hostel", () => ({
+vi.mock("@hostel/db/models/Hostel", () => ({
   HostelModel: {
     findOne: serviceMocks.hostelFindOne,
   },
 }));
 
-vi.mock("@/models/Room", () => ({
+vi.mock("@hostel/db/models/Room", () => ({
   RoomModel: {
     findOne: serviceMocks.roomFindOne,
   },
 }));
 
-vi.mock("@/models/Bed", () => ({
+vi.mock("@hostel/db/models/Bed", () => ({
   BedModel: {
     findOne: serviceMocks.bedFindOne,
   },
 }));
 
-vi.mock("@/models/Guardian", () => ({
+vi.mock("@hostel/db/models/Guardian", () => ({
   GuardianModel: {
     find: serviceMocks.guardianFind,
   },
 }));
 
-vi.mock("@/models/EmergencyContact", () => ({
+vi.mock("@hostel/db/models/EmergencyContact", () => ({
   EmergencyContactModel: {
     find: serviceMocks.emergencyContactFind,
   },

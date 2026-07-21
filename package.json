@@ -1,7 +1,18 @@
 {
   "name": "hostel-management-software",
   "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/db",
+    "packages/shared"
+  ],
   "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "db:seed": "node --experimental-transform-types packages/db/src/seed.ts",
     "web:dev": "npm --prefix apps/web run dev",
     "web:build": "npm --prefix apps/web run build",
     "web:lint": "npm --prefix apps/web run lint",
@@ -15,5 +26,8 @@
     "mobile:start": "npm --prefix apps/mobile run start",
     "mobile:typecheck": "npm --prefix apps/mobile run typecheck",
     "mobile:build:test": "npm --prefix apps/mobile run build:test"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
   }
 }

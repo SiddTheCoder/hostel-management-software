@@ -2,10 +2,10 @@ import { Types } from "mongoose";
 
 import type { ApiPrincipal } from "@/lib/api-auth";
 import { connectToDatabase } from "@/lib/db";
-import { BedModel } from "@/models/Bed";
-import { FloorModel } from "@/models/Floor";
-import { HostelModel } from "@/models/Hostel";
-import { RoomModel } from "@/models/Room";
+import { BedModel } from "@hostel/db/models/Bed";
+import { FloorModel } from "@hostel/db/models/Floor";
+import { HostelModel } from "@hostel/db/models/Hostel";
+import { RoomModel } from "@hostel/db/models/Room";
 import type {
   bedCreateSchema,
   bedUpdateSchema,

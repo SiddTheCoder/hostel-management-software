@@ -11,10 +11,10 @@ import {
 describe("route access", () => {
   it("maps protected portal prefixes to the expected roles", () => {
     expect(protectedRouteRuleForPath("/platform/dashboard")?.roles).toEqual([
-      Role.PLATFORM_OWNER,
+      Role.SUPERADMIN,
+      Role.PLATFORM_MODERATOR,
     ]);
     expect(protectedRouteRuleForPath("/hostel-admin/rooms")?.roles).toEqual([
-      Role.HOSTEL_OWNER,
       Role.HOSTEL_ADMIN,
       Role.WARDEN,
     ]);

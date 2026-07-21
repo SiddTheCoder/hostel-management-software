@@ -8,6 +8,16 @@ This file is the project's working memory across coding sessions. Update it ever
 
 - **2026-07-14** — Full `docs/` set created: README, PRD, ARCHITECTURE, DATABASE (MongoDB+Mongoose), EMAIL_SYSTEM, FOLDER_STRUCTURE, PHASES, RULES, DESIGN, CODING_STANDARDS, ENVIRONMENT, TESTING, MEMORY, CHANGELOG. No code written yet.
 - **2026-07-14 (Late)** — Documentation updated with 7 major new features: Cook Portal, Community Feature, Location Tracking/Auto-Attendance, QuestionCall Integration, Advanced Notifications, Configuration System, Privacy Policy. All features integrated into DATABASE.md, API.md, PHASES.md, ARCHITECTURE.md, RULES.md, PRIVACY_POLICY.md.
+- **2026-07-20 — Phase 1 alignment session (IMPORTANT CONTEXT):** Contrary to the older note above, a large codebase ALREADY EXISTED in `apps/web` (built under the deleted `sprints.md` spec: 60+ models, 18 service modules, all portals, `/api/v1/*` routes, OTP-based auth). This session aligned it to `docs/`:
+  1. **Monorepo scaffold** — root `package.json` with npm workspaces (`apps/web`, `packages/db`, `packages/shared`) + `turbo.json` + turbo devDependency. **Deviation:** npm workspaces instead of pnpm (pnpm not installed on the machine; corepack shim needs admin). `packages/database` and `packages/ui` are obsolete empty placeholders — delete manually (agent tooling blocked deletes).
+  2. **packages/db** — all 61 Mongoose models moved from `apps/web/src/models` (git mv, history preserved), `connection.ts`, `seed.ts` (SUPERADMIN, run via `npm run db:seed`), `migrate-roles.ts` (one-shot legacy→canonical role migration; NOT yet run against the dev DB). `apps/web` imports via `@hostel/db/models/*`; `@/lib/db` is a thin re-export.
+  3. **packages/shared** — canonical `Role` enum + `LEGACY_ROLE_MAP`, all DATABASE.md enums, auth Zod schemas, `sendEmail()` (Resend REST; logs + no-throw when unconfigured), 7 Phase 1 email templates (**deviation:** plain `.ts` HTML-string templates, not React Email `.tsx`).
+  4. **Role alignment** — `PLATFORM_OWNER→SUPERADMIN`, `HOSTEL_OWNER→HOSTEL_ADMIN` (merged), `PUBLIC_USER→PUBLIC`, `SERVICE_PROVIDER` role removed (directory only), added `PLATFORM_MODERATOR` + `COOK`. Updated route-access, permissions, seed/demo scripts. **Existing dev-DB users still carry legacy role strings until `migrate-roles.ts` is run.**
+  5. **User model** — added `emailVerified`, `authProvider`, `googleId`, `mustChangePassword`, `tokenVersion` per DATABASE.md (kept richer `status` enum + soft-delete fields).
+  6. **Auth flows (ARCHITECTURE §3)** — new `/api/auth/*` routes: signup (email verification link, JWT purpose token, 24 h), verify-email (+ `/verify-email` page), resend-verification, login (EMAIL_NOT_VERIFIED gate, `redirectPath`, `mustChangePassword`, rate-limited 5/15 min), google (ID-token POST — **deviation** from docs' GET redirect flow; server-side verification per §3.1), refresh, logout, me, change-password, forgot-password, reset-password (tokenVersion-stale check, revokes all sessions). Legacy `/api/v1/auth/*` (incl. OTP flow) kept working — frontend still calls v1.
+  7. **Account upgrade (§3.2)** — `registerOrUpgradeUserByEmail()` in `apps/web/src/modules/users/user.service.ts`: create-with-temp-password / upgrade-PUBLIC-in-place / same-role-idempotent / 409 EMAIL_ALREADY_HAS_ROLE; AuditLog entries; credentials-issued or account-upgraded emails. 6 unit tests. **Gap:** §3.2's email-confirmation step before HOSTEL_ADMIN/SUPERADMIN upgrades is NOT implemented (upgrade applies immediately on approval).
+  8. **Hostel flow emails** — submission-received on public registration (owner now created as PUBLIC, upgraded at approval), hostel-approved (with temp credentials when owner never had a password), hostel-rejected with reason.
+  9. **Tests/quality** — all 91 vitest tests pass (fixed 10 pre-existing failures: stale mocks in `auth.service.test.ts` + `phase2-hostel-routes.test.ts`), `tsc --noEmit` clean, ESLint 0 errors, `.env.example` + README rewritten.
 
 ---
 
@@ -41,8 +51,30 @@ This file is the project's working memory across coding sessions. Update it ever
 
 ## Current Progress
 
-- **Phase:** Pre-Phase 1 (Documentation complete, codebase not yet scaffolded)
-- **Status:** Ready to begin Phase 1 implementation
+- **Phase:** Phase 1 — Foundation & Auth (~90% of deliverables done; see ticked items in PHASES.md)
+- **Status:** Session of 2026-07-20 ended mid-verification. Tests (91/91), typecheck, and lint are GREEN. **`next build` was NOT yet green** — see resume point below.
+
+---
+
+## RESUME POINT (next session starts here)
+
+1. **Finish the production build.** `npm --prefix apps/web run build` was failing on prerender because client components call `useSearchParams()` without a Suspense boundary. Already fixed by wrapping in `<Suspense>`: `/otp` page, `LoginForm`, `SignupForm`, `AuthExperiencePage`, `PublicHomePage`, `PublicInquiryPage`, `PublicPricingPage`, `PublicHostelListingPage`, `ServiceProviderRegistrationPage`; also added `turbopack.root` to `next.config.ts`. The build was interrupted before re-running — re-run it and fix any further prerender errors the same way.
+2. **Run the role migration** against the dev DB: `node --experimental-transform-types packages/db/src/migrate-roles.ts` (maps PLATFORM_OWNER→SUPERADMIN etc.). Then re-seed if needed: `npm run db:seed`.
+3. **Remaining Phase 1 items (unticked in PHASES.md):**
+   - Field-level alignment of the other 60 models with DATABASE.md + index audit (models exist but predate the doc).
+   - Repositories layer `packages/db/src/repositories/` (multi-tenancy currently enforced in `apps/web/src/modules/*` services + `lib/tenant.ts`).
+   - Audit log viewer page in platform portal (verify if exists).
+   - End-to-end email verification against a real Resend key; R2 env vars are not in `.env` yet (R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME).
+   - §3.2 email-confirmation safeguard before HOSTEL_ADMIN/SUPERADMIN upgrades.
+   - Manual acceptance-test pass (PHASES.md 1.2) — only unit-level coverage exists for auth/upgrade.
+4. **Known deviations from docs (decided 2026-07-20, revisit deliberately, don't "fix" casually):**
+   - npm workspaces + turbo instead of pnpm (pnpm needs admin install; switch later via `corepack enable`).
+   - API stays under `/api/v1/*` for existing portals ("platform" naming instead of docs' "superadmin"); new docs-standard auth lives at `/api/auth/*`. Frontend still calls `/api/v1` via `browser-api.ts`.
+   - Response envelope is `{ success, message, data | errorCode }` (existing app-wide) vs docs' `{ success, data | error:{code,message} }`. Migrate app-wide in one pass later, not piecemeal.
+   - Email templates are `.ts` HTML-string functions, not React Email `.tsx`.
+   - Google auth = Google Identity Services ID-token POST (server-verified), not GET redirect+callback (no GOOGLE_CLIENT_SECRET in env).
+   - Hostel model keeps old shape (slug/location object, `PENDING_APPROVAL`/`PUBLISHED` statuses) vs DATABASE.md — reconcile in Phase 2 public-discovery work.
+   - `packages/database` + `packages/ui` are dead placeholder dirs — delete manually.
 
 ---
 

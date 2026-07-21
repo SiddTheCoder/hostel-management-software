@@ -21,13 +21,13 @@ vi.mock("@/lib/db", () => ({
   connectToDatabase: serviceMocks.connectToDatabase,
 }));
 
-vi.mock("@/models/AuditLog", () => ({
+vi.mock("@hostel/db/models/AuditLog", () => ({
   AuditLogModel: {
     create: serviceMocks.auditCreate,
   },
 }));
 
-vi.mock("@/models/Complaint", () => ({
+vi.mock("@hostel/db/models/Complaint", () => ({
   ComplaintModel: {
     create: serviceMocks.complaintCreate,
     find: serviceMocks.complaintFind,
@@ -36,21 +36,21 @@ vi.mock("@/models/Complaint", () => ({
   },
 }));
 
-vi.mock("@/models/ComplaintAttachment", () => ({
+vi.mock("@hostel/db/models/ComplaintAttachment", () => ({
   ComplaintAttachmentModel: {
     create: serviceMocks.complaintAttachmentCreate,
     find: serviceMocks.complaintAttachmentFind,
   },
 }));
 
-vi.mock("@/models/ComplaintUpdate", () => ({
+vi.mock("@hostel/db/models/ComplaintUpdate", () => ({
   ComplaintUpdateModel: {
     create: serviceMocks.complaintUpdateCreate,
     find: serviceMocks.complaintUpdateFind,
   },
 }));
 
-vi.mock("@/models/Resident", () => ({
+vi.mock("@hostel/db/models/Resident", () => ({
   ResidentModel: {
     findOne: serviceMocks.residentFindOne,
   },

@@ -8,11 +8,11 @@ export type ProtectedRouteRule = {
 export const protectedRouteRules: ProtectedRouteRule[] = [
   {
     prefix: "/platform",
-    roles: [Role.PLATFORM_OWNER],
+    roles: [Role.SUPERADMIN, Role.PLATFORM_MODERATOR],
   },
   {
     prefix: "/hostel-admin",
-    roles: [Role.HOSTEL_OWNER, Role.HOSTEL_ADMIN, Role.WARDEN],
+    roles: [Role.HOSTEL_ADMIN, Role.WARDEN],
   },
   {
     prefix: "/resident",
@@ -25,19 +25,19 @@ export const protectedRouteRules: ProtectedRouteRule[] = [
 ];
 
 export const roleLandingPath: Record<Role, string> = {
-  [Role.PLATFORM_OWNER]: "/platform/dashboard",
-  [Role.HOSTEL_OWNER]: "/hostel-admin/dashboard",
+  [Role.SUPERADMIN]: "/platform/dashboard",
+  [Role.PLATFORM_MODERATOR]: "/platform/dashboard",
   [Role.HOSTEL_ADMIN]: "/hostel-admin/dashboard",
   [Role.WARDEN]: "/hostel-admin/dashboard",
+  [Role.COOK]: "/",
   [Role.RESIDENT]: "/resident/dashboard",
   [Role.GUARDIAN]: "/guardian/dashboard",
-  [Role.SERVICE_PROVIDER]: "/",
-  [Role.PUBLIC_USER]: "/",
+  [Role.PUBLIC]: "/",
 };
 
 export const roleAllowedNextPrefixes: Partial<Record<Role, string[]>> = {
-  [Role.PLATFORM_OWNER]: ["/platform"],
-  [Role.HOSTEL_OWNER]: ["/hostel-admin"],
+  [Role.SUPERADMIN]: ["/platform"],
+  [Role.PLATFORM_MODERATOR]: ["/platform"],
   [Role.HOSTEL_ADMIN]: ["/hostel-admin"],
   [Role.WARDEN]: ["/hostel-admin"],
   [Role.RESIDENT]: ["/resident"],
