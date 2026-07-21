@@ -75,6 +75,14 @@ const ADMIN_ISSUABLE_ROLES = [
 
 export type AdminIssuableRole = (typeof ADMIN_ISSUABLE_ROLES)[number];
 
+/**
+ * Roles whose upgrade must not take effect on a bare email match alone
+ * (ARCHITECTURE.md §3.2 security safeguard). Raising a PUBLIC account to one of
+ * these requires the recipient to prove mailbox control — see the PUBLIC branch
+ * in {@link registerOrUpgradeUserByEmail}.
+ */
+const HIGH_PRIVILEGE_ROLES = new Set<string>([Role.HOSTEL_ADMIN, Role.SUPERADMIN]);
+
 const ROLE_LABELS: Record<string, string> = {
   [Role.HOSTEL_ADMIN]: "Hostel Admin",
   [Role.WARDEN]: "Warden",
@@ -169,9 +177,17 @@ export async function registerOrUpgradeUserByEmail(input: RegisterOrUpgradeInput
       existing.hostelIds = [...(existing.hostelIds ?? []), input.hostelId as never];
     }
 
-    if (!existing.passwordHash) {
-      // Google-only account: also issue a temp password so email/password
-      // login works as a fallback (ARCHITECTURE.md §3.2).
+    // ARCHITECTURE.md §3.2 safeguard: a PUBLIC account may only be raised to a
+    // high-privilege role (HOSTEL_ADMIN / SUPERADMIN) once the recipient proves
+    // control of the mailbox. We enforce that by rotating to a fresh temporary
+    // password and forcing a reset on next login, so the elevated role cannot be
+    // exercised with a pre-existing password the admin never verified. Google-only
+    // accounts also get a temp password so email/password login works as a
+    // fallback. Lower-trust roles (RESIDENT / WARDEN / GUARDIAN) keep their
+    // existing credentials — the registering admin vetted them out-of-band.
+    const requiresMailboxProof = HIGH_PRIVILEGE_ROLES.has(input.role);
+
+    if (!existing.passwordHash || requiresMailboxProof) {
       temporaryPassword = generateTemporaryPassword();
       existing.passwordHash = await hashPassword(temporaryPassword);
       existing.mustChangePassword = true;

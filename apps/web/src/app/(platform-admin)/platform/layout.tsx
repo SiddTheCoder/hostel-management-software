@@ -14,6 +14,7 @@ const navItems = [
   { href: "/platform/reports", icon: "file" as const, label: "Reports" },
   { href: "/platform/reviews", icon: "star" as const, label: "Reviews" },
   { href: "/platform/abuse-flags", icon: "flag" as const, label: "Abuse Flags" },
+  { href: "/platform/audit-logs", icon: "clipboard" as const, label: "Audit Log" },
   { href: "/platform/settings", icon: "settings" as const, label: "Settings" },
 ];
 

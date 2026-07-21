@@ -20,7 +20,7 @@ export function PublicComparePage() {
     ["Monthly Rent", "price"],
     ["Location", "area"],
     ["Room Types", "roomTypes"],
-    ["Vacancy", "vacancy"],
+    ["Vacant", "vacancy"],
     ["Food Score", "foodScore"],
     ["Facilities", "facilities"],
     ["Verification", "verified"],

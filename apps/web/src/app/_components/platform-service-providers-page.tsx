@@ -4,7 +4,7 @@ import React, { useCallback, useState, useEffect } from "react";
 import { Users } from "lucide-react";
 import { EmptyState, LoadingRows, Panel, StatusBadge } from "@/app/_components/shared-ui";
 import { browserApi } from "@/lib/browser-api";
-import { Message, PageHeader, type LoadState, type ServiceProvider } from "./phase5-shared";
+import { Message, PageHeader, type LoadState, type ServiceProvider } from "./portal-shared";
 
 export const PlatformServiceProvidersPageContent = React.memo(
   function PlatformServiceProvidersPageContent() {

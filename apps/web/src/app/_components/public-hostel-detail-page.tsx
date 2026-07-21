@@ -146,7 +146,7 @@ export function PublicHostelDetailPage() {
     {
       detail: "Beds",
       icon: BedDouble,
-      label: "Vacancy",
+      label: "Vacant",
       value: hostelSummary.vacancy.toString(),
     },
     {

@@ -582,7 +582,7 @@ export function HostelCard({ hostel }: { hostel: HostelSummary }) {
             <div className="flex items-center justify-between border-t border-border/50 pt-2 text-[10px] font-semibold text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Building2 className="size-3.5 text-muted-foreground/80" />
-                Vacancy {hostel.vacancy}
+                Vacant {hostel.vacancy}
               </span>
               <span className="flex items-center gap-1">
                 <Wifi className="size-3.5 text-muted-foreground/80" />
@@ -660,7 +660,7 @@ export function HostelListCard({ hostel }: { hostel: HostelSummary }) {
           <div className="flex items-center gap-3 text-[10px] font-semibold text-muted-foreground">
             <span className="flex items-center gap-1">
               <Building2 className="size-3.5 text-muted-foreground/80" />
-              Vacancy {hostel.vacancy}
+              Vacant {hostel.vacancy}
             </span>
             <span className="flex items-center gap-1">
               <Wifi className="size-3.5 text-muted-foreground/80" />

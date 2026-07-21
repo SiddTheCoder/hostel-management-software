@@ -4,7 +4,7 @@ import React, { useCallback, useState, useEffect, type FormEvent } from "react";
 import { Flag } from "lucide-react";
 import { EmptyState, Panel, StatusBadge } from "@/app/_components/shared-ui";
 import { browserApi } from "@/lib/browser-api";
-import { Message, PageHeader, field, type ListingFlag } from "./phase5-shared";
+import { Message, PageHeader, field, type ListingFlag } from "./portal-shared";
 
 export const PlatformListingFlagsPageContent = React.memo(
   function PlatformListingFlagsPageContent() {

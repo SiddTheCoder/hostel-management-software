@@ -11,8 +11,30 @@ export type SendEmailResult =
   | { sent: true; id: string }
   | { sent: false; reason: "not_configured" | "send_failed"; detail?: string };
 
-function fromAddress() {
-  return process.env.EMAIL_FROM ?? process.env.RESEND_FROM_EMAIL ?? null;
+/**
+ * Resolves the Resend "From" header. Precedence:
+ *   1. EMAIL_FROM — used verbatim (already a full `Name <email>` header).
+ *   2. RESEND_FROM_EMAIL — if it already contains `<`, used verbatim; otherwise
+ *      combined with the optional RESEND_FROM_NAME into `Name <email>`.
+ * Returns null when no sender is configured (local dev → email is logged, not sent).
+ */
+function fromAddress(): string | null {
+  const explicit = process.env.EMAIL_FROM?.trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  const email = process.env.RESEND_FROM_EMAIL?.trim();
+  if (!email) {
+    return null;
+  }
+
+  if (email.includes("<")) {
+    return email;
+  }
+
+  const name = process.env.RESEND_FROM_NAME?.trim();
+  return name ? `${name} <${email}>` : email;
 }
 
 /**

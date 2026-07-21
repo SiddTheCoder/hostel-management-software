@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { BarChart3 } from "lucide-react";
 import { browserApi } from "@/lib/browser-api";
-import { Message, PageHeader, ReportGrid, type ReportRecord } from "./phase5-shared";
+import { Message, PageHeader, ReportGrid, type ReportRecord } from "./portal-shared";
 
 export const PlatformReportsPageContent = React.memo(
   function PlatformReportsPageContent() {

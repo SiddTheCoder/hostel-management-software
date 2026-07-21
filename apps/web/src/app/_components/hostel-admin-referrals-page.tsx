@@ -10,7 +10,7 @@ import {
   optionalField,
   optionalNumber,
   type Referral,
-} from "./phase5-shared";
+} from "./portal-shared";
 
 export const HostelAdminReferralsPageContent = React.memo(
   function HostelAdminReferralsPageContent() {

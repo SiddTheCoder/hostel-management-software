@@ -51,23 +51,33 @@ This file is the project's working memory across coding sessions. Update it ever
 
 ## Current Progress
 
-- **Phase:** Phase 1 — Foundation & Auth (~90% of deliverables done; see ticked items in PHASES.md)
-- **Status:** Session of 2026-07-20 ended mid-verification. Tests (91/91), typecheck, and lint are GREEN. **`next build` was NOT yet green** — see resume point below.
+- **Phase:** Phase 1 — Foundation & Auth (all code-side deliverables done; remaining items are external infra or deliberately deferred — see below and `TODO.md`).
+- **Status (2026-07-21):** Production **build is GREEN**, tests **95/95**, typecheck + lint clean. Session of 2026-07-21 cleared the build blocker, added the audit log viewer, closed the §3.2 safeguard, and renamed all `phase*`-named source files to production names.
+
+### 2026-07-21 session — what was done
+1. **Build green** — re-ran `npm --prefix apps/web run build` after the prior `useSearchParams()`→Suspense fixes; exit 0, no further prerender errors.
+2. **Typecheck fix** — `user.service.test.ts` mock was missing `mustChangePassword` (TS2339); added it. Suite + tsc now clean.
+3. **Audit log viewer (read-only)** — PHASES.md §1.1 deliverable. New `apps/web/src/modules/audit/audit.service.ts` (`listPlatformAuditLogs`, actor/hostel labels resolved, capped, newest-first) + `audit.validation.ts`, `GET /api/v1/platform/audit-logs` (SUPERADMIN-gated), `/platform/audit-logs` page + `platform-audit-logs-page.tsx`, nav item, 3 service tests.
+4. **§3.2 high-privilege upgrade safeguard** — `registerOrUpgradeUserByEmail` now rotates a PUBLIC→HOSTEL_ADMIN/SUPERADMIN upgrade to a fresh emailed temporary password + `mustChangePassword`, so the elevated role can't be exercised with an un-verified pre-existing password (mailbox-proof). Lower-trust roles (RESIDENT/WARDEN/GUARDIAN) keep credentials. `HIGH_PRIVILEGE_ROLES` set added; 1 new test.
+5. **Index audit** — verified the Phase 1 model set (User, Hostel, Room, Bed, HostelDocument, HostelMember, Session, HostelApplication, HostelVerification, AuditLog) already satisfies DATABASE.md "Indexing Strategy Summary" (hostelId compound indexes, unique email/googleId, session TTL). No changes needed.
+6. **Production naming** — renamed `phase5-shared.tsx`→`portal-shared.tsx` (8 importers updated), `phase2-hostel-routes.test.ts`→`platform-hostel-routes.test.ts`, `phase5-routes.test.ts`→`growth-routes.test.ts` (via `git mv`, history preserved; `describe()` labels updated). No `phase*`-named source files remain.
 
 ---
 
 ## RESUME POINT (next session starts here)
 
-1. **Finish the production build.** `npm --prefix apps/web run build` was failing on prerender because client components call `useSearchParams()` without a Suspense boundary. Already fixed by wrapping in `<Suspense>`: `/otp` page, `LoginForm`, `SignupForm`, `AuthExperiencePage`, `PublicHomePage`, `PublicInquiryPage`, `PublicPricingPage`, `PublicHostelListingPage`, `ServiceProviderRegistrationPage`; also added `turbopack.root` to `next.config.ts`. The build was interrupted before re-running — re-run it and fix any further prerender errors the same way.
-2. **Run the role migration** against the dev DB: `node --experimental-transform-types packages/db/src/migrate-roles.ts` (maps PLATFORM_OWNER→SUPERADMIN etc.). Then re-seed if needed: `npm run db:seed`.
-3. **Remaining Phase 1 items (unticked in PHASES.md):**
-   - Field-level alignment of the other 60 models with DATABASE.md + index audit (models exist but predate the doc).
-   - Repositories layer `packages/db/src/repositories/` (multi-tenancy currently enforced in `apps/web/src/modules/*` services + `lib/tenant.ts`).
-   - Audit log viewer page in platform portal (verify if exists).
-   - End-to-end email verification against a real Resend key; R2 env vars are not in `.env` yet (R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME).
-   - §3.2 email-confirmation safeguard before HOSTEL_ADMIN/SUPERADMIN upgrades.
-   - Manual acceptance-test pass (PHASES.md 1.2) — only unit-level coverage exists for auth/upgrade.
-4. **Known deviations from docs (decided 2026-07-20, revisit deliberately, don't "fix" casually):**
+Code-side Phase 1 is done. What's left is **external/infra or deliberately deferred** — full list in `TODO.md`:
+
+1. **External infra (needs the user):**
+   - Cloudflare R2 bucket + `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` in `.env` (upload helper + validation already coded).
+   - Live `RESEND_API_KEY` + verified sender to test the 7 Phase 1 email templates end-to-end.
+   - Role migration against the dev DB: `node --experimental-transform-types packages/db/src/migrate-roles.ts` (PLATFORM_OWNER→SUPERADMIN etc.), then `npm run db:seed`.
+   - Manual acceptance-test pass (PHASES.md §1.2) against a running instance once the above are provisioned; unit coverage exists for auth/upgrade/§3.2.
+2. **Deliberately deferred (not part of a clean Phase 1):**
+   - App-wide response-envelope migration (`{ success, message, data|errorCode }` → docs' `{ success, data|error:{code,message} }`) — do in ONE pass later, not piecemeal.
+   - Dedicated `packages/db/src/repositories/` layer — tenant scoping is functionally covered by `apps/web/src/modules/*` services + `lib/tenant.ts`.
+   - Field-level alignment of all ~60 models + Phase 3–5 model creation — phase discipline defers future-phase work.
+3. **Known deviations from docs (decided 2026-07-20, revisit deliberately, don't "fix" casually):**
    - npm workspaces + turbo instead of pnpm (pnpm needs admin install; switch later via `corepack enable`).
    - API stays under `/api/v1/*` for existing portals ("platform" naming instead of docs' "superadmin"); new docs-standard auth lives at `/api/auth/*`. Frontend still calls `/api/v1` via `browser-api.ts`.
    - Response envelope is `{ success, message, data | errorCode }` (existing app-wide) vs docs' `{ success, data | error:{code,message} }`. Migrate app-wide in one pass later, not piecemeal.

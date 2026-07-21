@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { BarChart3 } from "lucide-react";
 import { Panel } from "@/app/_components/shared-ui";
 import { browserApi } from "@/lib/browser-api";
-import { Message, PageHeader, ReportGrid, type ReportRecord } from "./phase5-shared";
+import { Message, PageHeader, ReportGrid, type ReportRecord } from "./portal-shared";
 
 export const HostelAdminReportsPageContent = React.memo(
   function HostelAdminReportsPageContent() {

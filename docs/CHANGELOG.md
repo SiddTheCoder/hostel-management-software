@@ -16,6 +16,61 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) — sections per 
 
 ---
 
+## [0.3.2] - 2026-07-21 — Infra: R2, email, cron (patterns ported from QuestionCall)
+
+### Added
+- **Cron infrastructure** (external scheduler, cron-job.org): `lib/cron-auth.ts` `validateCronRequest()`
+  (timing-safe, header-only `x-cron-secret` / `Authorization: Bearer`, env-only `CRON_SECRET`), a first
+  job `POST /api/v1/cron/purge-expired-otps` (idempotent backup sweep alongside the OTP TTL index),
+  `docs/CRON.md`, and 4 cron-auth unit tests.
+- **R2 helpers**: `getPublicUrl()` (public-bucket URLs via `R2_PUBLIC_URL`) and `deleteFromR2()`.
+
+### Changed
+- **R2 optimization**: image variants now upload with `Cache-Control: public, max-age=31536000, immutable`
+  (CDN/browser caching); S3 client sets explicit `maxAttempts: 3` retry. (The `sharp` WebP variant
+  pipeline in `image-optimizer.ts` already existed.)
+- **Email sender**: `From` header now resolves `EMAIL_FROM` → else `RESEND_FROM_NAME` + `RESEND_FROM_EMAIL`
+  combined into `Name <email>` (backward compatible).
+- **Env**: `.env`/`.env.local` now carry R2 + Resend creds **borrowed temporarily from the QuestionCall
+  project** (git-ignored, banner-marked "REPLACE LATER"); `CRON_SECRET` added. `.env.example` documents
+  `R2_PUBLIC_URL`, `RESEND_FROM_NAME`, and the cron-job.org secret (placeholders only).
+
+### Notes
+- Only R2 + Resend secrets were borrowed — no other QuestionCall credentials. Replace with dedicated
+  accounts before production. Cron uses cron-job.org, not Vercel Cron.
+
+---
+
+## [0.3.1] - 2026-07-21 — Phase 1 code-side completion
+
+### Added
+- **Audit log viewer (read-only)** in the platform owner portal (PHASES.md §1.1): `audit.service.ts`
+  `listPlatformAuditLogs()` (newest-first, capped, actor/hostel labels resolved) + `audit.validation.ts`,
+  `GET /api/v1/platform/audit-logs` (SUPERADMIN-gated), `/platform/audit-logs` page + component + nav item.
+
+### Changed
+- **ARCHITECTURE §3.2 high-privilege upgrade safeguard**: raising a PUBLIC account to HOSTEL_ADMIN/
+  SUPERADMIN now rotates to a fresh emailed temporary password with `mustChangePassword`, so the elevated
+  role cannot be exercised with an un-verified pre-existing password. RESIDENT/WARDEN/GUARDIAN upgrades are
+  unchanged (immediate, credentials preserved).
+- **Production file naming** (no `phase*` filenames): `phase5-shared.tsx`→`portal-shared.tsx` (8 importers),
+  `phase2-hostel-routes.test.ts`→`platform-hostel-routes.test.ts`, `phase5-routes.test.ts`→`growth-routes.test.ts`.
+
+### Fixed
+- Typecheck regression: `user.service.test.ts` mock was missing `mustChangePassword` (TS2339).
+- **Production build is now green** (exit 0); the prior session's build verification is complete.
+
+### Tested
+- Suite 95/95 (added 3 audit-service tests + 1 §3.2 safeguard test). Typecheck + ESLint clean (0 errors).
+- Verified Phase 1 model index coverage against DATABASE.md "Indexing Strategy Summary" — no gaps.
+
+### Notes
+- Remaining Phase 1 items are external infra (Cloudflare R2 bucket, live Resend delivery test, dev-DB role
+  migration) or deliberately deferred (app-wide envelope migration, dedicated repositories layer). See
+  `TODO.md` and MEMORY.md resume point.
+
+---
+
 ## [0.3.0] - 2026-07-20 — Phase 1 alignment (in progress, ~90%)
 
 ### Added

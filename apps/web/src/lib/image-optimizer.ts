@@ -78,6 +78,9 @@ export async function optimizeImage(
         Key: variantKey,
         Body: result,
         ContentType: "image/webp",
+        // Variants are content-addressed (unique key per source) and never
+        // mutated, so they can be cached aggressively by the browser + CDN.
+        CacheControl: "public, max-age=31536000, immutable",
       }),
     );
 

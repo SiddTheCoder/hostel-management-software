@@ -20,7 +20,7 @@ import {
   type LoadState,
   type MaintenanceRequest,
   type ServiceProvider,
-} from "./phase5-shared";
+} from "./portal-shared";
 
 export const HostelAdminMaintenancePageContent = React.memo(
   function HostelAdminMaintenancePageContent() {

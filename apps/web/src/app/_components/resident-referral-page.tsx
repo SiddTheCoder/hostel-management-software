@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Gift } from "lucide-react";
 import { EmptyState, Panel, StatusBadge } from "@/app/_components/shared-ui";
 import { browserApi } from "@/lib/browser-api";
-import { Message, PageHeader, type Referral } from "./phase5-shared";
+import { Message, PageHeader, type Referral } from "./portal-shared";
 
 export const ResidentReferralPageContent = React.memo(
   function ResidentReferralPageContent() {

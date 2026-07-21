@@ -46,6 +46,7 @@ function mockExistingUser(overrides: Record<string, unknown> = {}) {
     _id: "user-1",
     email: "test@example.com",
     hostelIds: [],
+    mustChangePassword: false,
     passwordHash: "existing-hash",
     role: Role.PUBLIC,
     save: vi.fn(),
@@ -135,6 +136,30 @@ describe("registerOrUpgradeUserByEmail (ARCHITECTURE.md §3.2)", () => {
     expect(result.temporaryPassword).toBeTruthy();
     expect(existing.mustChangePassword).toBe(true);
     expect(existing.passwordHash).toContain("hash:");
+  });
+
+  it("rotates to a temporary password when upgrading PUBLIC -> HOSTEL_ADMIN (§3.2 safeguard)", async () => {
+    const existing = mockExistingUser({ passwordHash: "existing-hash" });
+    mockFindOneResult(existing);
+
+    const result = await registerOrUpgradeUserByEmail({
+      email: "test@example.com",
+      performedBy: "actor-1",
+      role: Role.HOSTEL_ADMIN,
+    });
+
+    expect(result.upgraded).toBe(true);
+    // A high-privilege upgrade must not be usable with the un-verified
+    // pre-existing password; a fresh temporary password gates mailbox proof.
+    expect(result.temporaryPassword).toBeTruthy();
+    expect(existing.mustChangePassword).toBe(true);
+    expect(existing.passwordHash).toContain("hash:");
+    expect(existing.passwordHash).not.toBe("existing-hash");
+    // Credentials email (carrying the temp password) is sent, not the silent
+    // "account upgraded" notice.
+    expect(mocks.sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "test@example.com" }),
+    );
   });
 
   it("rejects when the email already has a different non-PUBLIC role", async () => {

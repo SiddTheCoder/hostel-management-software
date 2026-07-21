@@ -40,7 +40,13 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 
 **Goal:** Have a running, multi-tenant, role-aware backend + platform-owner portal that can approve hostels. Core auth system with account upgrade mechanism working end-to-end.
 
-> **Status note (2026-07-20):** Phase 1 alignment largely complete on top of the pre-existing codebase — see MEMORY.md "Completed Work" for what was done, the deviations from this doc (npm workspaces instead of pnpm, `/api/v1` legacy routes kept alongside new `/api/auth/*`, response envelope shape), and the short list of remaining Phase 1 items.
+> **Status note (2026-07-21):** Phase 1 alignment complete for all code-side deliverables. Production
+> build is green; tests 95/95; typecheck + lint clean. This session added the read-only **audit log
+> viewer** and closed the ARCHITECTURE.md §3.2 **high-privilege upgrade safeguard** (PUBLIC→HOSTEL_ADMIN
+> now requires mailbox proof via an emailed temporary password). Remaining open items are external/infra
+> (Cloudflare R2 bucket, live Resend delivery test, dev-DB role migration) or deliberately deferred
+> (app-wide response-envelope migration, dedicated repositories layer) — tracked in `TODO.md` and
+> MEMORY.md. See MEMORY.md "Completed Work" for the full list and the locked deviations.
 
 ### 1.1 Deliverables
 
@@ -115,7 +121,7 @@ This document splits the entire build into **6 sequential phases**. The AI codin
   - Sends rejection email with reason
   - Creates AuditLog entry
 - ☑ View hostel details page
-- ☐ Audit log viewer (read-only)
+- ☑ Audit log viewer (read-only)
 
 **Shared Components (shadcn/ui)**
 - ☑ Install and configure shadcn/ui + Tailwind
