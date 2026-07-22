@@ -9,6 +9,7 @@ const navItems = [
   { href: "/hostel-admin/profile", icon: "building" as const, label: "Hostel Profile" },
   { href: "/hostel-admin/rooms", icon: "bed" as const, label: "Rooms & Beds" },
   { href: "/hostel-admin/residents", icon: "users" as const, label: "Residents" },
+  { href: "/hostel-admin/wardens", icon: "shield" as const, label: "Wardens" },
   { href: "/hostel-admin/inquiries", icon: "clipboard" as const, label: "Inquiries" },
   { href: "/hostel-admin/payments", icon: "card" as const, label: "Payments" },
   { href: "/hostel-admin/food", icon: "food" as const, label: "Food" },

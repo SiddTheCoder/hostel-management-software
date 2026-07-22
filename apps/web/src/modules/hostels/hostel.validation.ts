@@ -116,6 +116,32 @@ export const hostelRejectSchema = z.object({
   reason: z.string().trim().min(3).max(1000),
 });
 
+export const hostelRequestDocumentsSchema = z.object({
+  documents: z
+    .array(
+      z.object({
+        documentType: z.string().trim().min(2).max(120),
+        note: z.string().trim().max(400).optional(),
+      }),
+    )
+    .min(1, "Request at least one document.")
+    .max(12),
+  note: z.string().trim().max(1000).optional(),
+});
+
+export const hostelResubmitDocumentsSchema = z.object({
+  documents: z
+    .array(
+      z.object({
+        documentType: z.string().trim().min(2).max(120),
+        fileAssetId: objectIdSchema.optional(),
+        fileUrl: z.string().trim().url(),
+      }),
+    )
+    .min(1, "Upload at least one document.")
+    .max(12),
+});
+
 export const publicHostelListQuerySchema = z.object({
   area: z.string().trim().min(1).max(120).optional(),
   facility: z.string().trim().min(1).max(80).optional(),

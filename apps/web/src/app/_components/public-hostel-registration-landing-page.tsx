@@ -17,9 +17,12 @@ import {
 } from "lucide-react";
 import { motion, useScroll, useTransform, type Easing, type Variants } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
+import { HostelStatusView, type OwnerApplication } from "@/app/_components/public-hostel-registration-page";
 import { PublicShell } from "@/app/_components/shared";
 
 const SYMBOLS = "0SCB87675HJGS##&";
@@ -143,6 +146,27 @@ export function PublicHostelRegistrationLandingPage() {
   const [bordersDone, setBordersDone] = useState(false);
   const featureRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
+  const router = useRouter();
+
+  // If the signed-in user has already submitted a hostel, this route shows their
+  // application status instead of the marketing page. Anonymous visitors (the
+  // request 401s) keep seeing the landing page.
+  const [statusApp, setStatusApp] = useState<OwnerApplication | null>(null);
+
+  const loadOwnerStatus = async () => {
+    try {
+      const data = await browserApi<{ applications: OwnerApplication[] }>(
+        "/api/v1/public/hostel-applications/my-applications",
+      );
+      setStatusApp(data.applications[0] ?? null);
+    } catch {
+      setStatusApp(null);
+    }
+  };
+
+  useEffect(() => {
+    void loadOwnerStatus();
+  }, []);
 
   const bottomCtaOpacity = useTransform(scrollY, [600, 900], [0, 1]);
 
@@ -181,6 +205,18 @@ export function PublicHostelRegistrationLandingPage() {
   }, []);
 
   const SlideIcon = heroSlides[currentSlide].icon;
+
+  if (statusApp) {
+    return (
+      <PublicShell active="register-hostel">
+        <HostelStatusView
+          application={statusApp}
+          onRegisterAnother={() => router.push("/register-hostel/form")}
+          onResubmitted={loadOwnerStatus}
+        />
+      </PublicShell>
+    );
+  }
 
   return (
     <PublicShell active="register-hostel">

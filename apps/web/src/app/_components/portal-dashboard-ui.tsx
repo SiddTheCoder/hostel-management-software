@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronDown, Star, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
@@ -105,9 +105,21 @@ export function PortalPageHeader({
   );
 }
 
+const noteToneClasses: Record<SoftTone, string> = {
+  amber: "text-amber-600",
+  blue: "text-blue-600",
+  cyan: "text-cyan-600",
+  green: "text-emerald-600",
+  purple: "text-violet-600",
+  rose: "text-rose-600",
+  slate: "text-muted-foreground",
+};
+
 export function MetricCard({
   icon: Icon,
   label,
+  note,
+  noteTone = "slate",
   tone = "blue",
   trend,
   trendDown = false,
@@ -115,6 +127,8 @@ export function MetricCard({
 }: {
   icon: LucideIcon;
   label: string;
+  note?: string;
+  noteTone?: SoftTone;
   tone?: SoftTone;
   trend?: string;
   trendDown?: boolean;
@@ -160,6 +174,10 @@ export function MetricCard({
                   <TrendingUp className="size-3" />
                 )}
                 {trend}
+              </p>
+            ) : note ? (
+              <p className={cn("mt-1.5 text-[11px] font-semibold", noteToneClasses[noteTone])}>
+                {note}
               </p>
             ) : null}
           </div>
@@ -369,6 +387,64 @@ export function SimpleSparkline({
   );
 }
 
+export function AreaSparkline({
+  labels,
+  stroke = "#2563eb",
+  values,
+}: {
+  labels?: string[];
+  stroke?: string;
+  values: number[];
+}) {
+  const width = 320;
+  const height = 96;
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const range = max - min || 1;
+  const stepX = width / (values.length - 1 || 1);
+  const points = values.map((value, index) => {
+    const x = index * stepX;
+    const y = height - ((value - min) / range) * (height - 8) - 4;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const line = points.map((point, index) => `${index === 0 ? "M" : "L"}${point}`).join(" ");
+  const area = `${line} L${width},${height} L0,${height} Z`;
+  const gradientId = `area-${stroke.replace(/[^a-z0-9]/gi, "")}`;
+
+  return (
+    <div>
+      <svg
+        className="h-24 w-full"
+        preserveAspectRatio="none"
+        viewBox={`0 0 ${width} ${height}`}
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={stroke} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={stroke} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={area} fill={`url(#${gradientId})`} />
+        <path
+          d={line}
+          fill="none"
+          stroke={stroke}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        />
+      </svg>
+      {labels && labels.length > 0 ? (
+        <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+          {labels.map((label, index) => (
+            <span key={`${label}-${index}`}>{label}</span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function EmptyInline({ label }: { label: string }) {
   return (
     <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
@@ -420,6 +496,118 @@ export function SearchField({
         placeholder={placeholder ?? "Search..."}
         value={value}
       />
+    </div>
+  );
+}
+
+const pagerActiveTone: Record<PortalTone, string> = {
+  admin: "bg-role-admin text-white",
+  guardian: "bg-role-guardian text-white",
+  platform: "bg-role-platform text-white",
+  resident: "bg-role-resident text-white",
+};
+
+function PagerButton({
+  active,
+  disabled,
+  label,
+  tone = "platform",
+}: {
+  active?: boolean;
+  disabled?: boolean;
+  label: string;
+  tone?: PortalTone;
+}) {
+  return (
+    <button
+      className={cn(
+        "flex size-7 items-center justify-center rounded-md text-xs",
+        active
+          ? cn("font-semibold", pagerActiveTone[tone])
+          : "border border-border font-medium text-muted-foreground disabled:opacity-40",
+      )}
+      disabled={disabled}
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+export function ListPager({
+  pageSize = 10,
+  showPageSize = false,
+  tone = "platform",
+  total,
+  unit,
+}: {
+  pageSize?: number;
+  showPageSize?: boolean;
+  tone?: PortalTone;
+  total: number;
+  unit?: string;
+}) {
+  const shown = Math.min(pageSize, total);
+  const lastPage = Math.max(1, Math.ceil(total / pageSize));
+
+  return (
+    <div className="mt-4 flex flex-col gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <span>
+        Showing {total === 0 ? 0 : 1} to {shown} of {total.toLocaleString()}
+        {unit ? ` ${unit}` : ""}
+      </span>
+      <div className="flex items-center gap-1">
+        <PagerButton disabled label="‹" tone={tone} />
+        <PagerButton active label="1" tone={tone} />
+        {lastPage >= 2 ? <PagerButton label="2" tone={tone} /> : null}
+        {lastPage >= 3 ? <PagerButton label="3" tone={tone} /> : null}
+        {lastPage > 4 ? <span className="px-1">…</span> : null}
+        {lastPage > 3 ? <PagerButton label={String(lastPage)} tone={tone} /> : null}
+        <PagerButton label="›" tone={tone} />
+        {showPageSize ? (
+          <span className="ml-2 inline-flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[11px] font-medium text-muted-foreground">
+            {pageSize} / page
+            <ChevronDown className="size-3" />
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export function RatingStars({ count, rating }: { count?: number; rating: number }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground">
+      <Star className="size-3.5 fill-amber-400 text-amber-400" />
+      {rating.toFixed(1)}
+      {count != null ? (
+        <span className="font-normal text-muted-foreground">({count})</span>
+      ) : null}
+    </span>
+  );
+}
+
+export function FilterSelect({
+  className,
+  defaultLabel,
+  options = [],
+}: {
+  className?: string;
+  defaultLabel: string;
+  options?: string[];
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      <select
+        className="h-10 w-full appearance-none rounded-xl border border-border bg-card px-3 pr-8 text-sm text-foreground shadow-sm outline-none"
+        defaultValue=""
+      >
+        <option value="">{defaultLabel}</option>
+        {options.map((option) => (
+          <option key={option}>{option}</option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
     </div>
   );
 }

@@ -2,18 +2,57 @@
 
 import { PhoneCall, Plus, Send, Star, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 
-import { browserApi } from "@/lib/browser-api";
+import { useCompareHostels, useHostels } from "@/hooks/use-hostels";
+import { useComparisonStore } from "@/stores/comparison-store";
 import { PublicShell, SectionCard, StatusPill, formatMoney } from "./shared";
-import { mapPublicHostelToSummary, type PublicHostel } from "./public-hostel-data";
-import type { HostelSummary } from "@/app/_components/public-hostel-types";
+import { mapPublicHostelToSummary } from "./public-hostel-data";
 
 export function PublicComparePage() {
-  const [comparedHostels, setComparedHostels] = useState<HostelSummary[]>([]);
-  const [availableHostels, setAvailableHostels] = useState<HostelSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const compareIds = useComparisonStore((state) => state.ids);
+  const toggleCompare = useComparisonStore((state) => state.toggle);
+  const removeCompare = useComparisonStore((state) => state.remove);
+
+  const availableQuery = useHostels();
+  const available = useMemo(
+    () => availableQuery.data?.hostels ?? [],
+    [availableQuery.data],
+  );
+
+  // Seed a default selection (first up to 3) so a direct visit to /compare is
+  // not empty. Zustand action in an effect — not React setState.
+  useEffect(() => {
+    if (compareIds.length === 0 && available.length >= 2) {
+      available.slice(0, 3).forEach((hostel) => toggleCompare(hostel.id));
+    }
+  }, [compareIds.length, available, toggleCompare]);
+
+  // Guard against stale persisted ids (e.g. a hostel later unpublished).
+  const validIds = useMemo(
+    () => compareIds.filter((id) => available.some((hostel) => hostel.id === id)),
+    [compareIds, available],
+  );
+
+  const comparisonQuery = useCompareHostels(validIds);
+
+  const comparedHostels = useMemo(
+    () => (comparisonQuery.data?.hostels ?? []).map(mapPublicHostelToSummary),
+    [comparisonQuery.data],
+  );
+
+  const availableHostels = useMemo(
+    () => available.map(mapPublicHostelToSummary),
+    [available],
+  );
+
+  const isLoading = availableQuery.isPending || comparisonQuery.isFetching;
+
+  const message = availableQuery.isError
+    ? "Could not load hostel comparison data."
+    : available.length < 2
+      ? "Publish at least two verified hostels to compare them."
+      : "";
 
   const rows = [
     ["Hostel", "name"],
@@ -27,60 +66,16 @@ export function PublicComparePage() {
     ["Rating & Reviews", "rating"],
   ] as const;
 
-  const removeHostel = (id: string) => {
-    setComparedHostels(comparedHostels.filter((h) => h.id !== id));
-  };
-
   const addHostel = () => {
-    const remaining = availableHostels.filter(
-      (h) => !comparedHostels.find((ch) => ch.id === h.id),
-    );
-    if (remaining.length > 0 && comparedHostels.length < 3) {
-      setComparedHostels([...comparedHostels, remaining[0]]);
-    } else {
-      alert("You can compare up to 3 hostels side-by-side.");
+    const next = availableHostels.find((hostel) => !compareIds.includes(hostel.id));
+    if (!next) {
+      return;
+    }
+    const added = toggleCompare(next.id);
+    if (!added) {
+      window.alert("You can compare up to 3 hostels side-by-side.");
     }
   };
-
-  useEffect(() => {
-    async function loadComparison() {
-      try {
-        const publicData = await browserApi<{ hostels: PublicHostel[] }>(
-          "/api/v1/public/hostels",
-        );
-
-        if (publicData.hostels.length < 2) {
-          setAvailableHostels(publicData.hostels.map(mapPublicHostelToSummary));
-          setComparedHostels([]);
-          setMessage("Publish at least two verified hostels to compare them.");
-          return;
-        }
-
-        const ids = publicData.hostels
-          .slice(0, 3)
-          .map((hostel) => hostel.id)
-          .join(",");
-        const comparisonData = await browserApi<{ hostels: PublicHostel[] }>(
-          `/api/v1/public/hostels/compare?ids=${encodeURIComponent(ids)}`,
-        );
-        const mapped = comparisonData.hostels.map(mapPublicHostelToSummary);
-
-        setAvailableHostels(publicData.hostels.map(mapPublicHostelToSummary));
-        setComparedHostels(mapped);
-        setMessage("Loaded live hostel comparison data.");
-      } catch {
-        setMessage("Could not load hostel comparison data.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    const timer = window.setTimeout(() => {
-      void loadComparison();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, []);
 
   return (
     <PublicShell active="compare">
@@ -122,7 +117,11 @@ export function PublicComparePage() {
         ) : comparedHostels.length === 0 ? (
           <SectionCard>
             <div className="p-10 text-center text-sm text-muted-foreground">
-              No comparable hostels yet.
+              No hostels selected. Pick hostels from the{" "}
+              <Link className="font-semibold text-brand-teal hover:underline" href="/hostels">
+                listing page
+              </Link>{" "}
+              to compare them here.
             </div>
           </SectionCard>
         ) : (
@@ -158,7 +157,7 @@ export function PublicComparePage() {
                 >
                   {/* Delete header button */}
                   <button
-                    onClick={() => removeHostel(hostel.id)}
+                    onClick={() => removeCompare(hostel.id)}
                     className="absolute right-3 top-3 z-20 size-7 bg-surface/90 hover:bg-red-50 hover:text-danger rounded-full border border-border flex items-center justify-center text-muted-foreground transition shadow-sm"
                     title="Remove from comparison"
                   >

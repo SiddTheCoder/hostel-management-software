@@ -96,6 +96,19 @@ export async function requireHostelStaffPrincipal(request: NextRequest) {
   return principal;
 }
 
+/**
+ * Stricter than {@link requireHostelStaffPrincipal}: only HOSTEL_ADMIN may pass.
+ * Wardens are hostel staff but cannot manage other wardens (PHASES.md §2 —
+ * "Warden Management (HOSTEL_ADMIN only)").
+ */
+export async function requireHostelAdminPrincipal(request: NextRequest) {
+  const principal = await requireApiPrincipal(request);
+
+  assertApiRoles(principal, [Role.HOSTEL_ADMIN]);
+
+  return principal;
+}
+
 export function assertHostelScopedApiAccess(principal: ApiPrincipal, hostelId: string) {
   try {
     assertHostelAccess(principal, hostelId);

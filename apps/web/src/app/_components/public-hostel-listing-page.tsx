@@ -4,24 +4,25 @@ import {
   AlertCircle as AlertIcon,
   ChevronRight,
   Filter,
+  GitCompare,
   Grid2X2,
   List,
   Search,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
-import { browserApi } from "@/lib/browser-api";
+import { useHostels } from "@/hooks/use-hostels";
+import { haversineMeters } from "@/lib/maps/nearby";
+import { NEPAL_COLLEGES } from "@/lib/maps/nepal-colleges";
+import { useComparisonStore } from "@/stores/comparison-store";
+import { useHostelFiltersStore } from "@/stores/hostel-filters-store";
+import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { HostelCard, HostelListCard, NepalBannerGraphic, PublicShell } from "./shared";
-import {
-  hasFood,
-  mapPublicHostelToSummary,
-  type PublicHostel,
-} from "./public-hostel-data";
-
-type LoadState = "loading" | "ready" | "error";
+import { hasFood, mapPublicHostelToSummary } from "./public-hostel-data";
 
 function hostelTypeQuery(value: string) {
   if (value === "Boys") return "BOYS";
@@ -31,7 +32,7 @@ function hostelTypeQuery(value: string) {
   return "";
 }
 
-function budgetQuery(value: string) {
+function budgetQuery(value: string): { maxPrice?: string; minPrice?: string } {
   if (value === "Under NPR 8,000") return { maxPrice: "7999" };
   if (value === "NPR 8,000 - 10,000") {
     return { maxPrice: "10000", minPrice: "8000" };
@@ -45,75 +46,73 @@ function PublicHostelListingPageContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams ? searchParams.get("search") || "" : "";
 
-  const [query, setQuery] = useState(initialSearch);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedArea, setSelectedArea] = useState<string>("All Areas");
-  const [selectedBudget, setSelectedBudget] = useState<string>("Any Budget");
-  const [selectedType, setSelectedType] = useState<string>("All Types");
-  const [selectedRoom, setSelectedRoom] = useState<string>("All Room Types");
-  const [selectedFood, setSelectedFood] = useState<string>("Any");
-  const [selectedFacilities, setSelectedFacilities] = useState<string>("All Facilities");
-  const [sortBy, setSortBy] = useState<string>("Recommended");
-  const [hostels, setHostels] = useState<PublicHostel[]>([]);
-  const [loadState, setLoadState] = useState<LoadState>("loading");
-  const [message, setMessage] = useState("");
+  const {
+    area: selectedArea,
+    budget: selectedBudget,
+    college: selectedCollege,
+    facilities: selectedFacilities,
+    food: selectedFood,
+    query,
+    reset,
+    room: selectedRoom,
+    sortBy,
+    type: selectedType,
+    update,
+    viewMode,
+  } = useHostelFiltersStore();
 
+  const compareIds = useComparisonStore((state) => state.ids);
+  const toggleCompare = useComparisonStore((state) => state.toggle);
+  const clearCompare = useComparisonStore((state) => state.clear);
+
+  const mobileFiltersOpen = useUiStore((state) => state.mobileFiltersOpen);
+  const setMobileFiltersOpen = useUiStore((state) => state.setMobileFiltersOpen);
+
+  // Seed the search box from a ?search= deep link (zustand action, not React
+  // setState — safe inside an effect).
   useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadHostels() {
-      setLoadState("loading");
-      setMessage("");
-
-      try {
-        const params = new URLSearchParams();
-        const budget = budgetQuery(selectedBudget);
-        const type = hostelTypeQuery(selectedType);
-
-        if (query.trim()) params.set("q", query.trim());
-        if (selectedArea !== "All Areas") params.set("area", selectedArea);
-        if (type) params.set("type", type);
-        if (selectedRoom !== "All Room Types") params.set("roomType", selectedRoom);
-        if (selectedFacilities !== "All Facilities") {
-          params.set("facility", selectedFacilities);
-        }
-        Object.entries(budget).forEach(([key, value]) => params.set(key, value));
-
-        const data = await browserApi<{ hostels: PublicHostel[] }>(
-          `/api/v1/public/hostels${params.size ? `?${params.toString()}` : ""}`,
-          { signal: controller.signal },
-        );
-
-        setHostels(data.hostels);
-        setLoadState("ready");
-      } catch (error) {
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setMessage(
-          error instanceof Error ? error.message : "Could not load published hostels.",
-        );
-        setLoadState("error");
-      }
+    if (initialSearch) {
+      update({ query: initialSearch });
     }
+  }, [initialSearch, update]);
 
-    const timer = window.setTimeout(() => {
-      void loadHostels();
-    }, 180);
+  // Debounce the search term that actually drives the query, so typing does not
+  // fire a request per keystroke.
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query), 180);
+    return () => window.clearTimeout(timer);
+  }, [query]);
 
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
+  const apiParams = useMemo(() => {
+    const budget = budgetQuery(selectedBudget);
+    const type = hostelTypeQuery(selectedType);
+
+    return {
+      area: selectedArea !== "All Areas" ? selectedArea : undefined,
+      facility: selectedFacilities !== "All Facilities" ? selectedFacilities : undefined,
+      maxPrice: budget.maxPrice,
+      minPrice: budget.minPrice,
+      q: debouncedQuery.trim() || undefined,
+      roomType: selectedRoom !== "All Room Types" ? selectedRoom : undefined,
+      type: type || undefined,
     };
   }, [
-    query,
+    debouncedQuery,
     selectedArea,
     selectedBudget,
     selectedFacilities,
     selectedRoom,
     selectedType,
   ]);
+
+  const { data, error, isError, isPending } = useHostels(apiParams);
+  const hostels = useMemo(() => data?.hostels ?? [], [data]);
+  const message = isError
+    ? error instanceof Error
+      ? error.message
+      : "Could not load published hostels."
+    : "";
 
   const hostelRows = useMemo(
     () =>
@@ -125,28 +124,39 @@ function PublicHostelListingPageContent() {
   );
 
   const filtered = useMemo(() => {
-    let result = hostelRows
-      .filter(({ raw }) => {
-        if (selectedFood !== "Any") {
-          const hostelHasFood = hasFood(raw);
-          if (selectedFood === "With Food" && !hostelHasFood) return false;
-          if (selectedFood === "Without Food" && hostelHasFood) return false;
-        }
+    let rows = hostelRows.filter(({ raw }) => {
+      if (selectedFood !== "Any") {
+        const hostelHasFood = hasFood(raw);
+        if (selectedFood === "With Food" && !hostelHasFood) return false;
+        if (selectedFood === "Without Food" && hostelHasFood) return false;
+      }
 
-        return true;
-      })
-      .map(({ summary }) => summary);
+      return true;
+    });
 
-    if (sortBy === "Price: Low to High") {
-      result = [...result].sort((a, b) => a.price - b.price);
+    const college =
+      selectedCollege !== "All Colleges"
+        ? NEPAL_COLLEGES.find((item) => item.name === selectedCollege)
+        : undefined;
+
+    if (college) {
+      // "Near my college": rank by straight-line distance; hostels without
+      // pinned coordinates fall to the end.
+      const distanceOf = ({ raw }: (typeof rows)[number]) =>
+        raw.coordinates
+          ? haversineMeters(raw.coordinates, college.coordinates)
+          : Number.POSITIVE_INFINITY;
+      rows = [...rows].sort((a, b) => distanceOf(a) - distanceOf(b));
+    } else if (sortBy === "Price: Low to High") {
+      rows = [...rows].sort((a, b) => a.summary.price - b.summary.price);
     } else if (sortBy === "Price: High to Low") {
-      result = [...result].sort((a, b) => b.price - a.price);
+      rows = [...rows].sort((a, b) => b.summary.price - a.summary.price);
     } else if (sortBy === "Rating") {
-      result = [...result].sort((a, b) => b.rating - a.rating);
+      rows = [...rows].sort((a, b) => b.summary.rating - a.summary.rating);
     }
 
-    return result;
-  }, [selectedFood, hostelRows, sortBy]);
+    return rows.map(({ summary }) => summary);
+  }, [selectedFood, hostelRows, sortBy, selectedCollege]);
 
   const areaOptions = useMemo(() => {
     const areas = new Set<string>(["All Areas"]);
@@ -158,6 +168,11 @@ function PublicHostelListingPageContent() {
 
     return [...areas];
   }, [hostels]);
+
+  const handleClearAll = () => {
+    reset();
+    setDebouncedQuery("");
+  };
 
   return (
     <PublicShell active="browse">
@@ -188,10 +203,25 @@ function PublicHostelListingPageContent() {
           <span className="text-foreground font-semibold">Hostels</span>
         </div>
 
+        {/* Mobile filters toggle */}
+        <button
+          className="lg:hidden mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-bold text-foreground shadow-sm"
+          onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+          type="button"
+        >
+          <Filter className="size-4 text-brand-teal" />
+          {mobileFiltersOpen ? "Hide Filters" : "Show Filters"}
+        </button>
+
         {/* Main Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
           {/* Left Sidebar Filter Column */}
-          <aside className="space-y-6 lg:sticky lg:top-24">
+          <aside
+            className={cn(
+              "space-y-6 lg:sticky lg:top-24",
+              !mobileFiltersOpen && "hidden lg:block",
+            )}
+          >
             <div className="bg-surface rounded-xl border border-border/80 p-5 shadow-sm space-y-6">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -199,16 +229,7 @@ function PublicHostelListingPageContent() {
                   <Filter className="size-4 text-brand-teal" /> Filters
                 </h3>
                 <button
-                  onClick={() => {
-                    setQuery("");
-                    setSelectedArea("All Areas");
-                    setSelectedBudget("Any Budget");
-                    setSelectedType("All Types");
-                    setSelectedRoom("All Room Types");
-                    setSelectedFood("Any");
-                    setSelectedFacilities("All Facilities");
-                    setSortBy("Recommended");
-                  }}
+                  onClick={handleClearAll}
                   className="text-xs font-bold text-brand-teal hover:underline"
                 >
                   Clear All
@@ -224,7 +245,7 @@ function PublicHostelListingPageContent() {
                   <Search className="size-4 text-muted-foreground shrink-0" />
                   <input
                     className="ml-2 w-full bg-transparent text-xs outline-none placeholder:text-muted-foreground"
-                    onChange={(event) => setQuery(event.target.value)}
+                    onChange={(event) => update({ query: event.target.value })}
                     placeholder="Hostel name or area..."
                     value={query}
                   />
@@ -242,7 +263,7 @@ function PublicHostelListingPageContent() {
                     return (
                       <button
                         key={areaName}
-                        onClick={() => setSelectedArea(areaName)}
+                        onClick={() => update({ area: areaName })}
                         className={cn(
                           "flex items-center justify-between w-full text-left px-2 py-1.5 rounded-md text-xs font-semibold transition",
                           active
@@ -291,7 +312,7 @@ function PublicHostelListingPageContent() {
                           type="radio"
                           name="budget"
                           checked={active}
-                          onChange={() => setSelectedBudget(budgetRange)}
+                          onChange={() => update({ budget: budgetRange })}
                           className="size-3.5 text-brand-teal border-border focus:ring-brand-teal"
                         />
                         <span>{budgetRange}</span>
@@ -318,7 +339,7 @@ function PublicHostelListingPageContent() {
                           type="radio"
                           name="type"
                           checked={active}
-                          onChange={() => setSelectedType(typeVal)}
+                          onChange={() => update({ type: typeVal })}
                           className="size-3.5 text-brand-teal border-border focus:ring-brand-teal"
                         />
                         <span>{typeVal}</span>
@@ -346,7 +367,7 @@ function PublicHostelListingPageContent() {
                             type="radio"
                             name="room"
                             checked={active}
-                            onChange={() => setSelectedRoom(roomVal)}
+                            onChange={() => update({ room: roomVal })}
                             className="size-3.5 text-brand-teal border-border focus:ring-brand-teal"
                           />
                           <span>{roomVal}</span>
@@ -374,7 +395,7 @@ function PublicHostelListingPageContent() {
                           type="radio"
                           name="food"
                           checked={active}
-                          onChange={() => setSelectedFood(foodVal)}
+                          onChange={() => update({ food: foodVal })}
                           className="size-3.5 text-brand-teal border-border focus:ring-brand-teal"
                         />
                         <span>{foodVal}</span>
@@ -409,7 +430,7 @@ function PublicHostelListingPageContent() {
                           type="radio"
                           name="facilities"
                           checked={active}
-                          onChange={() => setSelectedFacilities(facVal)}
+                          onChange={() => update({ facilities: facVal })}
                           className="size-3.5 text-brand-teal border-border focus:ring-brand-teal"
                         />
                         <span>{facVal}</span>
@@ -417,6 +438,30 @@ function PublicHostelListingPageContent() {
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Near my college */}
+              <div className="space-y-2 pt-2 border-t border-border/60">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Near My College
+                </p>
+                <select
+                  className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-semibold text-foreground outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/15"
+                  onChange={(event) => update({ college: event.target.value })}
+                  value={selectedCollege}
+                >
+                  <option value="All Colleges">All Colleges</option>
+                  {NEPAL_COLLEGES.map((college) => (
+                    <option key={college.name} value={college.name}>
+                      {college.name}
+                    </option>
+                  ))}
+                </select>
+                {selectedCollege !== "All Colleges" ? (
+                  <p className="text-[10px] font-medium text-muted-foreground">
+                    Sorted by distance to {selectedCollege}.
+                  </p>
+                ) : null}
               </div>
             </div>
           </aside>
@@ -428,7 +473,7 @@ function PublicHostelListingPageContent() {
               <div className="space-y-0.5">
                 <h3 className="font-bold text-sm text-foreground">Showing Hostels</h3>
                 <p className="text-[11px] text-muted-foreground font-semibold">
-                  {loadState === "loading"
+                  {isPending
                     ? "Loading published hostels..."
                     : `${filtered.length} verified ${
                         filtered.length === 1 ? "result" : "results"
@@ -444,7 +489,7 @@ function PublicHostelListingPageContent() {
                   </span>
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={(e) => update({ sortBy: e.target.value })}
                     className="bg-muted border border-border rounded-lg text-xs font-bold text-foreground py-1.5 px-3 outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/15 transition cursor-pointer"
                   >
                     {[
@@ -463,7 +508,7 @@ function PublicHostelListingPageContent() {
                 {/* View Toggles */}
                 <div className="flex items-center gap-1.5 border-l border-border/60 pl-4">
                   <button
-                    onClick={() => setViewMode("grid")}
+                    onClick={() => update({ viewMode: "grid" })}
                     className={cn(
                       "size-8 rounded-lg flex items-center justify-center border transition",
                       viewMode === "grid"
@@ -474,7 +519,7 @@ function PublicHostelListingPageContent() {
                     <Grid2X2 className="size-4" />
                   </button>
                   <button
-                    onClick={() => setViewMode("list")}
+                    onClick={() => update({ viewMode: "list" })}
                     className={cn(
                       "size-8 rounded-lg flex items-center justify-center border transition",
                       viewMode === "list"
@@ -495,7 +540,7 @@ function PublicHostelListingPageContent() {
               </div>
             ) : null}
 
-            {loadState === "loading" ? (
+            {isPending ? (
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div
@@ -516,16 +561,7 @@ function PublicHostelListingPageContent() {
                 </p>
                 <button
                   className="mt-5 rounded-lg bg-brand-teal px-5 py-2.5 text-xs font-bold text-white hover:brightness-105 transition"
-                  onClick={() => {
-                    setQuery("");
-                    setSelectedArea("All Areas");
-                    setSelectedBudget("Any Budget");
-                    setSelectedType("All Types");
-                    setSelectedRoom("All Room Types");
-                    setSelectedFood("Any");
-                    setSelectedFacilities("All Facilities");
-                    setSortBy("Recommended");
-                  }}
+                  onClick={handleClearAll}
                 >
                   Reset All Filters
                 </button>
@@ -538,18 +574,66 @@ function PublicHostelListingPageContent() {
                     : "flex flex-col gap-4",
                 )}
               >
-                {filtered.map((hostel) =>
-                  viewMode === "grid" ? (
-                    <HostelCard hostel={hostel} key={hostel.id} />
-                  ) : (
-                    <HostelListCard hostel={hostel} key={hostel.id} />
-                  ),
-                )}
+                {filtered.map((hostel) => {
+                  const inCompare = compareIds.includes(hostel.id);
+                  return (
+                    <div className="relative" key={hostel.id}>
+                      <button
+                        aria-pressed={inCompare}
+                        className={cn(
+                          "absolute left-3 top-3 z-20 flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold shadow-sm transition",
+                          inCompare
+                            ? "border-brand-teal bg-brand-teal text-white"
+                            : "border-border bg-surface/90 text-foreground hover:bg-muted",
+                        )}
+                        onClick={() => {
+                          const ok = toggleCompare(hostel.id);
+                          if (!ok) {
+                            window.alert("You can compare up to 3 hostels side-by-side.");
+                          }
+                        }}
+                        type="button"
+                      >
+                        <GitCompare className="size-3" />
+                        {inCompare ? "Added" : "Compare"}
+                      </button>
+                      {viewMode === "grid" ? (
+                        <HostelCard hostel={hostel} />
+                      ) : (
+                        <HostelListCard hostel={hostel} />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </main>
         </div>
       </div>
+
+      {/* Floating comparison tray */}
+      {compareIds.length > 0 ? (
+        <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-5 py-3 shadow-xl">
+          <GitCompare className="size-4 text-brand-teal" />
+          <span className="text-sm font-bold text-foreground">
+            {compareIds.length} selected
+          </span>
+          <Link
+            className="rounded-full bg-brand-teal px-4 py-1.5 text-xs font-bold text-white transition hover:brightness-105"
+            href="/compare"
+          >
+            Compare
+          </Link>
+          <button
+            aria-label="Clear comparison"
+            className="text-muted-foreground transition hover:text-foreground"
+            onClick={clearCompare}
+            type="button"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      ) : null}
     </PublicShell>
   );
 }

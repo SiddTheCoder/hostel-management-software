@@ -1,4 +1,6 @@
 import { connectToDatabase } from "@/lib/db";
+import { buildAddressQuery } from "@/lib/maps/geocoding";
+import { geocodeAndCacheHostel } from "@/modules/hostels/hostel-geo.service";
 import { HostelModel } from "@hostel/db/models/Hostel";
 import type {
   hostelAdminProfileQuerySchema,
@@ -60,6 +62,27 @@ export async function updateHostelAdminProfile(
   }
 
   await auditHostelAction(principal, hostel._id, "HOSTEL_PROFILE_UPDATED");
+
+  // Re-geocode + refresh nearby places when the address changed or coordinates
+  // are missing. Best-effort — never fail the save on a map-provider hiccup
+  // (ARCHITECTURE.md §4.3).
+  const beforeAddress = buildAddressQuery(hostel.location ?? {});
+  const afterAddress = buildAddressQuery(updatedHostel.location ?? {});
+  const missingCoords =
+    updatedHostel.location?.lat == null || updatedHostel.location?.lng == null;
+
+  if (afterAddress && (missingCoords || beforeAddress !== afterAddress)) {
+    const geo = await geocodeAndCacheHostel(String(updatedHostel._id)).catch(
+      () => null,
+    );
+    if (geo) {
+      updatedHostel.location = {
+        ...updatedHostel.location,
+        lat: geo.coordinates.lat,
+        lng: geo.coordinates.lng,
+      };
+    }
+  }
 
   return {
     hostel: serializeHostel(updatedHostel),

@@ -6,6 +6,7 @@ const DEFAULT_DOCUMENT_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
+  "text/plain",
 ];
 
 function positiveInteger(value: string | undefined, fallback: number) {

@@ -1,10 +1,17 @@
 "use client";
 
-import React, { useCallback, useState, useEffect, type FormEvent } from "react";
-import { Flag } from "lucide-react";
-import { EmptyState, Panel, StatusBadge } from "@/app/_components/shared-ui";
+import React, { useCallback, useState, useEffect, useMemo, type FormEvent } from "react";
+import { AlertOctagon, CheckCircle2, Flag, XCircle } from "lucide-react";
+
+import { EmptyState, Panel } from "@/app/_components/shared-ui";
 import { browserApi } from "@/lib/browser-api";
-import { Message, PageHeader, field, type ListingFlag } from "./portal-shared";
+import {
+  MetricCard,
+  PortalPageHeader,
+  SoftBadge,
+  statusToneFromLabel,
+} from "@/app/_components/portal-dashboard-ui";
+import { Message, field, type ListingFlag } from "./portal-shared";
 
 export const PlatformListingFlagsPageContent = React.memo(
   function PlatformListingFlagsPageContent() {
@@ -36,6 +43,7 @@ export const PlatformListingFlagsPageContent = React.memo(
         event.preventDefault();
         const form = new FormData(event.currentTarget);
         const hostelId = field(form, "hostelId");
+        const currentForm = event.currentTarget;
 
         try {
           await browserApi(`/api/v1/platform/hostels/${hostelId}/run-duplicate-check`, {
@@ -43,13 +51,13 @@ export const PlatformListingFlagsPageContent = React.memo(
             method: "POST",
           });
           setMessage("Duplicate check completed.");
-          event.currentTarget.reset();
+          currentForm.reset();
           await load();
         } catch (error) {
           setMessage(error instanceof Error ? error.message : "Could not run check.");
         }
       },
-      [load, setMessage],
+      [load],
     );
 
     const resolve = useCallback(
@@ -70,35 +78,54 @@ export const PlatformListingFlagsPageContent = React.memo(
           setMessage(error instanceof Error ? error.message : "Could not resolve flag.");
         }
       },
-      [load, setMessage],
+      [load],
     );
 
+    const counts = useMemo(() => {
+      const by = (status: string) => flags.filter((flag) => flag.status === status).length;
+      return {
+        dismissed: by("DISMISSED"),
+        highRisk: flags.filter((flag) => flag.riskLevel?.toUpperCase() === "HIGH").length,
+        open: by("OPEN"),
+        resolved: by("RESOLVED"),
+      };
+    }, [flags]);
+
     return (
-      <div className="mx-auto max-w-[1448px] space-y-6">
-        <PageHeader
+      <div className="mx-auto max-w-[1448px] space-y-5">
+        <PortalPageHeader
+          breadcrumb={["Home", "Abuse Flags"]}
           description="Manual duplicate and ghost-listing checks for hostel records."
-          icon={Flag}
           title="Abuse Flags"
         />
         <Message value={message} />
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard icon={Flag} label="Open Flags" note="Needs review" noteTone="amber" tone="amber" value={counts.open} />
+          <MetricCard icon={AlertOctagon} label="High Risk" note="Duplicate signals" noteTone="rose" tone="rose" value={counts.highRisk} />
+          <MetricCard icon={CheckCircle2} label="Resolved" note="Actioned" noteTone="green" tone="green" value={counts.resolved} />
+          <MetricCard icon={XCircle} label="Dismissed" note="No action needed" tone="slate" value={counts.dismissed} />
+        </div>
+
         <Panel title="Run Duplicate Check">
           <form className="flex flex-wrap gap-3" onSubmit={runCheck}>
             <input
-              className="h-11 min-w-80 rounded-md border border-border bg-background px-3 text-sm"
+              className="h-11 min-w-80 flex-1 rounded-xl border border-border bg-background px-3 text-sm"
               name="hostelId"
               placeholder="Hostel id"
               required
             />
-            <button className="rounded-md bg-role-platform px-4 py-2 text-sm font-semibold text-white">
+            <button className="rounded-xl bg-role-platform px-4 py-2 text-sm font-semibold text-white" type="submit">
               Run Check
             </button>
           </form>
         </Panel>
+
         <Panel title="Flags">
           {flags.length === 0 ? <EmptyState label="No listing flags." /> : null}
           <div className="space-y-3">
             {flags.map((flag) => (
-              <div className="rounded-lg border border-border p-4" key={flag.id}>
+              <div className="rounded-xl border border-border p-4" key={flag.id}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-foreground">{flag.reason}</p>
@@ -110,20 +137,20 @@ export const PlatformListingFlagsPageContent = React.memo(
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <StatusBadge>{flag.riskLevel}</StatusBadge>
-                    <StatusBadge>{flag.status}</StatusBadge>
+                    <SoftBadge tone={statusToneFromLabel(flag.riskLevel)}>{flag.riskLevel}</SoftBadge>
+                    <SoftBadge tone={statusToneFromLabel(flag.status)}>{flag.status}</SoftBadge>
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">
                   <button
-                    className="rounded-md border px-3 py-2 text-sm font-semibold"
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground"
                     onClick={() => void resolve(flag.id, "RESOLVED")}
                     type="button"
                   >
                     Resolve
                   </button>
                   <button
-                    className="rounded-md border px-3 py-2 text-sm font-semibold"
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground"
                     onClick={() => void resolve(flag.id, "DISMISSED")}
                     type="button"
                   >

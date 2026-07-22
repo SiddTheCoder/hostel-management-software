@@ -50,6 +50,22 @@ const hostelSchema = new Schema(
       totalBeds: { min: 0, type: Number },
       vacantBeds: { min: 0, type: Number },
     },
+    nearbyPlaces: [
+      {
+        name: { type: String, trim: true },
+        type: {
+          type: String,
+          enum: ["college", "hospital", "bus_stop", "other"],
+          default: "other",
+        },
+        distance: Number,
+        coordinates: {
+          lat: Number,
+          lng: Number,
+        },
+      },
+    ],
+    nearbyPlacesLastUpdated: Date,
     status: {
       type: String,
       enum: [

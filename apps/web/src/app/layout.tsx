@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 
+import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SITE_NAME, siteUrl } from "@/lib/site";
 
 import "./globals.css";
 
@@ -22,8 +24,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HostelHub",
-  description: "Nepal-focused multi-hostel SaaS for discovery and hostel operations.",
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: `${SITE_NAME} — Find & Manage Hostels in Nepal`,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description:
+    "Nepal-focused multi-hostel SaaS for discovery and hostel operations.",
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "en_NP",
+  },
 };
 
 export default function RootLayout({
@@ -38,7 +50,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

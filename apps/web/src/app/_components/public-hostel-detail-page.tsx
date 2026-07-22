@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { HostelMap } from "@/components/maps/hostel-map";
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
 
@@ -585,26 +586,56 @@ export function PublicHostelDetailPage() {
           >
             <h2 className="text-xl font-extrabold text-foreground">Location</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-[1fr_260px]">
-              <div className="flex min-h-44 items-center justify-center rounded-lg border border-dashed border-brand-teal/40 bg-brand-teal-soft/20 text-center">
-                <div>
-                  <MapPin className="mx-auto size-8 text-brand-teal" />
-                  <p className="mt-3 text-sm font-extrabold text-foreground">{address}</p>
-                  <p className="mt-1 text-xs font-medium text-muted-foreground">
-                    Near campus, transit, and daily essentials.
-                  </p>
-                </div>
+              <div className="min-h-44 overflow-hidden rounded-lg border border-border">
+                {hostel.coordinates ? (
+                  <div className="h-64 w-full md:h-full">
+                    <HostelMap
+                      center={hostel.coordinates}
+                      name={hostel.name}
+                      nearby={hostel.nearbyPlaces}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-full min-h-44 items-center justify-center border border-dashed border-brand-teal/40 bg-brand-teal-soft/20 text-center">
+                    <div>
+                      <MapPin className="mx-auto size-8 text-brand-teal" />
+                      <p className="mt-3 text-sm font-extrabold text-foreground">
+                        {address}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-muted-foreground">
+                        The exact location appears once the hostel admin saves an
+                        address.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="space-y-3 text-sm font-medium text-muted-foreground">
-                {[
-                  "Campus area access",
-                  "Public transport nearby",
-                  "Food and pharmacy within walking distance",
-                ].map((item) => (
-                  <p className="flex items-start gap-2" key={item}>
-                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-teal" />
-                    {item}
-                  </p>
-                ))}
+                {hostel.nearbyPlaces && hostel.nearbyPlaces.length > 0
+                  ? hostel.nearbyPlaces.slice(0, 6).map((place) => (
+                      <p
+                        className="flex items-start gap-2"
+                        key={`${place.name}-${place.distance}`}
+                      >
+                        <MapPin className="mt-0.5 size-4 shrink-0 text-brand-teal" />
+                        <span>
+                          <span className="text-foreground">{place.name}</span>
+                          <span className="ml-1 text-xs">
+                            · {place.type.replace("_", " ")} · {place.distance}m
+                          </span>
+                        </span>
+                      </p>
+                    ))
+                  : [
+                      "Campus area access",
+                      "Public transport nearby",
+                      "Food and pharmacy within walking distance",
+                    ].map((item) => (
+                      <p className="flex items-start gap-2" key={item}>
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-teal" />
+                        {item}
+                      </p>
+                    ))}
               </div>
             </div>
           </section>

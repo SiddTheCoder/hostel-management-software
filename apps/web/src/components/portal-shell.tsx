@@ -44,6 +44,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 type IconName =
@@ -215,41 +223,46 @@ export function PortalShell({
 
   function renderNav(onNavigate?: () => void) {
     return (
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
+      <SidebarMenu className="flex flex-1 flex-col gap-0.5 px-2.5 py-2.5">
         {navItems.map((item) => {
           const Icon = iconMap[item.icon ?? "dashboard"];
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 transition dark:text-slate-300",
-                styles.hover,
-                isActive && styles.active,
-              )}
-            >
-              <Icon className="size-[18px] shrink-0" strokeWidth={isActive ? 2.25 : 2} />
-              <span className="truncate">{item.label}</span>
-              {item.badge && item.badge > 0 ? (
-                <Badge
-                  className={cn(
-                    "ml-auto h-5 min-w-5 rounded-full px-1.5 text-[10px] font-bold",
-                    isActive
-                      ? "border-white/20 bg-white/20 text-white"
-                      : "border-transparent bg-role-resident text-white",
-                  )}
-                >
-                  {item.badge}
-                </Badge>
-              ) : null}
-            </Link>
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                className={cn(
+                  "min-h-0 gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 dark:text-slate-300",
+                  styles.hover,
+                  isActive && styles.active,
+                )}
+              >
+                <Link href={item.href} onClick={onNavigate}>
+                  <Icon
+                    className="size-4 shrink-0"
+                    strokeWidth={isActive ? 2.25 : 2}
+                  />
+                  <span className="truncate">{item.label}</span>
+                  {item.badge && item.badge > 0 ? (
+                    <Badge
+                      className={cn(
+                        "ml-auto h-5 min-w-5 rounded-full px-1.5 text-[10px] font-bold",
+                        isActive
+                          ? "border-white/20 bg-white/20 text-white"
+                          : "border-transparent bg-role-resident text-white",
+                      )}
+                    >
+                      {item.badge}
+                    </Badge>
+                  ) : null}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           );
         })}
-      </nav>
+      </SidebarMenu>
     );
   }
 
@@ -262,38 +275,40 @@ export function PortalShell({
           : "Visit our help center or contact support.";
 
     return (
-      <div className="mt-auto space-y-3 border-t border-slate-100 p-3 dark:border-border">
-        <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 dark:border-border dark:bg-muted/30">
-          <div className="flex items-start gap-2.5">
-            <span
-              className={cn(
-                "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full",
-                styles.badge,
-              )}
-            >
-              <HelpCircle className="size-3.5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Need Help?</p>
-              <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{helpCopy}</p>
+      <div className="mt-auto space-y-2 border-t border-slate-100 p-2.5 dark:border-border">
+        {tone !== "platform" ? (
+          <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 dark:border-border dark:bg-muted/30">
+            <div className="flex items-start gap-2">
+              <span
+                className={cn(
+                  "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full",
+                  styles.badge,
+                )}
+              >
+                <HelpCircle className="size-3" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold text-foreground">Need Help?</p>
+                <p className="mt-0.5 text-[10.5px] leading-4 text-muted-foreground">{helpCopy}</p>
+              </div>
             </div>
+            <Button
+              className="mt-2 h-8 w-full rounded-lg border-slate-200 bg-white text-[11px] font-semibold text-slate-700 shadow-sm dark:border-border dark:bg-card dark:text-foreground"
+              type="button"
+              variant="outline"
+            >
+              {tone === "guardian" ? "Contact Hostel" : "Help Center"}
+              <ExternalLink className="size-3" />
+            </Button>
           </div>
-          <Button
-            className="mt-3 h-9 w-full rounded-xl border-slate-200 bg-white text-xs font-semibold text-slate-700 shadow-sm dark:border-border dark:bg-card dark:text-foreground"
-            type="button"
-            variant="outline"
-          >
-            {tone === "guardian" ? "Contact Hostel" : "Help Center"}
-            <ExternalLink className="size-3" />
-          </Button>
-        </div>
+        ) : null}
 
-        <div className="rounded-2xl border border-slate-100 bg-white p-3.5 dark:border-border dark:bg-card">
-          <p className="text-[11px] font-medium text-muted-foreground">Current Plan</p>
-          <p className="mt-0.5 text-sm font-bold text-foreground">{plan.label}</p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">{plan.renews}</p>
+        <div className="rounded-xl border border-slate-100 bg-white p-2.5 dark:border-border dark:bg-card">
+          <p className="text-[10.5px] font-medium text-muted-foreground">Current Plan</p>
+          <p className="mt-0.5 text-[12.5px] font-bold text-foreground">{plan.label}</p>
+          <p className="mt-0.5 text-[10.5px] text-muted-foreground">{plan.renews}</p>
           <Button
-            className={cn("mt-3 h-9 w-full rounded-xl border text-xs font-semibold", styles.badge)}
+            className={cn("mt-2 h-8 w-full rounded-lg border text-[11px] font-semibold", styles.badge)}
             type="button"
             variant="outline"
           >
@@ -329,15 +344,17 @@ export function PortalShell({
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f4f7fb] text-foreground dark:bg-background">
-      <aside className="hidden h-screen w-[260px] shrink-0 flex-col border-r border-slate-200/80 bg-white dark:border-border dark:bg-card md:flex">
-        <div className="shrink-0 border-b border-slate-100 px-4 py-4 dark:border-border">
+      <Sidebar className="w-[260px] shrink-0 border-slate-200/80 bg-white dark:border-border dark:bg-card">
+        <SidebarHeader className="border-slate-100 px-3.5 py-3.5 dark:border-border">
           {renderBrand()}
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        </SidebarHeader>
+        {/* Fixed, non-scrollable rail: overflow-hidden overrides the library's
+            default overflow-y-auto so the sidebar never scrolls independently. */}
+        <SidebarContent className="flex flex-col overflow-hidden">
           {renderNav()}
           {renderSidebarFooter()}
-        </div>
-      </aside>
+        </SidebarContent>
+      </Sidebar>
 
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <SheetContent className="w-[280px] gap-0 p-0 sm:max-w-[280px]" side="left">

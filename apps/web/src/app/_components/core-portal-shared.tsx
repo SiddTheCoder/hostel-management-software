@@ -258,7 +258,7 @@ export function HostelTable({
               {onAction ? (
                 <td>
                   <div className="flex flex-wrap gap-2">
-                    {["approve", "reject", "publish", "unpublish"].map((action) => (
+                    {["approve", "reject", "request-documents", "publish", "unpublish"].map((action) => (
                       <button
                         className="rounded-md border border-border px-2 py-1 text-xs font-semibold text-foreground"
                         key={action}

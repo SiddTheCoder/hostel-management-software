@@ -165,6 +165,58 @@ export async function getPlatformDashboardReport() {
   };
 }
 
+type PlatformPaymentRecord = {
+  _id: Types.ObjectId;
+  dueAmount: number;
+  dueDate?: Date;
+  hostelId: Types.ObjectId;
+  month: string;
+  paidAmount: number;
+  status: string;
+};
+
+// Read-only, platform-wide roll-up of resident payment records (no hostel
+// scoping) for the Platform Owner "Payments" tab. Manual/gateway billing stays
+// out of scope; this simply aggregates what admins have already recorded.
+export async function getPlatformPaymentsOverview() {
+  await connectToDatabase();
+
+  const [totals, statusCounts, pendingProofs, recent] = await Promise.all([
+    sumPayments({}),
+    countByField(PaymentModel, {}, "status"),
+    PaymentProofModel.countDocuments({ status: "PENDING" }),
+    PaymentModel.find({})
+      .sort({ createdAt: -1 })
+      .limit(25)
+      .lean<PlatformPaymentRecord[]>(),
+  ]);
+
+  const hostelIds = [...new Set(recent.map((payment) => payment.hostelId.toString()))];
+  const hostels = await HostelModel.find({ _id: { $in: hostelIds } })
+    .select("name")
+    .lean<Array<{ _id: Types.ObjectId; name?: string }>>();
+  const nameById = new Map(hostels.map((hostel) => [hostel._id.toString(), hostel.name ?? "—"]));
+
+  return {
+    overview: {
+      outstanding: Math.max(totals.dueAmount - totals.paidAmount, 0),
+      pendingProofs,
+      statusCounts,
+      totalDue: totals.dueAmount,
+      totalPaid: totals.paidAmount,
+    },
+    recent: recent.map((payment) => ({
+      dueAmount: payment.dueAmount,
+      dueDate: payment.dueDate?.toISOString() ?? null,
+      hostelName: nameById.get(payment.hostelId.toString()) ?? "—",
+      id: payment._id.toString(),
+      month: payment.month,
+      paidAmount: payment.paidAmount,
+      status: payment.status,
+    })),
+  };
+}
+
 export async function getHostelAdminDashboardReport(
   query: ReportQuery,
   principal: ApiPrincipal,

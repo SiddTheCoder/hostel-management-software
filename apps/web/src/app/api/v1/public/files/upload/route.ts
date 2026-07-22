@@ -13,6 +13,7 @@ export const runtime = "nodejs";
 
 const ALLOWED_TYPES = [
   "image/jpeg", "image/png", "image/webp",
+  "application/pdf", "text/plain",
 ];
 
 const MAX_SIZE = 5 * 1024 * 1024;
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return errorResponse("File type not allowed. Accepted: JPEG, PNG, WebP", "FILE_TYPE_NOT_ALLOWED", 422);
+      return errorResponse("File type not allowed. Accepted: JPEG, PNG, WebP, PDF, TXT", "FILE_TYPE_NOT_ALLOWED", 422);
     }
 
     if (file.size > MAX_SIZE) {

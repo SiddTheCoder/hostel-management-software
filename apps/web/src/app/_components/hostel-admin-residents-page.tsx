@@ -9,7 +9,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { memo, useCallback, useMemo, useState, type FormEvent } from "react";
 
 import {
   currency,
@@ -28,17 +28,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useResidents, useRoomMap } from "@/hooks/use-hostel-admin";
 import { browserApi } from "@/lib/browser-api";
 import { cn } from "@/lib/utils";
 
-import {
-  DemoDataBadge,
-  field,
-  optionalField,
-  type LoadState,
-  type Resident,
-  type RoomMapFloor,
-} from "./hostel-admin-shared";
+import { DemoDataBadge, field, optionalField } from "./hostel-admin-shared";
 import {
   DataTable,
   EmptyInline,
@@ -57,19 +51,26 @@ import {
 } from "./portal-dashboard-ui";
 
 export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage() {
-  const [residents, setResidents] = useState<Resident[]>([]);
-  const [floors, setFloors] = useState<RoomMapFloor[]>([]);
+  const residentsQuery = useResidents();
+  const roomMapQuery = useRoomMap();
+  const residents = useMemo(
+    () => residentsQuery.data?.residents ?? [],
+    [residentsQuery.data],
+  );
+  const floors = useMemo(() => roomMapQuery.data?.floors ?? [], [roomMapQuery.data]);
+  const isPending = residentsQuery.isPending || roomMapQuery.isPending;
+  const isError = residentsQuery.isError || roomMapQuery.isError;
+
   const [selectedResidentId, setSelectedResidentId] = useState("");
   const [activationCode, setActivationCode] = useState("");
-  const [state, setState] = useState<LoadState>("idle");
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const selectedResident = residents.find(
-    (resident) => resident.id === selectedResidentId,
-  );
+  const selectedResident =
+    residents.find((resident) => resident.id === selectedResidentId) ?? residents[0];
+  const activeResidentId = selectedResident?.id ?? "";
 
   const roomOptions = useMemo(
     () =>
@@ -122,32 +123,6 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
     });
   }, [bedById, residents, search, statusFilter]);
 
-  const load = useCallback(async () => {
-    setState("loading");
-    try {
-      const [residentData, roomMapData] = await Promise.all([
-        browserApi<{ residents: Resident[] }>("/api/v1/hostel-admin/residents"),
-        browserApi<{ floors: RoomMapFloor[] }>("/api/v1/hostel-admin/room-map"),
-      ]);
-
-      setResidents(residentData.residents);
-      setFloors(roomMapData.floors);
-      setSelectedResidentId((current) => current || residentData.residents[0]?.id || "");
-      setState("ready");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not load residents.");
-      setState("error");
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void load();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [load]);
-
   const handleCreateResident = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -172,22 +147,22 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
         event.currentTarget.reset();
         setShowAddForm(false);
         setMessage("Resident created.");
-        await load();
+        await residentsQuery.refetch();
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "Could not create resident.");
       }
     },
-    [bedOptions, load],
+    [bedOptions, residentsQuery],
   );
 
   const handleGenerateActivation = useCallback(async () => {
-    if (!selectedResidentId) {
+    if (!activeResidentId) {
       return;
     }
 
     try {
       const result = await browserApi<{ activation: { code?: string } }>(
-        `/api/v1/hostel-admin/residents/${selectedResidentId}/activation-code`,
+        `/api/v1/hostel-admin/residents/${activeResidentId}/activation-code`,
         {
           body: JSON.stringify({ expiresInHours: 48 }),
           method: "POST",
@@ -201,13 +176,13 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
         error instanceof Error ? error.message : "Could not generate activation code.",
       );
     }
-  }, [selectedResidentId]);
+  }, [activeResidentId]);
 
   const handleAddGuardian = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      if (!selectedResidentId) {
+      if (!activeResidentId) {
         return;
       }
 
@@ -215,7 +190,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
 
       try {
         await browserApi(
-          `/api/v1/hostel-admin/residents/${selectedResidentId}/guardians`,
+          `/api/v1/hostel-admin/residents/${activeResidentId}/guardians`,
           {
             body: JSON.stringify({
               email: optionalField(form, "email"),
@@ -234,14 +209,14 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
         setMessage(error instanceof Error ? error.message : "Could not save guardian.");
       }
     },
-    [selectedResidentId],
+    [activeResidentId],
   );
 
   const handleAddEmergencyContact = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      if (!selectedResidentId) {
+      if (!activeResidentId) {
         return;
       }
 
@@ -249,7 +224,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
 
       try {
         await browserApi(
-          `/api/v1/hostel-admin/residents/${selectedResidentId}/emergency-contacts`,
+          `/api/v1/hostel-admin/residents/${activeResidentId}/emergency-contacts`,
           {
             body: JSON.stringify({
               isPrimary: form.get("isPrimary") === "on",
@@ -268,7 +243,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
         );
       }
     },
-    [selectedResidentId],
+    [activeResidentId],
   );
 
   return (
@@ -380,13 +355,13 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
             </div>
           </div>
 
-          {state === "loading" ? <LoadingRows /> : null}
-          {state === "error" ? <EmptyState label="Residents could not be loaded." /> : null}
-          {state === "ready" && filteredResidents.length === 0 ? (
+          {isPending ? <LoadingRows /> : null}
+          {isError ? <EmptyState label="Residents could not be loaded." /> : null}
+          {!isPending && !isError && filteredResidents.length === 0 ? (
             <EmptyInline label="No residents match your filters." />
           ) : null}
 
-          {state === "ready" && filteredResidents.length > 0 ? (
+          {!isPending && !isError && filteredResidents.length > 0 ? (
             <DataTable className="min-w-[720px]">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -415,7 +390,7 @@ export const HostelAdminResidentsPage = memo(function HostelAdminResidentsPage()
                 {filteredResidents.map((resident) => {
                   const bed = bedById.get(resident.bedId);
                   const fullName = `${resident.firstName} ${resident.lastName}`.trim();
-                  const selected = selectedResidentId === resident.id;
+                  const selected = activeResidentId === resident.id;
 
                   return (
                     <TableRow

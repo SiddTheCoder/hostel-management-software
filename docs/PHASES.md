@@ -191,88 +191,98 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 
 **Goal:** Anyone can browse hostels on the public site; approved hostel admins can manage their rooms/beds/residents (registration only, no QR activation yet).
 
+> **Status note (2026-07-22):** Phase 2 code-side deliverables are complete. This session added the
+> remaining gaps on top of the already-built public/hostel-admin surface: **Warden Management** (service +
+> API + UI + tests), **public SEO** (dynamic metadata + `sitemap.ts` + `robots.ts`), **TanStack Query +
+> Zustand** foundation wired into listing/compare/residents/wardens, and the full **Maps integration**
+> (Leaflet default + Google embed fallback, provider detection, Nominatim geocoding with coarse fallback,
+> Overpass nearby-places caching, a refresh cron, and the "Near my college" proximity filter). Typecheck +
+> lint clean; 103/103 unit tests pass. **Remaining = manual/browser QA** (§2.2 acceptance tests, 375px pass,
+> Lighthouse ≥80) and **external infra** (live R2, `CRON_SECRET` on the deploy, optional Google Maps keys).
+> The public Overpass endpoint rate-limits bursts, so nearby-places fill in gradually over cron runs.
+
 ### 2.1 Deliverables
 
 **Public Portal (Website)**
-- ☐ Home page with hero section and hostel search bar
-- ☐ Hostel listing page with filters:
-  - Area/city dropdown
-  - Gender type (boys/girls/co-living)
-  - Price range slider
-  - Room type checkboxes
-  - Facilities checkboxes (wifi, parking, gym, laundry, etc.)
-  - "Near my college" search (with college dropdown)
-- ☐ Hostel cards in grid view (photo, name, price, gender badge, rating, verified badge)
-- ☐ Hostel detail page:
-  - Photo gallery
-  - Description, rules, facilities
-  - Room types and pricing table
-  - Location map (OpenStreetMap + Leaflet default, with Google Maps fallback detection per ARCHITECTURE.md §4)
-  - Nearby places (colleges, hospitals, bus stops) - cached data
-  - Inquiry form (no login required)
-  - Reviews section (empty in this phase, populated in Phase 4)
-- ☐ Hostel comparison page (side-by-side up to 3 hostels)
-- ☐ Map view of search results (optional, can be Phase 5 if time-constrained)
-- ☐ Mobile-responsive layout (test at 375px width)
-- ☐ SEO: proper meta tags, sitemap.xml for hostel pages
+- ☑ Home page with hero section and hostel search bar
+- ☑ Hostel listing page with filters _(data via `useHostels` + `useHostelFiltersStore`)_:
+  - ☑ Area/city dropdown
+  - ☑ Gender type (boys/girls/co-living)
+  - ☑ Price range _(budget buckets, not a slider — functionally equivalent)_
+  - ☑ Room type
+  - ☑ Facilities
+  - ☑ "Near my college" search (college dropdown → proximity sort via haversine on cached coords)
+- ☑ Hostel cards in grid view (photo, name, price, gender badge, rating, verified badge)
+- ☑ Hostel detail page:
+  - ☑ Photo gallery
+  - ☑ Description, rules, facilities
+  - ☑ Room types and pricing table
+  - ☑ Location map (OpenStreetMap + Leaflet default, Google fallback detection per §4)
+  - ☑ Nearby places (colleges, hospitals, bus stops) - cached data
+  - ☑ Inquiry form (no login required)
+  - ☑ Reviews section (empty in this phase, populated in Phase 4)
+- ☑ Hostel comparison page (side-by-side up to 3 hostels) — persisted comparison tray
+- ☐ Map view of search results (optional, deferred to Phase 5)
+- ◐ Mobile-responsive layout — responsive grids + mobile filter drawer added; **needs your 375px visual pass**
+- ☑ SEO: proper meta tags, sitemap.xml for hostel pages — dynamic `generateMetadata` on hostel detail (title/description/OG/canonical), static metadata on home/listing/compare, `app/sitemap.ts` (static + all published hostels) and `app/robots.ts`
 
 **Maps Integration**
-- ☐ Implement smart maps provider detection per ARCHITECTURE.md §4.2
-- ☐ OpenStreetMap + Leaflet as default (no API key needed)
-- ☐ Google Maps fallback if `GOOGLE_MAPS_API_KEY` env var set and valid
-- ☐ Geocoding helper (address → lat/lng) with provider fallback
-- ☐ Nearby places caching system (compute on address change, store in Hostel.nearbyPlaces)
-- ☐ Background job to refresh stale nearby places data
+- ☑ Implement smart maps provider detection per ARCHITECTURE.md §4.2 — `getMapProvider()` (server) + `useMapProvider()` (client)
+- ☑ OpenStreetMap + Leaflet as default (no API key needed) — `components/maps/leaflet-map.tsx` (dynamic import, SSR-safe) + `HostelMap` switcher
+- ☑ Google Maps fallback if `GOOGLE_MAPS_API_KEY` env var set and valid — `google-map.tsx` (Maps Embed API, browser-key-gated), geocoding + nearby prefer Google when key set
+- ☑ Geocoding helper (address → lat/lng) with provider fallback — `lib/maps/geocoding.ts` (Google→Nominatim, plus coarse area/city fallback); verified live (3/3 demo hostels geocoded)
+- ☑ Nearby places caching system (compute on address change, store in Hostel.nearbyPlaces) — Overpass/Google → cached on `Hostel.nearbyPlaces` + `nearbyPlacesLastUpdated`; re-geocode on profile address save
+- ☑ Background job to refresh stale nearby places data — `POST /api/v1/cron/refresh-nearby-places` (cron-secret gated); verified 200
 
 **Hostel Admin Portal - Profile & Setup**
-- ☐ Login redirects to `/hostel-admin` for HOSTEL_ADMIN role
-- ☐ Dashboard with overview: total residents, pending inquiries, payment due, room occupancy
-- ☐ **Hostel Profile Management**:
+- ☑ Login redirects to `/hostel-admin` for HOSTEL_ADMIN role
+- ☑ Dashboard with overview: total residents, pending inquiries, payment due, room occupancy
+- ☑ **Hostel Profile Management**:
   - Edit description, rules, facilities
   - Upload/manage hostel photos (to R2)
   - Edit contact info
-  - Update address (triggers geocoding + nearby places refresh)
-- ☐ **Room Management**:
+  - ☑ Update address (now triggers geocoding + nearby places refresh — added this phase)
+- ☑ **Room Management**:
   - Create room (floor, roomNumber, type, rentPerBed, capacity, facilities)
   - Auto-create beds when room is created (based on capacity)
   - Edit room details
   - Soft delete room (marks `isActive: false`)
   - List all rooms with bed status summary
-- ☐ **Bed Management**:
+- ☑ **Bed Management**:
   - View beds in a room
   - Update bed status (AVAILABLE, OCCUPIED, RESERVED, UNDER_REPAIR)
   - Add maintenance note per bed
   - Visual bed map (simple grid, color-coded by status)
-- ☐ **Manual Resident Registration** (no QR activation yet - that's Phase 3):
+- ☑ **Manual Resident Registration** (no QR activation yet - that's Phase 3):
   - Form: email, fullName, phone, guardianContact, educationInfo, roomId, bedId, depositAmount
   - Triggers account creation/upgrade per ARCHITECTURE.md §3.2
   - Creates Resident document with `status: PENDING`
   - Sends email notification to resident (informing them they'll receive QR code soon)
   - Does NOT send QR code yet (Phase 3)
-- ☐ **Warden Management** (HOSTEL_ADMIN only):
-  - Create warden account (email, name)
-  - Set permission flags per HostelStaff schema
-  - List wardens
-  - Edit warden permissions
-  - Deactivate warden
-- ☐ **Inquiry Inbox**:
+- ☑ **Warden Management** (HOSTEL_ADMIN only):
+  - ☑ Create warden account (email, name) — account create/upgrade per §3.2, `POST /api/v1/hostel-admin/wardens`
+  - ☑ Set permission flags per HostelStaff schema — 11 capability flags on `HostelMember.permissions`
+  - ☑ List wardens — `GET /api/v1/hostel-admin/wardens`
+  - ☑ Edit warden permissions — `PATCH /api/v1/hostel-admin/wardens/[id]`
+  - ☑ Deactivate warden — `DELETE /api/v1/hostel-admin/wardens/[id]` (status → SUSPENDED)
+- ☑ **Inquiry Inbox**:
   - List inquiries from public site
   - Mark as contacted/converted/closed
   - Track conversion to resident (if inquiry → resident)
 
 **TanStack Query + Zustand Setup**
-- ☐ Install and configure TanStack Query
-- ☐ Create query hooks for hostels, rooms, beds, residents (`useHostels`, `useRooms`, etc.)
-- ☐ Install and configure Zustand
-- ☐ Create stores for: hostel filters, comparison tray, modal state
+- ☑ Install and configure TanStack Query — `@tanstack/react-query` + `QueryProvider` in root layout
+- ☑ Create query hooks for hostels, rooms, beds, residents (`useHostels`/`useCompareHostels`, `useRoomMap` (rooms+beds), `useResidents`, `useHostelWardens`) — consumed by listing/compare/residents/wardens pages
+- ☑ Install and configure Zustand
+- ☑ Create stores for: hostel filters (`useHostelFiltersStore`), comparison tray (`useComparisonStore`, persisted), modal/drawer state (`useUiStore`)
 
 **Shared Components**
-- ☐ HostelCard component
-- ☐ VerificationBadge component
-- ☐ StatusBadge component (uses status color mapping from DESIGN.md)
-- ☐ RoomBedMap component (visual grid)
-- ☐ InquiryForm component
-- ☐ Map components (LeafletMap, GoogleMap with provider switcher)
+- ☑ HostelCard component (`_components/shared.tsx` — `HostelCard`/`HostelListCard`)
+- ☑ VerificationBadge (verified badge via `StatusPill` + `BadgeCheck`)
+- ☑ StatusBadge component (`components/status-badge.tsx`)
+- ☑ RoomBedMap component (visual grid — hostel-admin rooms page + `room-map` API)
+- ☑ InquiryForm component (public inquiry page/form)
+- ☑ Map components (LeafletMap, GoogleMap, `HostelMap` provider switcher) — added this phase
 
 ### 2.2 Acceptance Tests
 
@@ -308,9 +318,9 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 - ☐ Warden trying to access restricted section gets 403 error
 
 **Public SEO**
-- ☐ Hostel detail pages have proper `<title>` and meta description
-- ☐ `sitemap.xml` includes all approved hostel pages
-- ☐ Lighthouse mobile score ≥ 80 on hostel detail page
+- ☑ Hostel detail pages have proper `<title>` and meta description (verified live: `Himalayan Stay Boys Hostel — Lalitpur · HostelHub` + description/OG/canonical)
+- ☑ `sitemap.xml` includes all approved hostel pages (verified: static routes + 3 published demo hostels)
+- ☐ Lighthouse mobile score ≥ 80 on hostel detail page _(needs a Lighthouse run — tracked under responsive/QA)_
 
 ### 2.3 Phase 2 Definition of Done
 
@@ -922,7 +932,7 @@ This document splits the entire build into **6 sequential phases**. The AI codin
 
 **Project Setup**
 - ☐ Create `apps/mobile` in monorepo
-- ☐ Expo app scaffolded with TypeScript
+- ☐ Expo app scaffolded with TypeScript - ask user how they want to init the mobile .
 - ☐ Configure Expo Dev Build (EAS Build)
 - ☐ Import shared types/schemas from `packages/shared`
 - ☐ Configure Axios instance to use same API as web (env: `EXPO_PUBLIC_API_URL`)

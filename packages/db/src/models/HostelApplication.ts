@@ -7,12 +7,28 @@ const hostelApplicationSchema = new Schema(
     submittedBy: { ref: "User", required: true, type: Schema.Types.ObjectId },
     status: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
+      enum: ["PENDING", "APPROVED", "REJECTED", "NEEDS_MORE_INFO"],
       default: "PENDING",
     },
     reviewedBy: { ref: "User", type: Schema.Types.ObjectId },
     reviewedAt: Date,
     rejectionReason: { type: String, trim: true },
+    // Superadmin "documents needed" requests. When populated with an unresolved
+    // entry the application status is NEEDS_MORE_INFO and the owner is asked to
+    // provide the listed documents.
+    requestedDocuments: {
+      default: [],
+      type: [
+        {
+          _id: false,
+          documentType: { required: true, trim: true, type: String },
+          note: { trim: true, type: String },
+        },
+      ],
+    },
+    infoRequestNote: { type: String, trim: true },
+    infoRequestedAt: Date,
+    infoRequestedBy: { ref: "User", type: Schema.Types.ObjectId },
     notes: { type: String, trim: true },
     snapshot: { default: {}, type: Schema.Types.Mixed },
     isDeleted: { type: Boolean, default: false },

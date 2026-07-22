@@ -27,6 +27,7 @@ export type PublicHostel = {
     email?: string;
     phone?: string;
   };
+  coordinates?: { lat: number; lng: number } | null;
   description?: string;
   facilities: string[];
   food?: {
@@ -44,6 +45,12 @@ export type PublicHostel = {
     province?: string;
   };
   name: string;
+  nearbyPlaces?: Array<{
+    coordinates: { lat: number; lng: number };
+    distance: number;
+    name: string;
+    type: "college" | "hospital" | "bus_stop" | "other";
+  }>;
   photos: Array<{
     alt?: string;
     id?: string;

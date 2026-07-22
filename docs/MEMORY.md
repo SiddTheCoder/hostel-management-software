@@ -51,8 +51,10 @@ This file is the project's working memory across coding sessions. Update it ever
 
 ## Current Progress
 
-- **Phase:** Phase 1 — Foundation & Auth (all code-side deliverables done; remaining items are external infra or deliberately deferred — see below and `TODO.md`).
-- **Status (2026-07-21):** Production **build is GREEN**, tests **95/95**, typecheck + lint clean. Session of 2026-07-21 cleared the build blocker, added the audit log viewer, closed the §3.2 safeguard, and renamed all `phase*`-named source files to production names.
+- **Phase:** Phase 2 — Public Discovery + Hostel Core (all code-side deliverables done; remaining = manual/browser QA + external infra).
+- **Status (2026-07-22):** typecheck + lint clean, **103/103** unit tests pass. Session of 2026-07-22 filled the Phase 2 gaps on the already-built public/hostel-admin surface: Warden Management (service+API+UI+tests), public SEO (dynamic metadata + `sitemap.ts` + `robots.ts`), TanStack Query + Zustand foundation (wired into listing/compare/residents/wardens), and the full Maps integration (Leaflet + Google embed fallback, provider detection, Nominatim geocoding w/ coarse fallback, Overpass nearby-places caching, refresh cron, "Near my college" filter). Also relocated the in-progress owner-application routes out of a `[id]` vs `[slug]` Next.js route conflict. See CHANGELOG `[0.4.0]`.
+- **Phase 2 remaining (not code):** §2.2 acceptance tests + 375px pass + Lighthouse ≥80 (browser QA), and infra — live R2, `CRON_SECRET` on deploy, optional `GOOGLE_MAPS_API_KEY`/`NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY`. Public Overpass rate-limits bursts, so nearby-places fill in over cron runs.
+- **Prior — Phase 1 (2026-07-21):** Production build GREEN, audit log viewer, §3.2 safeguard, `phase*` files renamed.
 
 ### 2026-07-21 session — what was done
 1. **Build green** — re-ran `npm --prefix apps/web run build` after the prior `useSearchParams()`→Suspense fixes; exit 0, no further prerender errors.

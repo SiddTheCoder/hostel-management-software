@@ -16,6 +16,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) — sections per 
 
 ---
 
+## [0.4.0] - 2026-07-22 — Phase 2: Public discovery + hostel core (gap completion)
+
+### Added
+- **Warden Management** (HOSTEL_ADMIN only): `modules/wardens/` service + validation (11 capability flags
+  on `HostelMember.permissions`), `GET/POST /api/v1/hostel-admin/wardens` + `PATCH/DELETE …/[id]`,
+  `requireHostelAdminPrincipal` gate, `/hostel-admin/wardens` page + nav, and 4 service unit tests. Account
+  create/upgrade reuses the §3.2 `registerOrUpgradeUserByEmail` flow (no duplicate users).
+- **Public SEO**: dynamic `generateMetadata` on the hostel detail page (title/description/OpenGraph/
+  canonical), static metadata on home/listing/compare, `app/sitemap.ts` (static routes + all published
+  hostels) and `app/robots.ts`; `lib/site.ts` base-URL helper + `metadataBase`/title template in root layout.
+- **TanStack Query + Zustand**: `QueryProvider` in root layout; hooks `useHostels`/`useCompareHostels`,
+  `useRoomMap`/`useResidents`/`useHostelWardens`; stores `useHostelFiltersStore`, `useComparisonStore`
+  (persisted comparison tray), `useUiStore` (mobile filter drawer). Wired into the listing, compare,
+  residents, and wardens pages.
+- **Maps integration** (ARCHITECTURE.md §4): `lib/maps/*` — provider detection (`getMapProvider` /
+  `useMapProvider`), Nominatim geocoding with a coarse area/city fallback, Overpass nearby-places, haversine;
+  `components/maps/*` — Leaflet default (SSR-safe dynamic import) + Google Maps Embed fallback + `HostelMap`
+  switcher. `Hostel.nearbyPlaces`/`nearbyPlacesLastUpdated` added; profile address-save re-geocodes;
+  `POST /api/v1/cron/refresh-nearby-places` batch refresh. Hostel detail page renders the live map + nearby
+  places; listing gains a "Near my college" proximity filter (`lib/maps/nepal-colleges.ts`).
+
+### Changed
+- Public hostel serialization now includes `coordinates` + `nearbyPlaces`.
+- Relocated in-progress owner application routes out of a Next.js dynamic-segment conflict:
+  `api/v1/public/hostels/[id]/…` → `api/v1/public/hostel-applications/[id]/resubmit-documents` and
+  `…/hostel-applications/my-applications` (kept `[slug]` for public hostel detail); callers updated.
+
+---
+
 ## [0.3.2] - 2026-07-21 — Infra: R2, email, cron (patterns ported from QuestionCall)
 
 ### Added

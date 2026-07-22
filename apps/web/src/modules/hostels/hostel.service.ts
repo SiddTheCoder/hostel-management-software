@@ -15,10 +15,13 @@ import { UserModel } from "@hostel/db/models/User";
 import { registerOrUpgradeUserByEmail } from "@/modules/users/user.service";
 import { sendEmail } from "@hostel/shared/email/sender";
 import { hostelApprovedEmail } from "@hostel/shared/email/templates/hostel/hostel-approved";
+import { hostelDocumentsRequestedEmail } from "@hostel/shared/email/templates/hostel/documents-requested";
 import { hostelRejectedEmail } from "@hostel/shared/email/templates/hostel/hostel-rejected";
 import { hostelSubmissionReceivedEmail } from "@hostel/shared/email/templates/hostel/submission-received";
 import type {
   hostelRejectSchema,
+  hostelRequestDocumentsSchema,
+  hostelResubmitDocumentsSchema,
   platformHostelCreateSchema,
   platformHostelListQuerySchema,
   publicHostelCompareQuerySchema,
@@ -34,6 +37,8 @@ type PublicHostelApplicationCreateInput = z.infer<
 >;
 type PlatformHostelListQuery = z.infer<typeof platformHostelListQuerySchema>;
 type HostelRejectInput = z.infer<typeof hostelRejectSchema>;
+type HostelRequestDocumentsInput = z.infer<typeof hostelRequestDocumentsSchema>;
+type HostelResubmitDocumentsInput = z.infer<typeof hostelResubmitDocumentsSchema>;
 type PublicHostelListQuery = z.infer<typeof publicHostelListQuerySchema>;
 type PublicHostelCompareQuery = z.infer<typeof publicHostelCompareQuerySchema>;
 type PublicInquiryCreateInput = z.infer<typeof publicInquiryCreateSchema>;
@@ -70,6 +75,13 @@ export type HostelRecord = {
     province?: string;
   };
   name: string;
+  nearbyPlaces?: Array<{
+    coordinates?: { lat?: number; lng?: number };
+    distance?: number;
+    name?: string;
+    type?: string;
+  }>;
+  nearbyPlacesLastUpdated?: Date;
   ownerId: Types.ObjectId;
   photos?: Array<{
     _id?: Types.ObjectId;
@@ -101,9 +113,13 @@ type HostelApplicationRecord = {
   _id: Types.ObjectId;
   applicantId: Types.ObjectId;
   hostelId: Types.ObjectId;
+  infoRequestNote?: string;
+  infoRequestedAt?: Date;
   rejectionReason?: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  requestedDocuments?: { documentType: string; note?: string }[];
+  status: "PENDING" | "APPROVED" | "REJECTED" | "NEEDS_MORE_INFO";
   submittedBy: Types.ObjectId;
+  updatedAt?: Date;
 };
 
 type UserOwnerRecord = {
@@ -200,10 +216,29 @@ export function serializePublicHostel(hostel: HostelRecord) {
     facilities: hostel.facilities ?? [],
     food: hostel.food ?? {},
     hostelType: hostel.hostelType ?? "CO_LIVING",
+    coordinates:
+      hostel.location?.lat != null && hostel.location?.lng != null
+        ? { lat: hostel.location.lat, lng: hostel.location.lng }
+        : null,
     id: hostel._id.toString(),
     isDemoData: Boolean(hostel.isDemoData),
     location: hostel.location,
     name: hostel.name,
+    nearbyPlaces: (hostel.nearbyPlaces ?? [])
+      .map((place) => {
+        const lat = place.coordinates?.lat;
+        const lng = place.coordinates?.lng;
+        if (lat == null || lng == null) {
+          return null;
+        }
+        return {
+          coordinates: { lat, lng },
+          distance: place.distance ?? 0,
+          name: place.name ?? "",
+          type: place.type ?? "other",
+        };
+      })
+      .filter((place): place is NonNullable<typeof place> => place !== null),
     photos: (hostel.photos ?? []).map((photo) => ({
       alt: photo.alt ?? "",
       id: photo._id?.toString(),
@@ -255,6 +290,30 @@ function serializeInquiry(inquiry: InquiryRecord) {
   };
 }
 
+type HostelDocumentRecord = {
+  _id: Types.ObjectId;
+  createdAt?: Date;
+  documentType: string;
+  fileAssetId?: Types.ObjectId | null;
+  fileUrl?: string | null;
+  rejectionReason?: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+};
+
+function serializeHostelDocument(document: HostelDocumentRecord) {
+  return {
+    createdAt: document.createdAt?.toISOString() ?? null,
+    documentType: document.documentType,
+    // Prefer the FileAsset id so the client links to the secure, auth-gated
+    // presign route (/api/v1/files/:id/url) instead of a raw R2 URL.
+    fileAssetId: document.fileAssetId?.toString() ?? null,
+    fileUrl: document.fileUrl ?? "",
+    id: document._id.toString(),
+    rejectionReason: document.rejectionReason ?? "",
+    status: document.status,
+  };
+}
+
 function serializeApplication(application: HostelApplicationRecord | null) {
   if (!application) {
     return null;
@@ -264,7 +323,12 @@ function serializeApplication(application: HostelApplicationRecord | null) {
     applicantId: application.applicantId.toString(),
     hostelId: application.hostelId.toString(),
     id: application._id.toString(),
+    infoRequestNote: application.infoRequestNote ?? "",
     rejectionReason: application.rejectionReason ?? "",
+    requestedDocuments: (application.requestedDocuments ?? []).map((doc) => ({
+      documentType: doc.documentType,
+      note: doc.note ?? "",
+    })),
     status: application.status,
     submittedBy: application.submittedBy.toString(),
   };
@@ -402,6 +466,12 @@ function appLoginUrl() {
   return `${base}/login`;
 }
 
+function appHostelStatusUrl() {
+  const base =
+    process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  return `${base}/register-hostel/form`;
+}
+
 async function resolveHostelOwner(hostelId: Types.ObjectId | string) {
   const hostel = await HostelModel.findOne({ _id: hostelId })
     .select("ownerId name")
@@ -508,11 +578,19 @@ export async function createPlatformHostelApplication(
 
 export async function registerPublicHostelApplication(
   input: PublicHostelApplicationCreateInput,
+  options: { authUserId?: string } = {},
 ) {
   await connectToDatabase();
 
   const ownerId = await findOrCreatePublicHostelOwner(input.applicant);
   const slug = await uniqueSlug(input.name, input.location.area);
+
+  // Tie the application to the signed-in account when we have one, so the owner
+  // can always see their submission status on return. The hostel's ownerId stays
+  // the contact-resolved owner (used by the approval → account-upgrade flow).
+  const applicantUserId = options.authUserId
+    ? normalizeObjectId(options.authUserId)
+    : ownerId;
 
   const hostel = await HostelModel.create({
     capacitySummary: input.capacitySummary,
@@ -536,7 +614,7 @@ export async function registerPublicHostelApplication(
   });
 
   const application = await HostelApplicationModel.create({
-    applicantId: ownerId,
+    applicantId: applicantUserId,
     hostelId: hostel._id,
     notes: input.notes,
     snapshot: {
@@ -551,7 +629,7 @@ export async function registerPublicHostelApplication(
       selectedPlan: input.selectedPlan,
     },
     status: "PENDING",
-    submittedBy: ownerId,
+    submittedBy: applicantUserId,
   });
 
   await HostelVerificationModel.create({
@@ -646,9 +724,16 @@ export async function getPlatformHostel(hostelId: string) {
   })
     .sort({ createdAt: -1 })
     .lean<HostelApplicationRecord | null>();
+  const documents = await HostelDocumentModel.find({
+    hostelId: hostel._id,
+    isDeleted: false,
+  })
+    .sort({ createdAt: -1 })
+    .lean<HostelDocumentRecord[]>();
 
   return {
     application: serializeApplication(application),
+    documents: documents.map(serializeHostelDocument),
     hostel: serializeHostel(hostel),
   };
 }
@@ -845,6 +930,186 @@ export async function rejectPlatformHostel(
   return result;
 }
 
+export async function requestPlatformHostelDocuments(
+  hostelId: string,
+  input: HostelRequestDocumentsInput,
+  principal: ApiPrincipal,
+) {
+  await connectToDatabase();
+
+  const objectId = normalizeObjectId(hostelId);
+
+  // Keep the hostel in the review queue; the "needs more info" signal lives on
+  // the application so the owner sees exactly which documents are outstanding.
+  const hostel = await HostelModel.findOneAndUpdate(
+    { _id: objectId, isDeleted: false },
+    { $set: { updatedBy: principal.userId, verificationStatus: "PENDING" } },
+    { new: true },
+  ).lean<HostelRecord | null>();
+
+  if (!hostel) {
+    throw new HostelServiceError("Hostel was not found.", "HOSTEL_NOT_FOUND", 404);
+  }
+
+  const now = new Date();
+
+  await HostelApplicationModel.updateMany(
+    { hostelId: objectId, status: { $in: ["PENDING", "NEEDS_MORE_INFO"] } },
+    {
+      $set: {
+        infoRequestNote: input.note ?? "",
+        infoRequestedAt: now,
+        infoRequestedBy: principal.userId,
+        requestedDocuments: input.documents,
+        reviewedBy: principal.userId,
+        status: "NEEDS_MORE_INFO",
+      },
+    },
+  );
+
+  await auditHostelAction(principal, objectId, "HOSTEL_DOCUMENTS_REQUESTED", {
+    documents: input.documents.map((doc) => doc.documentType),
+  });
+
+  const ownerInfo = await resolveHostelOwner(objectId);
+
+  if (ownerInfo) {
+    await sendEmail({
+      to: ownerInfo.owner.email,
+      ...hostelDocumentsRequestedEmail({
+        documents: input.documents,
+        hostelName: ownerInfo.hostelName,
+        note: input.note,
+        ownerName: ownerInfo.owner.name,
+        statusUrl: appHostelStatusUrl(),
+      }),
+    });
+  }
+
+  return { hostel: serializeHostel(hostel) };
+}
+
+// Owner-facing: list the applications the signed-in user submitted, newest
+// first, with the current status and any outstanding document requests.
+export async function listOwnerHostelApplications(userId: string) {
+  await connectToDatabase();
+
+  const applicantId = normalizeObjectId(userId);
+
+  // The public registration flow resolves the owner from the contact details
+  // typed into the form (findOrCreatePublicHostelOwner), which can be a
+  // different user record than the signed-in account. Match applications for
+  // the signed-in user OR any owner record sharing their email/phone so the
+  // status tab stays consistent after a refresh.
+  const currentUser = await UserModel.findById(applicantId)
+    .select("email phone")
+    .lean<{ email?: string; phone?: string } | null>();
+
+  const ownerIds = new Set<string>([applicantId.toString()]);
+  const contactOr: Array<{ email?: string; phone?: string }> = [];
+  if (currentUser?.email) contactOr.push({ email: currentUser.email.toLowerCase() });
+  if (currentUser?.phone) contactOr.push({ phone: currentUser.phone });
+
+  if (contactOr.length > 0) {
+    const matches = await UserModel.find({
+      $or: contactOr,
+      isDeleted: { $ne: true },
+    })
+      .select("_id")
+      .lean<{ _id: Types.ObjectId }[]>();
+    matches.forEach((match) => ownerIds.add(match._id.toString()));
+  }
+
+  const applications = await HostelApplicationModel.find({
+    applicantId: { $in: Array.from(ownerIds).map((id) => new Types.ObjectId(id)) },
+    isDeleted: false,
+  })
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .lean<(HostelApplicationRecord & { snapshot?: { name?: string } })[]>();
+
+  const hostelIds = applications.map((application) => application.hostelId);
+  const hostels = await HostelModel.find({ _id: { $in: hostelIds } })
+    .select("name status verificationStatus")
+    .lean<{ _id: Types.ObjectId; name?: string; status?: string; verificationStatus?: string }[]>();
+  const hostelById = new Map(hostels.map((hostel) => [hostel._id.toString(), hostel]));
+
+  return {
+    applications: applications.map((application) => {
+      const hostel = hostelById.get(application.hostelId.toString());
+      return {
+        ...serializeApplication(application),
+        hostelName: hostel?.name ?? application.snapshot?.name ?? "Your hostel",
+        hostelStatus: hostel?.status ?? "PENDING_APPROVAL",
+        submittedAt: application.updatedAt?.toISOString() ?? "",
+        verificationStatus: hostel?.verificationStatus ?? "PENDING",
+      };
+    }),
+  };
+}
+
+// Owner-facing: attach freshly uploaded documents in response to a
+// "documents needed" request and return the application to the review queue.
+export async function resubmitOwnerHostelDocuments(
+  userId: string,
+  hostelId: string,
+  input: HostelResubmitDocumentsInput,
+) {
+  await connectToDatabase();
+
+  const applicantId = normalizeObjectId(userId);
+  const objectId = normalizeObjectId(hostelId);
+
+  const application = await HostelApplicationModel.findOne({
+    applicantId,
+    hostelId: objectId,
+    isDeleted: false,
+  }).sort({ createdAt: -1 });
+
+  if (!application) {
+    throw new HostelServiceError(
+      "No application was found for this hostel.",
+      "APPLICATION_NOT_FOUND",
+      404,
+    );
+  }
+
+  await HostelDocumentModel.insertMany(
+    input.documents.map((document) => ({
+      createdBy: applicantId,
+      documentType: document.documentType,
+      fileAssetId: document.fileAssetId,
+      fileUrl: document.fileUrl,
+      hostelId: objectId,
+      ownerId: applicantId,
+      status: "PENDING",
+      updatedBy: applicantId,
+    })),
+  );
+
+  application.set({
+    infoRequestNote: "",
+    requestedDocuments: [],
+    status: "PENDING",
+  });
+  await application.save();
+
+  await AuditLogModel.create({
+    action: "PUBLIC_HOSTEL_DOCUMENTS_RESUBMITTED",
+    actorId: applicantId,
+    entityId: objectId.toString(),
+    entityType: "Hostel",
+    hostelId: objectId,
+    metadata: { documents: input.documents.map((doc) => doc.documentType) },
+  });
+
+  return {
+    application: serializeApplication(
+      application.toObject() as unknown as HostelApplicationRecord,
+    ),
+  };
+}
+
 export async function publishPlatformHostel(hostelId: string, principal: ApiPrincipal) {
   await connectToDatabase();
 
@@ -932,6 +1197,28 @@ export async function listPublicHostels(query: PublicHostelListQuery) {
   return {
     hostels: hostels.map(serializePublicHostel),
   };
+}
+
+/**
+ * Slugs of every publicly-visible hostel, for sitemap.xml generation.
+ * Same visibility gate as {@link getPublicHostelBySlug} (published + verified).
+ */
+export async function listPublishedHostelSlugs() {
+  await connectToDatabase();
+
+  const hostels = await HostelModel.find({
+    isDeleted: false,
+    status: "PUBLISHED",
+    verificationStatus: "VERIFIED",
+  })
+    .select("slug updatedAt")
+    .sort({ updatedAt: -1 })
+    .limit(5000)
+    .lean<{ slug: string; updatedAt?: Date }[]>();
+
+  return hostels
+    .filter((hostel) => Boolean(hostel.slug))
+    .map((hostel) => ({ slug: hostel.slug, updatedAt: hostel.updatedAt }));
 }
 
 export async function getPublicHostelBySlug(slug: string) {
