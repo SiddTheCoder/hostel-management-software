@@ -1,0 +1,154 @@
+import type { ApiPrincipal } from "@/lib/api-auth";
+import { connectToDatabase } from "@/lib/db";
+import { AuditLogModel } from "@hostel/db/models/AuditLog";
+import { PlatformSettingModel } from "@hostel/db/models/PlatformSetting";
+
+import { DEFAULT_SITE_CONFIG } from "./site-config.defaults";
+import {
+  isSiteConfigSection,
+  siteConfigSectionSchemas,
+  SITE_CONFIG_SECTIONS,
+  type SiteConfig,
+  type SiteConfigSection,
+} from "./site-config.validation";
+
+type PlatformSettingRecord = {
+  key: string;
+  updatedAt?: Date;
+  value: unknown;
+};
+
+export class SiteConfigServiceError extends Error {
+  constructor(
+    message: string,
+    public errorCode = "SITE_CONFIG_ERROR",
+    public status = 400,
+  ) {
+    super(message);
+  }
+}
+
+/**
+ * Stored sections are re-parsed on read rather than trusted: a section written
+ * by an older build (or hand-edited in the database) falls back to the shipped
+ * default instead of breaking the public page that renders it.
+ */
+function coerceSection<Section extends SiteConfigSection>(
+  section: Section,
+  value: unknown,
+): SiteConfig[Section] {
+  const parsed = siteConfigSectionSchemas[section].safeParse(value);
+
+  if (!parsed.success) {
+    return DEFAULT_SITE_CONFIG[section];
+  }
+
+  return parsed.data as SiteConfig[Section];
+}
+
+export async function getSiteConfig(): Promise<SiteConfig> {
+  await connectToDatabase();
+
+  const stored = (await PlatformSettingModel.find({
+    key: { $in: SITE_CONFIG_SECTIONS },
+  }).lean()) as PlatformSettingRecord[];
+
+  const config = { ...DEFAULT_SITE_CONFIG };
+
+  for (const record of stored) {
+    if (!isSiteConfigSection(record.key)) {
+      continue;
+    }
+
+    // Index signature over a mapped type needs the widening cast; each value is
+    // validated by coerceSection immediately above it.
+    (config as Record<string, unknown>)[record.key] = coerceSection(
+      record.key,
+      record.value,
+    );
+  }
+
+  return config;
+}
+
+export async function getSiteConfigSection<Section extends SiteConfigSection>(
+  section: Section,
+): Promise<SiteConfig[Section]> {
+  await connectToDatabase();
+
+  const record = (await PlatformSettingModel.findOne({
+    key: section,
+  }).lean()) as PlatformSettingRecord | null;
+
+  if (!record) {
+    return DEFAULT_SITE_CONFIG[section];
+  }
+
+  return coerceSection(section, record.value);
+}
+
+export async function updateSiteConfigSection(
+  section: string,
+  input: unknown,
+  principal: ApiPrincipal,
+) {
+  if (!isSiteConfigSection(section)) {
+    throw new SiteConfigServiceError(
+      `Unknown site config section "${section}".`,
+      "UNKNOWN_SECTION",
+      404,
+    );
+  }
+
+  const parsed = siteConfigSectionSchemas[section].safeParse(input);
+
+  if (!parsed.success) {
+    throw new SiteConfigServiceError(
+      parsed.error.issues[0]?.message ?? "Invalid site configuration payload.",
+      "INVALID_SITE_CONFIG",
+      422,
+    );
+  }
+
+  await connectToDatabase();
+
+  await PlatformSettingModel.findOneAndUpdate(
+    { key: section },
+    { key: section, updatedBy: principal.userId, value: parsed.data },
+    { new: true, setDefaultsOnInsert: true, upsert: true },
+  );
+
+  await AuditLogModel.create({
+    action: "PLATFORM_SITE_CONFIG_UPDATED",
+    actorId: principal.userId,
+    entityId: section,
+    entityType: "PlatformSetting",
+    metadata: { section },
+  });
+
+  return { section, value: parsed.data };
+}
+
+/**
+ * Public projection — drops nothing today, but keeps a single choke point for
+ * anything that should stay owner-only if the config grows.
+ */
+export async function getPublicSiteConfig() {
+  const config = await getSiteConfig();
+
+  return {
+    announcement: config.announcement,
+    facilities: config.facilities.filter((facility) => facility.enabled),
+    features: config.features,
+    hero: config.hero,
+    identity: config.identity,
+    legal: config.legal,
+    locations: config.locations.filter((location) => location.enabled),
+    pricing: config.pricing,
+    social: config.social,
+    stats: config.stats,
+    trustPoints: config.trustPoints,
+  };
+}
+
+export type PublicSiteConfig = Awaited<ReturnType<typeof getPublicSiteConfig>>;

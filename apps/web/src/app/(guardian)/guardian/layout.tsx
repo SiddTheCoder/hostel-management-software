@@ -1,18 +1,5 @@
 import { PortalShell } from "@/components/portal-shell";
-
-const navItems = [
-  { href: "/guardian/dashboard", icon: "receipt" as const, label: "Fee Summary" },
-  { href: "/guardian/notices", icon: "bell" as const, label: "Notices" },
-  { href: "/guardian/food", icon: "food" as const, label: "Food View" },
-  { href: "/guardian/safety", icon: "shield" as const, label: "Safety Summary" },
-  {
-    href: "/guardian/emergency-contact",
-    icon: "siren" as const,
-    label: "Emergency Contact",
-  },
-  { href: "/guardian/messages", icon: "message" as const, label: "Messages" },
-  { href: "/guardian/help", icon: "help" as const, label: "Help & Support" },
-];
+import { GUARDIAN_NAV, GUARDIAN_SEARCH_ENTRIES } from "@/lib/portal-nav";
 
 export default function GuardianLayout({
   children,
@@ -21,8 +8,9 @@ export default function GuardianLayout({
 }>) {
   return (
     <PortalShell
-      navItems={navItems}
+      navGroups={GUARDIAN_NAV}
       portalName="HostelHub"
+      searchEntries={GUARDIAN_SEARCH_ENTRIES}
       searchPlaceholder="Search notices, payments..."
       subtitle="Guardian Portal"
       tone="guardian"

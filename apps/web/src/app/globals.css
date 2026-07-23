@@ -30,8 +30,8 @@
   --success: #16a34a;
   --brand-teal: #0A8A4B;
   --brand-teal-soft: rgba(10, 138, 75, 0.1);
-  --role-platform: #2563eb;
-  --role-platform-soft: #dbeafe;
+  --role-platform: #0d9488;
+  --role-platform-soft: #ccfbf1;
   --role-admin: #0891b2;
   --role-admin-soft: #ecfeff;
   --role-resident: #16a34a;
@@ -176,8 +176,8 @@ a {
   --success: #16a34a;
   --brand-teal: #0A8A4B;
   --brand-teal-soft: rgba(10, 138, 75, 0.18);
-  --role-platform: #60a5fa;
-  --role-platform-soft: #1e3a8a;
+  --role-platform: #2dd4bf;
+  --role-platform-soft: #134e4a;
   --role-admin: #22d3ee;
   --role-admin-soft: #164e63;
   --role-resident: #c4b5fd;
@@ -216,6 +216,19 @@ a {
 }
 
 @layer utilities {
+  /* Scroll region that still scrolls but never paints a scrollbar — used by the
+     portal sidebar and content pane so only the outer chrome stays fixed. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+    height: 0;
+    width: 0;
+  }
+
   .app-card {
     @apply rounded-lg border border-border bg-surface shadow-sm;
   }

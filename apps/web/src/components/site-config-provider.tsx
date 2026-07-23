@@ -1,0 +1,49 @@
+"use client";
+
+import { createContext, useContext, type ReactNode } from "react";
+
+import { DEFAULT_SITE_CONFIG } from "@/modules/platform-config/site-config.defaults";
+import type { PublicSiteConfig } from "@/modules/platform-config/site-config.service";
+
+/**
+ * Platform-owner-editable website content, fetched once on the server in the
+ * public layout and handed to client components below it. Falls back to the
+ * shipped defaults so a component rendered outside the provider (or a page that
+ * renders before the config resolves) still has something sensible to show.
+ */
+const FALLBACK: PublicSiteConfig = {
+  announcement: DEFAULT_SITE_CONFIG.announcement,
+  facilities: DEFAULT_SITE_CONFIG.facilities,
+  features: DEFAULT_SITE_CONFIG.features,
+  hero: DEFAULT_SITE_CONFIG.hero,
+  identity: DEFAULT_SITE_CONFIG.identity,
+  legal: DEFAULT_SITE_CONFIG.legal,
+  locations: DEFAULT_SITE_CONFIG.locations,
+  pricing: DEFAULT_SITE_CONFIG.pricing,
+  social: DEFAULT_SITE_CONFIG.social,
+  stats: DEFAULT_SITE_CONFIG.stats,
+  trustPoints: DEFAULT_SITE_CONFIG.trustPoints,
+};
+
+const SiteConfigContext = createContext<PublicSiteConfig>(FALLBACK);
+
+export function SiteConfigProvider({
+  children,
+  config,
+}: {
+  children: ReactNode;
+  config: PublicSiteConfig;
+}) {
+  return (
+    <SiteConfigContext.Provider value={config}>{children}</SiteConfigContext.Provider>
+  );
+}
+
+export function useSiteConfig() {
+  return useContext(SiteConfigContext);
+}
+
+/** Convenience reader for the most common check — a single feature flag. */
+export function useFeatureFlag(flag: keyof PublicSiteConfig["features"]) {
+  return useSiteConfig().features[flag];
+}

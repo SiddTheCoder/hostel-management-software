@@ -60,6 +60,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 
+import { useSiteConfig } from "@/components/site-config-provider";
 import { cn } from "@/lib/utils";
 import {
   AnimatedPage,
@@ -81,47 +82,20 @@ import {
 } from "./shared";
 
 function PublicPricingPageContent() {
-  const plans = [
-    {
-      name: "Starter",
-      desc: "Perfect for small hostels getting started with digital management.",
-      price: "2,900",
-      features: [
-        "1 Hostel / Branch",
-        "Up to 100 Residents",
-        "Core management features",
-        "Standard email support",
-      ],
-      tone: "teal" as const,
-      popular: false,
-    },
-    {
-      name: "Growth",
-      desc: "Ideal for growing hostels that need more power and flexibility.",
-      price: "5,900",
-      features: [
-        "Up to 5 Hostels / Branches",
-        "Up to 500 Residents",
-        "All Starter features, plus more",
-        "24/7 priority support",
-      ],
-      tone: "platform" as const,
-      popular: true,
-    },
-    {
-      name: "Enterprise",
-      desc: "For large hostel operators who need advanced control and scalability.",
-      price: "11,900",
-      features: [
-        "Unlimited Hostels / Branches",
-        "Unlimited Residents",
-        "All Growth features, plus more",
-        "Custom onboarding & training",
-      ],
-      tone: "success" as const,
-      popular: false,
-    },
-  ];
+  // Plans come from Platform → Website Config → Pricing Plans, so the owner can
+  // change tiers without a deploy.
+  const { pricing } = useSiteConfig();
+
+  const plans = pricing.map((plan) => ({
+    ctaHref: plan.ctaHref,
+    ctaLabel: plan.ctaLabel,
+    desc: plan.description,
+    features: plan.features,
+    name: plan.name,
+    period: plan.period,
+    popular: plan.highlighted,
+    price: plan.price,
+  }));
 
   // FAQ collapses state
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
@@ -189,13 +163,10 @@ function PublicPricingPageContent() {
                     {plan.desc}
                   </p>
                   <p className="mt-5 text-3xl font-extrabold text-foreground">
-                    NPR {plan.price}{" "}
+                    {plan.price}{" "}
                     <span className="text-xs font-normal text-muted-foreground">
-                      / month
+                      {plan.period}
                     </span>
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    Billed monthly
                   </p>
                   <ul className="mt-6 space-y-3 text-xs text-muted-foreground border-t border-border/40 pt-5">
                     {plan.features.map((item) => (
@@ -214,11 +185,11 @@ function PublicPricingPageContent() {
                       : "bg-surface border border-brand-teal text-brand-teal hover:bg-brand-teal/5",
                   )}
                   href={{
-                    pathname: "/hostels/register",
+                    pathname: plan.ctaHref,
                     query: { plan: plan.name.toLowerCase() },
                   }}
                 >
-                  Start Registration
+                  {plan.ctaLabel}
                 </Link>
               </div>
             </SectionCard>
@@ -231,11 +202,15 @@ function PublicPricingPageContent() {
           <div className="border border-border rounded-xl bg-surface overflow-hidden shadow-sm">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
+                {/* Column headers follow the configured plans so this table can
+                    never drift from the cards above it. */}
                 <tr className="bg-muted border-b border-border text-foreground font-bold">
                   <th className="p-4 w-[40%]">Features & Modules</th>
-                  <th className="p-4">Starter</th>
-                  <th className="p-4">Growth</th>
-                  <th className="p-4">Enterprise</th>
+                  {plans.map((plan) => (
+                    <th className="p-4" key={plan.name}>
+                      {plan.name}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60 text-muted-foreground">
@@ -250,18 +225,18 @@ function PublicPricingPageContent() {
                   ["Guardian portal Access", true, true, true],
                   ["Custom Branding & Subdomains", false, false, true],
                   ["Priority Onboarding & Multi-warden Roles", false, true, true],
-                ].map(([label, s, g, e]) => (
+                ].map(([label, ...tiers]) => (
                   <tr key={label as string} className="hover:bg-muted/50">
                     <td className="p-4 font-medium text-foreground">{label as string}</td>
-                    <td className="p-4">
-                      {s ? <Check className="size-4.5 text-brand-teal" /> : "-"}
-                    </td>
-                    <td className="p-4">
-                      {g ? <Check className="size-4.5 text-brand-teal" /> : "-"}
-                    </td>
-                    <td className="p-4">
-                      {e ? <Check className="size-4.5 text-brand-teal" /> : "-"}
-                    </td>
+                    {plans.map((plan, index) => (
+                      <td className="p-4" key={plan.name}>
+                        {tiers[index] ? (
+                          <Check className="size-4.5 text-brand-teal" />
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>

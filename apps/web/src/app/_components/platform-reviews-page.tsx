@@ -1,9 +1,11 @@
 "use client";
 
 import { Eye, EyeOff, Star, Stars } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 
 import { browserApi } from "@/lib/browser-api";
+import { platformEndpoints } from "@/lib/platform-endpoints";
+import { useInvalidateResources, usePortalResource } from "@/lib/portal-query";
 import { type Review, Message } from "./daily-operations-shared";
 import { EmptyState, Panel } from "@/app/_components/shared-ui";
 import {
@@ -15,41 +17,36 @@ import {
 } from "@/app/_components/portal-dashboard-ui";
 
 export const PlatformReviewsPageContent = memo(function PlatformReviewsPageContent() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [message, setMessage] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const invalidate = useInvalidateResources();
+  const reviewsResource = usePortalResource<{ reviews: Review[] }>(
+    platformEndpoints.reviews,
+    { errorMessage: "Could not load reviews." },
+  );
 
-  const load = useCallback(async () => {
-    try {
-      const data = await browserApi<{ reviews: Review[] }>("/api/v1/platform/reviews");
-
-      setReviews(data.reviews);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not load reviews.");
-    }
-  }, []);
+  const reviews = useMemo(
+    () => reviewsResource.data?.reviews ?? [],
+    [reviewsResource.data],
+  );
+  const message = actionMessage || reviewsResource.message;
 
   const moderate = useCallback(
     async (reviewId: string, action: "hide" | "unhide") => {
+      setActionMessage("");
       try {
-        await browserApi(`/api/v1/platform/reviews/${reviewId}/${action}`, {
+        await browserApi(`${platformEndpoints.reviews}/${reviewId}/${action}`, {
           body: JSON.stringify({}),
           method: "PATCH",
         });
-        await load();
+        invalidate(platformEndpoints.reviews);
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "Could not moderate review.");
+        setActionMessage(
+          error instanceof Error ? error.message : "Could not moderate review.",
+        );
       }
     },
-    [load],
+    [invalidate],
   );
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void load();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [load]);
 
   const stats = useMemo(() => {
     const hidden = reviews.filter((review) => review.status.toUpperCase().includes("HIDDEN")).length;

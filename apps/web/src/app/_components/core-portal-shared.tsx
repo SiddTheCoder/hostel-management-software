@@ -8,11 +8,20 @@ export type LoadState = "idle" | "loading" | "ready" | "error";
 export type ReportRecord = Record<string, unknown>;
 
 export type Hostel = {
+  /** Present on the platform approval queue — see listPlatformHostels. */
+  applicationStatus?: string;
   capacitySummary?: {
     totalBeds?: number;
     totalRooms?: number;
     vacantBeds?: number;
   };
+  createdAt?: string;
+  owner?: {
+    email: string;
+    name: string;
+    phone: string;
+  } | null;
+  submittedAt?: string | null;
   contact?: {
     email?: string;
     phone?: string;

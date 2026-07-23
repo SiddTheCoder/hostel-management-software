@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { ACCESS_TOKEN_COOKIE, getBearerToken, verifyAccessToken } from "@/lib/auth";
-import { HOSTEL_STAFF_ROLES, assertAllowedRole } from "@/lib/permissions";
+import { HOSTEL_STAFF_ROLES, PLATFORM_ROLES, assertAllowedRole } from "@/lib/permissions";
 import { assertHostelAccess } from "@/lib/tenant";
 import { Role } from "@/lib/roles";
 
@@ -80,7 +80,29 @@ export function assertApiRoles(principal: ApiPrincipal, roles: Role[]) {
   }
 }
 
+/**
+ * Grants the platform portal to both SUPERADMIN and PLATFORM_MODERATOR — the
+ * "acting superadmin" role, which sees and moderates everything a superadmin
+ * does. The one thing it must not do is create or revoke other platform admins;
+ * that is gated separately by {@link requireSuperadminPrincipal}.
+ *
+ * Matches the routing layer, which already lets PLATFORM_MODERATOR reach
+ * /platform (see PLATFORM_ROLES and protectedRouteRules).
+ */
 export async function requirePlatformPrincipal(request: NextRequest) {
+  const principal = await requireApiPrincipal(request);
+
+  assertApiRoles(principal, PLATFORM_ROLES);
+
+  return principal;
+}
+
+/**
+ * Stricter than {@link requirePlatformPrincipal}: only a full SUPERADMIN passes.
+ * Used for privilege management, so an acting superadmin cannot escalate itself
+ * or mint further admins.
+ */
+export async function requireSuperadminPrincipal(request: NextRequest) {
   const principal = await requireApiPrincipal(request);
 
   assertApiRoles(principal, [Role.SUPERADMIN]);

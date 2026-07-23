@@ -1,6 +1,8 @@
 "use client";
 
 import { PublicShell } from "@/app/_components/shared";
+import { LegalBody } from "@/components/legal-body";
+import { useSiteConfig } from "@/components/site-config-provider";
 import {
   FileText,
   UserCheck,
@@ -103,6 +105,9 @@ const sections = [
 ];
 
 export function PublicTermsPage() {
+  const { legal } = useSiteConfig();
+  const customBody = legal.terms.body.trim();
+
   return (
     <PublicShell>
       <div className="mx-auto max-w-3xl px-6 py-20">
@@ -115,7 +120,7 @@ export function PublicTermsPage() {
             Terms &amp; Regulations
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Last updated: July 11, 2026
+            Last updated: {legal.terms.updatedAt || "July 11, 2026"}
           </p>
           <div className="mx-auto mt-4 h-px max-w-xs bg-border" />
         </div>
@@ -135,9 +140,10 @@ export function PublicTermsPage() {
           </p>
         </div>
 
-        {/* Sections */}
+        {/* Sections — admin-authored copy replaces the built-in text when set. */}
         <div className="space-y-12">
-          {sections.map(({ icon: Icon, title, content }) => (
+          {customBody ? <LegalBody body={customBody} /> : null}
+          {customBody ? null : sections.map(({ icon: Icon, title, content }) => (
             <section key={title}>
               <div className="mb-4 flex items-center gap-3">
                 <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10">

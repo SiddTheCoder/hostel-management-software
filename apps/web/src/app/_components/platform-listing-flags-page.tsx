@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useCallback, useState, useEffect, useMemo, type FormEvent } from "react";
+import React, { useCallback, useState, useMemo, type FormEvent } from "react";
 import { AlertOctagon, CheckCircle2, Flag, XCircle } from "lucide-react";
 
 import { EmptyState, Panel } from "@/app/_components/shared-ui";
 import { browserApi } from "@/lib/browser-api";
+import { platformEndpoints } from "@/lib/platform-endpoints";
+import { useInvalidateResources, usePortalResource } from "@/lib/portal-query";
 import {
   MetricCard,
   PortalPageHeader,
@@ -15,28 +17,15 @@ import { Message, field, type ListingFlag } from "./portal-shared";
 
 export const PlatformListingFlagsPageContent = React.memo(
   function PlatformListingFlagsPageContent() {
-    const [flags, setFlags] = useState<ListingFlag[]>([]);
-    const [message, setMessage] = useState("");
+    const [actionMessage, setActionMessage] = useState("");
+    const invalidate = useInvalidateResources();
+    const flagsResource = usePortalResource<{ flags: ListingFlag[] }>(
+      platformEndpoints.listingFlags,
+      { errorMessage: "Could not load flags." },
+    );
 
-    const load = useCallback(async () => {
-      try {
-        const data = await browserApi<{ flags: ListingFlag[] }>(
-          "/api/v1/platform/listing-flags",
-        );
-
-        setFlags(data.flags);
-      } catch (error) {
-        setMessage(error instanceof Error ? error.message : "Could not load flags.");
-      }
-    }, []);
-
-    useEffect(() => {
-      const timer = window.setTimeout(() => {
-        void load();
-      }, 0);
-
-      return () => window.clearTimeout(timer);
-    }, [load]);
+    const flags = useMemo(() => flagsResource.data?.flags ?? [], [flagsResource.data]);
+    const message = actionMessage || flagsResource.message;
 
     const runCheck = useCallback(
       async (event: FormEvent<HTMLFormElement>) => {
@@ -46,18 +35,23 @@ export const PlatformListingFlagsPageContent = React.memo(
         const currentForm = event.currentTarget;
 
         try {
-          await browserApi(`/api/v1/platform/hostels/${hostelId}/run-duplicate-check`, {
-            body: JSON.stringify({}),
-            method: "POST",
-          });
-          setMessage("Duplicate check completed.");
+          await browserApi(
+            `${platformEndpoints.hostels}/${hostelId}/run-duplicate-check`,
+            {
+              body: JSON.stringify({}),
+              method: "POST",
+            },
+          );
+          setActionMessage("Duplicate check completed.");
           currentForm.reset();
-          await load();
+          invalidate(platformEndpoints.listingFlags);
         } catch (error) {
-          setMessage(error instanceof Error ? error.message : "Could not run check.");
+          setActionMessage(
+            error instanceof Error ? error.message : "Could not run check.",
+          );
         }
       },
-      [load],
+      [invalidate],
     );
 
     const resolve = useCallback(
@@ -69,16 +63,18 @@ export const PlatformListingFlagsPageContent = React.memo(
         }
 
         try {
-          await browserApi(`/api/v1/platform/listing-flags/${flagId}/resolve`, {
+          await browserApi(`${platformEndpoints.listingFlags}/${flagId}/resolve`, {
             body: JSON.stringify({ resolutionNote, status }),
             method: "PATCH",
           });
-          await load();
+          invalidate(platformEndpoints.listingFlags);
         } catch (error) {
-          setMessage(error instanceof Error ? error.message : "Could not resolve flag.");
+          setActionMessage(
+            error instanceof Error ? error.message : "Could not resolve flag.",
+          );
         }
       },
-      [load],
+      [invalidate],
     );
 
     const counts = useMemo(() => {

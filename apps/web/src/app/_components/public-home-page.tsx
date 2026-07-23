@@ -30,6 +30,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+import { useSiteConfig } from "@/components/site-config-provider";
 import { checkAuthWithRefresh } from "@/lib/auth-check";
 import { landingPathForRole } from "@/lib/route-access";
 import { Role } from "@/lib/roles";
@@ -37,11 +38,9 @@ import { Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { HostelCard, PublicShell, StatusPill, formatMoney } from "./shared";
 import {
-  CITY_OPTIONS,
   FACILITY_STATS,
   HOSTEL_TYPE_STATS,
   MOCK_HOSTELS,
-  TRUST_POINTS,
 } from "./public-home-mock-data";
 
 const PUBLIC_HERO_IMAGE =
@@ -76,7 +75,25 @@ const FACILITY_ICONS: Record<string, LucideIcon> = {
   WiFi: Wifi,
 };
 
-const TRUST_ICONS: LucideIcon[] = [ShieldCheck, Tag, LockKeyhole, Star, Users, Headphones];
+/** Icon names an admin can type in Website Config → Site Content → Trust Points. */
+const TRUST_ICONS_BY_NAME: Record<string, LucideIcon> = {
+  headphones: Headphones,
+  lock: LockKeyhole,
+  shield: ShieldCheck,
+  star: Star,
+  tag: Tag,
+  users: Users,
+  wallet: Tag,
+};
+
+const TRUST_ICON_FALLBACKS: LucideIcon[] = [
+  ShieldCheck,
+  Tag,
+  LockKeyhole,
+  Star,
+  Users,
+  Headphones,
+];
 
 function SectionHeading({
   title,
@@ -109,8 +126,10 @@ function SectionHeading({
 
 function PublicHomePageContent() {
   const router = useRouter();
+  const { features, hero, identity, locations, social, trustPoints } = useSiteConfig();
+  const cityOptions = locations.map((location) => location.city);
   const [searchVal, setSearchVal] = useState("");
-  const [selectedCity, setSelectedCity] = useState(CITY_OPTIONS[0]);
+  const [selectedCity, setSelectedCity] = useState(cityOptions[0] ?? "Kathmandu");
 
   useEffect(() => {
     async function redirectIfDashboardRole() {
@@ -147,19 +166,36 @@ function PublicHomePageContent() {
 
   const heroHostel = featuredHostels[0];
 
+  // Footer links follow the owner's feature flags — a surface that is switched
+  // off in Website Config shouldn't still be advertised down here.
+  const socialLinks: Array<[string, string]> = (
+    [
+      ["Facebook", social.facebook],
+      ["Instagram", social.instagram],
+      ["YouTube", social.youtube],
+      ["TikTok", social.tiktok],
+      ["LinkedIn", social.linkedin],
+      ["Website", social.website],
+    ] satisfies Array<[string, string]>
+  ).filter(([, href]) => Boolean(href));
+
   const footerGroups = [
     {
       links: [
         ["Browse hostels", "/hostels"],
-        ["Compare hostels", "/compare"],
-        ["Send inquiry", "/inquiry"],
+        ...(features.compare ? [["Compare hostels", "/compare"]] : []),
+        ...(features.inquiries ? [["Send inquiry", "/inquiry"]] : []),
       ],
       title: "Explore",
     },
     {
       links: [
-        ["Hostel registration", "/hostels/register"],
-        ["Service providers", "/service-providers/register"],
+        ...(features.publicRegistration
+          ? [["Hostel registration", "/hostels/register"]]
+          : []),
+        ...(features.serviceProviderSignup
+          ? [["Service providers", "/service-providers/register"]]
+          : []),
         ["Pricing", "/pricing"],
       ],
       title: "Partners",
@@ -200,19 +236,17 @@ function PublicHomePageContent() {
               Trusted by Students & Families
             </span>
             <h1 className="mt-8 max-w-xl font-heading text-5xl lg:text-[56px] font-extrabold leading-[1.15] text-foreground">
-              Find the Best <span className="text-brand-teal font-extrabold">Hostel</span>{" "}
-              for You
+              {hero.headline}
             </h1>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
-              Discover verified hostels, compare facilities, check reviews and book your
-              stay.
+              {hero.subheadline}
             </p>
             <div className="mt-8 flex max-w-lg items-center gap-2 rounded-lg border border-border bg-card p-1.5 shadow-md focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/15 transition">
               <Search className="ml-3 size-5 text-muted-foreground" />
               <input
                 className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 onChange={(e) => setSearchVal(e.target.value)}
-                placeholder="Search by hostel name, area or location..."
+                placeholder={hero.searchPlaceholder}
                 value={searchVal}
               />
               <Link
@@ -317,7 +351,7 @@ function PublicHomePageContent() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {CITY_OPTIONS.map((city) => (
+              {cityOptions.map((city) => (
                 <button
                   className={cn(
                     "rounded-full border px-3.5 py-1.5 text-xs font-bold transition",
@@ -476,14 +510,16 @@ function PublicHomePageContent() {
             <ShieldCheck className="size-6" />
           </span>
           <h2 className="mt-4 font-heading text-2xl font-extrabold text-foreground sm:text-3xl">
-            Why students trust HostelHub
+            Why students trust {identity.siteName}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             We prioritise your safety, comfort, and peace of mind.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {TRUST_POINTS.map((point, index) => {
-              const Icon = TRUST_ICONS[index];
+            {trustPoints.map((point, index) => {
+              const Icon =
+                TRUST_ICONS_BY_NAME[point.icon.toLowerCase()] ??
+                TRUST_ICON_FALLBACKS[index % TRUST_ICON_FALLBACKS.length];
               return (
                 <div
                   className="rounded-xl border border-border/80 bg-card p-5 text-left shadow-sm"
@@ -617,12 +653,27 @@ function PublicHomePageContent() {
               className="flex items-center gap-2 font-heading text-2xl font-bold text-brand-teal"
             >
               <Home className="size-7 fill-brand-teal/10" />
-              HostelHub
+              {identity.siteName}
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              A Nepal-focused hostel discovery and operations platform for students,
-              families, hostel teams, and trusted service partners.
+              {identity.tagline ||
+                "A Nepal-focused hostel discovery and operations platform for students, families, hostel teams, and trusted service partners."}
             </p>
+            {socialLinks.length > 0 ? (
+              <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold text-muted-foreground">
+                {socialLinks.map(([label, href]) => (
+                  <a
+                    className="transition hover:text-brand-teal"
+                    href={href}
+                    key={label}
+                    rel="noreferrer noopener"
+                    target="_blank"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-8 sm:grid-cols-3">
@@ -647,22 +698,29 @@ function PublicHomePageContent() {
           <div>
             <p className="text-sm font-extrabold text-foreground">Contact</p>
             <div className="mt-4 space-y-3 text-sm font-medium text-muted-foreground">
-              <a className="block transition hover:text-brand-teal" href="tel:015971234">
-                01-5971234
-              </a>
-              <a
-                className="block transition hover:text-brand-teal"
-                href="mailto:support@hostelhub.local"
-              >
-                support@hostelhub.local
-              </a>
-              <p>Kathmandu, Nepal</p>
+              {identity.supportPhone ? (
+                <a
+                  className="block transition hover:text-brand-teal"
+                  href={`tel:${identity.supportPhone.replace(/\s/g, "")}`}
+                >
+                  {identity.supportPhone}
+                </a>
+              ) : null}
+              {identity.supportEmail ? (
+                <a
+                  className="block transition hover:text-brand-teal"
+                  href={`mailto:${identity.supportEmail}`}
+                >
+                  {identity.supportEmail}
+                </a>
+              ) : null}
+              {identity.address ? <p>{identity.address}</p> : null}
             </div>
           </div>
         </div>
         <div className="border-t border-border">
           <div className="mx-auto flex max-w-[1448px] flex-col gap-3 px-6 py-5 text-xs font-medium text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <p>Copyright 2026 HostelHub. All rights reserved.</p>
+            <p>Copyright 2026 {identity.siteName}. All rights reserved.</p>
             <div className="flex gap-4">
               <Link className="hover:text-brand-teal" href="/privacy">
                 Privacy

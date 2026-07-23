@@ -175,13 +175,24 @@ type PlatformPaymentRecord = {
   status: string;
 };
 
+type PlatformPaymentProofRecord = {
+  _id: Types.ObjectId;
+  hostelId: Types.ObjectId;
+  paymentId: Types.ObjectId;
+  proofImageAssetId: string;
+  residentId: Types.ObjectId;
+  status: string;
+  submittedAt?: Date;
+  transactionCode?: string;
+};
+
 // Read-only, platform-wide roll-up of resident payment records (no hostel
 // scoping) for the Platform Owner "Payments" tab. Manual/gateway billing stays
 // out of scope; this simply aggregates what admins have already recorded.
 export async function getPlatformPaymentsOverview() {
   await connectToDatabase();
 
-  const [totals, statusCounts, pendingProofs, recent] = await Promise.all([
+  const [totals, statusCounts, pendingProofs, recent, proofs] = await Promise.all([
     sumPayments({}),
     countByField(PaymentModel, {}, "status"),
     PaymentProofModel.countDocuments({ status: "PENDING" }),
@@ -189,13 +200,31 @@ export async function getPlatformPaymentsOverview() {
       .sort({ createdAt: -1 })
       .limit(25)
       .lean<PlatformPaymentRecord[]>(),
+    PaymentProofModel.find({ status: "PENDING" })
+      .sort({ submittedAt: -1 })
+      .limit(10)
+      .lean<PlatformPaymentProofRecord[]>(),
   ]);
 
-  const hostelIds = [...new Set(recent.map((payment) => payment.hostelId.toString()))];
+  // Resolve hostel names for both the payment rows and the pending proof queue
+  // in one query rather than one per row.
+  const hostelIds = [
+    ...new Set([
+      ...recent.map((payment) => payment.hostelId.toString()),
+      ...proofs.map((proof) => proof.hostelId.toString()),
+    ]),
+  ];
   const hostels = await HostelModel.find({ _id: { $in: hostelIds } })
     .select("name")
     .lean<Array<{ _id: Types.ObjectId; name?: string }>>();
   const nameById = new Map(hostels.map((hostel) => [hostel._id.toString(), hostel.name ?? "—"]));
+
+  const proofPayments = await PaymentModel.find({
+    _id: { $in: proofs.map((proof) => proof.paymentId) },
+  }).lean<PlatformPaymentRecord[]>();
+  const paymentById = new Map(
+    proofPayments.map((payment) => [payment._id.toString(), payment]),
+  );
 
   return {
     overview: {
@@ -205,6 +234,22 @@ export async function getPlatformPaymentsOverview() {
       totalDue: totals.dueAmount,
       totalPaid: totals.paidAmount,
     },
+    proofs: proofs.map((proof) => {
+      const payment = paymentById.get(proof.paymentId.toString());
+
+      return {
+        amount: payment?.dueAmount ?? 0,
+        hostelName: nameById.get(proof.hostelId.toString()) ?? "—",
+        id: proof._id.toString(),
+        month: payment?.month ?? "—",
+        paymentId: proof.paymentId.toString(),
+        proofImageAssetId: proof.proofImageAssetId,
+        residentId: proof.residentId.toString(),
+        status: proof.status,
+        submittedAt: proof.submittedAt?.toISOString() ?? null,
+        transactionCode: proof.transactionCode ?? "",
+      };
+    }),
     recent: recent.map((payment) => ({
       dueAmount: payment.dueAmount,
       dueDate: payment.dueDate?.toISOString() ?? null,

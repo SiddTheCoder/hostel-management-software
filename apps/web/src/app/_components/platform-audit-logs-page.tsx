@@ -1,11 +1,12 @@
 "use client";
 
 import { ScrollText } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 
 import { EmptyState, Panel } from "@/app/_components/shared-ui";
-import { browserApi } from "@/lib/browser-api";
-import { deferLoad, Message, PageHeader } from "./core-portal-shared";
+import { platformEndpoints } from "@/lib/platform-endpoints";
+import { usePortalResource } from "@/lib/portal-query";
+import { Message, PageHeader } from "./core-portal-shared";
 
 type AuditLogRecord = {
   action: string;
@@ -41,26 +42,13 @@ function metadataSummary(metadata: Record<string, unknown>) {
 
 export const PlatformAuditLogsPageContent = memo(
   function PlatformAuditLogsPageContent() {
-    const [logs, setLogs] = useState<AuditLogRecord[]>([]);
-    const [message, setMessage] = useState("");
+    const logsResource = usePortalResource<{ logs: AuditLogRecord[] }>(
+      platformEndpoints.auditLogs,
+      { errorMessage: "Could not load audit logs." },
+    );
 
-    useEffect(() => {
-      async function load() {
-        try {
-          const data = await browserApi<{ logs: AuditLogRecord[] }>(
-            "/api/v1/platform/audit-logs",
-          );
-
-          setLogs(data.logs);
-        } catch (error) {
-          setMessage(
-            error instanceof Error ? error.message : "Could not load audit logs.",
-          );
-        }
-      }
-
-      return deferLoad(load);
-    }, []);
+    const logs = logsResource.data?.logs ?? [];
+    const message = logsResource.message;
 
     return (
       <div className="mx-auto max-w-[1448px] space-y-6">

@@ -14,16 +14,15 @@ import {
   WalletCards,
   Wrench,
 } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 
 import { LoadingRows } from "@/app/_components/shared-ui";
 import { Button } from "@/components/ui/button";
-import { browserApi } from "@/lib/browser-api";
+import { platformEndpoints } from "@/lib/platform-endpoints";
+import { combineResources, usePortalResource } from "@/lib/portal-query";
 import {
-  deferLoad,
   DemoDataBadge,
   Hostel,
-  LoadState,
   Message,
   ReportRecord,
 } from "./core-portal-shared";
@@ -116,33 +115,21 @@ const AUDIT_ACTIVITY = [
 ];
 
 export const PlatformDashboardPageContent = memo(function PlatformDashboardPageContent() {
-  const [report, setReport] = useState<ReportRecord | null>(null);
-  const [hostels, setHostels] = useState<Hostel[]>([]);
-  const [totalHostelCount, setTotalHostelCount] = useState(0);
-  const [message, setMessage] = useState("");
-  const [state, setState] = useState<LoadState>("idle");
+  const reportResource = usePortalResource<{ report: ReportRecord }>(
+    platformEndpoints.dashboardReport,
+    { errorMessage: "Could not load dashboard." },
+  );
+  // Shares its cache entry with the Hostels and Listings screens.
+  const hostelsResource = usePortalResource<{ hostels: Hostel[] }>(
+    platformEndpoints.hostels,
+    { errorMessage: "Could not load dashboard." },
+  );
 
-  useEffect(() => {
-    async function load() {
-      setState("loading");
-      try {
-        const [reportData, hostelData] = await Promise.all([
-          browserApi<{ report: ReportRecord }>("/api/v1/platform/reports/dashboard"),
-          browserApi<{ hostels: Hostel[] }>("/api/v1/platform/hostels"),
-        ]);
-
-        setReport(reportData.report);
-        setTotalHostelCount(hostelData.hostels.length);
-        setHostels(hostelData.hostels.slice(0, 5));
-        setState("ready");
-      } catch (error) {
-        setMessage(error instanceof Error ? error.message : "Could not load dashboard.");
-        setState("error");
-      }
-    }
-
-    return deferLoad(load);
-  }, []);
+  const { message, state } = combineResources(reportResource, hostelsResource);
+  const report = reportResource.data?.report ?? null;
+  const allHostels = hostelsResource.data?.hostels ?? [];
+  const totalHostelCount = allHostels.length;
+  const hostels = allHostels.slice(0, 5);
 
   const metrics = [
     {

@@ -516,21 +516,26 @@ export async function authenticateWithGoogle(
     provider: "google",
     providerAccountId: googleAccount.providerAccountId,
   });
-  let user = linkedAccount
+  const linkedUser = linkedAccount
     ? await UserModel.findOne({
         _id: linkedAccount.userId,
         isDeleted: { $ne: true },
-        status: "ACTIVE",
       })
     : null;
 
-  if (linkedAccount && !user) {
+  // The linked user still exists but has been suspended/archived — a real denial.
+  if (linkedUser && linkedUser.get("status") !== "ACTIVE") {
     throw new AuthServiceError(
       "Linked Google account no longer has access.",
       "USER_INACTIVE",
       401,
     );
   }
+
+  // The linked user row is gone entirely (hard-deleted). The link is stale, not a
+  // denial: fall through to email match / fresh signup and repoint it below.
+  const orphanedLink = Boolean(linkedAccount) && !linkedUser;
+  let user = linkedUser;
 
   if (!user) {
     user = await UserModel.findOne({
@@ -576,7 +581,14 @@ export async function authenticateWithGoogle(
     }
   }
 
-  if (!linkedAccount) {
+  if (orphanedLink && linkedAccount) {
+    // Reuse the stale row rather than creating a second one — {provider,
+    // providerAccountId} is uniquely indexed.
+    linkedAccount.set("email", googleAccount.email);
+    linkedAccount.set("userId", user._id);
+    linkedAccount.set("linkedAt", new Date());
+    await linkedAccount.save();
+  } else if (!linkedAccount) {
     await OAuthAccountModel.create({
       email: googleAccount.email,
       provider: "google",

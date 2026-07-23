@@ -20,7 +20,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const input = hostelRequestDocumentsSchema.parse(await request.json());
     const result = await requestPlatformHostelDocuments(id, input, principal);
 
-    return successResponse(result, "Documents requested from owner");
+    return successResponse(
+      result,
+      result.notification.sent
+        ? "Documents requested from owner"
+        : "Documents requested, but the owner could not be emailed",
+    );
   } catch (error) {
     return handleRouteError(error);
   }

@@ -44,12 +44,14 @@ export function Panel({
   return (
     <section
       className={cn(
-        "rounded-lg border border-border bg-surface p-5 shadow-sm",
+        "rounded-xl border border-border bg-surface p-3.5 shadow-sm",
         className,
       )}
     >
       {title ? (
-        <h2 className="mb-4 font-heading text-lg font-semibold text-foreground">{title}</h2>
+        <h2 className="mb-3 font-heading text-[13.5px] font-bold text-foreground">
+          {title}
+        </h2>
       ) : null}
       {children}
     </section>

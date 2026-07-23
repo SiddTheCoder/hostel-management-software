@@ -470,6 +470,7 @@ export function PublicHostelRegistrationPage() {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const ownerNameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const areaRef = useRef<HTMLInputElement>(null);
   const roomsSectionRef = useRef<HTMLDivElement>(null);
@@ -536,6 +537,10 @@ export function PublicHostelRegistrationPage() {
   const idProofSectionRef = useRef<HTMLDivElement>(null);
   const rulesSectionRef = useRef<HTMLDivElement>(null);
 
+  // Set once the signed-in account resolves. Non-empty means the Email field is
+  // bound to that account and locked (see the hydrate effect below).
+  const [lockedEmail, setLockedEmail] = useState("");
+
   const [draftAccountKey, setDraftAccountKey] = useState<string | null>(null);
   const [restoredDraftAt, setRestoredDraftAt] = useState<string | null>(null);
   const draftHydratedRef = useRef(false);
@@ -549,6 +554,7 @@ export function PublicHostelRegistrationPage() {
 
     async function resolveAccountAndHydrate() {
       let accountKey = "anonymous";
+      let accountEmail = "";
 
       try {
         const res = await checkAuthWithRefresh();
@@ -556,6 +562,7 @@ export function PublicHostelRegistrationPage() {
           const payload = await res.json().catch(() => null);
           const id = payload?.data?.user?.id;
           if (id) accountKey = String(id);
+          accountEmail = payload?.data?.user?.email ?? "";
         }
       } catch {
         // ignore — fall back to the anonymous slot
@@ -563,6 +570,16 @@ export function PublicHostelRegistrationPage() {
 
       if (cancelled) return;
       setDraftAccountKey(accountKey);
+
+      // Approval mails the owner *account's* address, not this field: on
+      // approve the server resolves hostel.ownerId -> User.email. A typo here
+      // would create a separate owner account and send the credentials to an
+      // address the applicant can't read, so bind the field to the signed-in
+      // account and lock it.
+      if (accountEmail) {
+        setLockedEmail(accountEmail);
+        setEmail(accountEmail);
+      }
 
       // Restore the submitted-application status for this account slot so the
       // status screen stays consistent across refreshes. The server lookup is
@@ -614,7 +631,8 @@ export function PublicHostelRegistrationPage() {
         if (draft.ownerGender !== undefined) setOwnerGender(draft.ownerGender);
         if (draft.phone !== undefined) setPhone(draft.phone);
         if (draft.alternatePhone !== undefined) setAlternatePhone(draft.alternatePhone);
-        if (draft.email !== undefined) setEmail(draft.email);
+        // A locked account email always wins over whatever the draft saved.
+        if (draft.email !== undefined && !accountEmail) setEmail(draft.email);
         if (draft.mealsPerDay !== undefined) setMealsPerDay(draft.mealsPerDay);
         if (draft.hasVeg !== undefined) setHasVeg(draft.hasVeg);
         if (draft.hasNonVeg !== undefined) setHasNonVeg(draft.hasNonVeg);
@@ -837,6 +855,9 @@ export function PublicHostelRegistrationPage() {
       { label: "Description", step: 1, valid: Boolean(description.trim()) },
       { label: "Owner Full Name", step: 1, valid: Boolean(ownerName.trim()) },
       { label: "Owner Phone — at least 7 digits", step: 1, valid: phone.trim().length >= 7 },
+      // Without an email the approval never reaches the owner: the server
+      // creates an owner User with no address, and resolveHostelOwner bails.
+      { label: "Owner Email", step: 1, valid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) },
       { label: "Address Line", step: 2, valid: Boolean(address.trim()) },
       { label: "Area / Locality", step: 2, valid: Boolean(area.trim()) },
       {
@@ -871,6 +892,8 @@ export function PublicHostelRegistrationPage() {
         return ownerNameRef;
       case "Owner Phone — at least 7 digits":
         return phoneRef;
+      case "Owner Email":
+        return emailRef;
       case "Address Line":
         return addressRef;
       case "Area / Locality":
@@ -1251,8 +1274,22 @@ export function PublicHostelRegistrationPage() {
                       <Field label="Alternate Phone">
                         <input className="input-field" onChange={(e) => setAlternatePhone(e.target.value)} type="tel" value={alternatePhone} />
                       </Field>
-                      <Field label="Email">
-                        <input className="input-field" onChange={(e) => setEmail(e.target.value)} type="email" value={email} />
+                      <Field label="Email" required>
+                        <input
+                          className={lockedEmail ? "input-field cursor-not-allowed bg-muted text-muted-foreground" : "input-field"}
+                          onChange={(e) => setEmail(e.target.value)}
+                          readOnly={Boolean(lockedEmail)}
+                          ref={emailRef}
+                          required
+                          type="email"
+                          value={email}
+                        />
+                        {lockedEmail ? (
+                          <span className="flex items-start gap-1.5 text-[11px] font-medium text-muted-foreground">
+                            <Lock className="mt-0.5 size-3 shrink-0" />
+                            Taken from your signed-in account. Approval and login credentials are sent here.
+                          </span>
+                        ) : null}
                       </Field>
                     </div>
                   </div>

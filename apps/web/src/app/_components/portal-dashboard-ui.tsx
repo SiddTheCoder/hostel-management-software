@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { ChevronDown, Star, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronDown, Star, TrendingDown, TrendingUp, X } from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
@@ -27,7 +27,15 @@ import {
 import { cn } from "@/lib/utils";
 
 export type PortalTone = "platform" | "admin" | "resident" | "guardian";
-export type SoftTone = "green" | "amber" | "rose" | "blue" | "slate" | "cyan" | "purple";
+export type SoftTone =
+  | "green"
+  | "amber"
+  | "rose"
+  | "blue"
+  | "slate"
+  | "cyan"
+  | "purple"
+  | "teal";
 
 const softToneClasses: Record<SoftTone, string> = {
   amber:
@@ -40,6 +48,7 @@ const softToneClasses: Record<SoftTone, string> = {
     "border-violet-200/80 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-300",
   rose: "border-rose-200/80 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300",
   slate: "border-border bg-muted text-muted-foreground",
+  teal: "border-role-platform/25 bg-role-platform-soft text-role-platform",
 };
 
 const roleLinkClasses: Record<PortalTone, string> = {
@@ -63,6 +72,30 @@ const avatarToneClasses: Record<PortalTone, string> = {
   resident: "bg-role-resident-soft text-role-resident",
 };
 
+const roleTextClasses: Record<PortalTone, string> = {
+  admin: "text-role-admin",
+  guardian: "text-role-guardian",
+  platform: "text-role-platform",
+  resident: "text-role-resident",
+};
+
+const roleBorderClasses: Record<PortalTone, string> = {
+  admin: "border-role-admin",
+  guardian: "border-role-guardian",
+  platform: "border-role-platform",
+  resident: "border-role-resident",
+};
+
+export type BreadcrumbItem = string | { href: string; label: string };
+
+function breadcrumbLabel(item: BreadcrumbItem) {
+  return typeof item === "string" ? item : item.label;
+}
+
+function breadcrumbHref(item: BreadcrumbItem) {
+  return typeof item === "string" ? undefined : item.href;
+}
+
 export function PortalPageHeader({
   actions,
   breadcrumb,
@@ -70,32 +103,43 @@ export function PortalPageHeader({
   title,
 }: {
   actions?: ReactNode;
-  breadcrumb?: string[];
+  breadcrumb?: BreadcrumbItem[];
   description?: string;
   title: string;
 }) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0 space-y-1">
+    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0 space-y-0.5">
         {breadcrumb && breadcrumb.length > 0 ? (
-          <p className="text-xs font-medium text-muted-foreground">
-            {breadcrumb.map((item, index) => (
-              <span key={`${item}-${index}`}>
-                {index > 0 ? (
-                  <span className="mx-1.5 text-muted-foreground/50">›</span>
-                ) : null}
-                <span className={index === breadcrumb.length - 1 ? "text-foreground" : ""}>
-                  {item}
+          <p className="text-[11px] font-medium text-muted-foreground">
+            {breadcrumb.map((item, index) => {
+              const href = breadcrumbHref(item);
+              const isLast = index === breadcrumb.length - 1;
+
+              return (
+                <span key={`${breadcrumbLabel(item)}-${index}`}>
+                  {index > 0 ? (
+                    <span className="mx-1 text-muted-foreground/50">›</span>
+                  ) : null}
+                  {href && !isLast ? (
+                    <Link className="hover:text-foreground hover:underline" href={href}>
+                      {breadcrumbLabel(item)}
+                    </Link>
+                  ) : (
+                    <span className={isLast ? "text-foreground" : ""}>
+                      {breadcrumbLabel(item)}
+                    </span>
+                  )}
                 </span>
-              </span>
-            ))}
+              );
+            })}
           </p>
         ) : null}
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground md:text-[1.75rem]">
+        <h1 className="font-heading text-lg font-bold tracking-tight text-foreground md:text-xl">
           {title}
         </h1>
         {description ? (
-          <p className="max-w-2xl text-sm text-muted-foreground">{description}</p>
+          <p className="max-w-2xl text-[12.5px] text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {actions ? (
@@ -113,6 +157,18 @@ const noteToneClasses: Record<SoftTone, string> = {
   purple: "text-violet-600",
   rose: "text-rose-600",
   slate: "text-muted-foreground",
+  teal: "text-role-platform",
+};
+
+const iconToneClasses: Record<SoftTone, string> = {
+  amber: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  blue: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
+  cyan: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/40 dark:text-cyan-400",
+  green: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
+  purple: "bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400",
+  rose: "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400",
+  slate: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+  teal: "bg-role-platform-soft text-role-platform",
 };
 
 export function MetricCard({
@@ -120,7 +176,7 @@ export function MetricCard({
   label,
   note,
   noteTone = "slate",
-  tone = "blue",
+  tone = "teal",
   trend,
   trendDown = false,
   value,
@@ -134,37 +190,27 @@ export function MetricCard({
   trendDown?: boolean;
   value: ReactNode;
 }) {
-  const iconTones: Record<SoftTone, string> = {
-    amber: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
-    blue: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
-    cyan: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/40 dark:text-cyan-400",
-    green: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
-    purple: "bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400",
-    rose: "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400",
-    slate: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-  };
-
   return (
-    <Card className="shadow-sm ring-border/60">
-      <CardContent className="pt-1">
-        <div className="flex items-start gap-3">
+    <Card className="shadow-sm ring-border/60" size="sm">
+      <CardContent>
+        <div className="flex items-start gap-2.5">
           <span
             className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-xl",
-              iconTones[tone],
+              "flex size-9 shrink-0 items-center justify-center rounded-lg",
+              iconToneClasses[tone],
             )}
           >
-            <Icon className="size-5" />
+            <Icon className="size-[17px]" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">{label}</p>
-            <p className="mt-1 truncate text-2xl font-bold tracking-tight text-foreground">
+            <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
+            <p className="mt-0.5 truncate text-[19px] font-bold leading-tight tracking-tight text-foreground">
               {value}
             </p>
             {trend ? (
               <p
                 className={cn(
-                  "mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold",
+                  "mt-1 inline-flex items-center gap-1 text-[10.5px] font-semibold",
                   trendDown ? "text-rose-600" : "text-emerald-600",
                 )}
               >
@@ -176,7 +222,12 @@ export function MetricCard({
                 {trend}
               </p>
             ) : note ? (
-              <p className={cn("mt-1.5 text-[11px] font-semibold", noteToneClasses[noteTone])}>
+              <p
+                className={cn(
+                  "mt-1 text-[10.5px] font-semibold",
+                  noteToneClasses[noteTone],
+                )}
+              >
                 {note}
               </p>
             ) : null}
@@ -201,19 +252,21 @@ export function SectionCard({
   title?: string;
 }) {
   return (
-    <Card className={cn("shadow-sm ring-border/60", className)}>
+    <Card className={cn("shadow-sm ring-border/60", className)} size="sm">
       {title || actions || description ? (
-        <CardHeader className="border-b border-border/60 pb-4">
+        <CardHeader className="border-b border-border/60 pb-3">
           {title ? (
-            <CardTitle className="font-heading text-base font-bold text-foreground">
+            <CardTitle className="font-heading text-[13.5px] font-bold text-foreground">
               {title}
             </CardTitle>
           ) : null}
-          {description ? <CardDescription>{description}</CardDescription> : null}
+          {description ? (
+            <CardDescription className="text-[12px]">{description}</CardDescription>
+          ) : null}
           {actions ? <CardAction>{actions}</CardAction> : null}
         </CardHeader>
       ) : null}
-      <CardContent className={title || actions || description ? "pt-4" : undefined}>
+      <CardContent className={title || actions || description ? "pt-3" : undefined}>
         {children}
       </CardContent>
     </Card>
@@ -232,7 +285,7 @@ export function SoftBadge({
   return (
     <Badge
       className={cn(
-        "h-auto rounded-full border px-2.5 py-0.5 text-[11px] font-semibold shadow-none",
+        "h-auto rounded-full border px-2 py-0.5 text-[10.5px] font-semibold shadow-none",
         softToneClasses[tone],
         className,
       )}
@@ -263,15 +316,19 @@ export function InitialsAvatar({
 
   const sizeClass =
     size === "sm"
-      ? "size-8 text-xs"
+      ? "size-7 text-[10px]"
       : size === "lg"
-        ? "size-14 text-lg data-[size=lg]:size-14"
-        : "size-10 text-sm data-[size=default]:size-10";
+        ? "size-12 text-base data-[size=lg]:size-12"
+        : "size-9 text-[12px] data-[size=default]:size-9";
 
   return (
     <Avatar className={cn(sizeClass, className)} size={size === "sm" ? "sm" : "lg"}>
       <AvatarFallback
-        className={cn("font-bold", avatarToneClasses[tone], size === "sm" && "text-xs")}
+        className={cn(
+          "font-bold",
+          avatarToneClasses[tone],
+          size === "sm" && "text-[10px]",
+        )}
       >
         {initials || "?"}
       </AvatarFallback>
@@ -290,7 +347,10 @@ export function ViewAllLink({
 }) {
   return (
     <Link
-      className={cn("text-xs font-semibold transition hover:underline", roleLinkClasses[tone])}
+      className={cn(
+        "text-[11.5px] font-semibold transition hover:underline",
+        roleLinkClasses[tone],
+      )}
       href={href}
     >
       {label}
@@ -311,13 +371,15 @@ export function RoleButton({
   return (
     <Button
       className={cn(
-        "h-10 gap-2 rounded-xl px-4 font-semibold shadow-sm",
+        "h-8 gap-1.5 rounded-lg px-3 text-[12.5px] font-semibold shadow-sm",
         variant === "solid" && roleSolidClasses[tone],
         variant === "outline" &&
           cn(
             "border bg-card",
-            tone === "platform" && "border-role-platform/30 text-role-platform hover:bg-role-platform-soft",
-            tone === "admin" && "border-role-admin/30 text-role-admin hover:bg-role-admin-soft",
+            tone === "platform" &&
+              "border-role-platform/30 text-role-platform hover:bg-role-platform-soft",
+            tone === "admin" &&
+              "border-role-admin/30 text-role-admin hover:bg-role-admin-soft",
             tone === "resident" &&
               "border-role-resident/30 text-role-resident hover:bg-role-resident-soft",
             tone === "guardian" &&
@@ -326,7 +388,8 @@ export function RoleButton({
         variant === "soft" &&
           cn(
             "border",
-            tone === "platform" && "border-role-platform/20 bg-role-platform-soft text-role-platform",
+            tone === "platform" &&
+              "border-role-platform/20 bg-role-platform-soft text-role-platform",
             tone === "admin" && "border-role-admin/20 bg-role-admin-soft text-role-admin",
             tone === "resident" &&
               "border-role-resident/20 bg-role-resident-soft text-role-resident",
@@ -350,20 +413,35 @@ export function DataTable({
   children: ReactNode;
   className?: string;
 }) {
+  return <Table className={cn("min-w-full text-[12.5px]", className)}>{children}</Table>;
+}
+
+/** Uppercase micro-label used for every table column header in the portals. */
+export function Th({
+  align = "left",
+  children,
+  className,
+}: {
+  align?: "left" | "right" | "center";
+  /** Omitted for spacer columns (checkbox / row-action gutters). */
+  children?: ReactNode;
+  className?: string;
+}) {
   return (
-    <Table className={cn("min-w-full", className)}>
+    <TableHead
+      className={cn(
+        "h-9 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground",
+        align === "right" && "text-right",
+        align === "center" && "text-center",
+        className,
+      )}
+    >
       {children}
-    </Table>
+    </TableHead>
   );
 }
 
-export {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-};
+export { TableBody, TableCell, TableHead, TableHeader, TableRow };
 
 export function SimpleSparkline({
   color = "bg-role-platform",
@@ -375,7 +453,7 @@ export function SimpleSparkline({
   const max = Math.max(...values, 1);
 
   return (
-    <div className="flex h-20 items-end gap-1">
+    <div className="flex h-16 items-end gap-1">
       {values.map((value, index) => (
         <div
           className={cn("flex-1 rounded-t-sm opacity-80", color)}
@@ -389,7 +467,7 @@ export function SimpleSparkline({
 
 export function AreaSparkline({
   labels,
-  stroke = "#2563eb",
+  stroke = "#0d9488",
   values,
 }: {
   labels?: string[];
@@ -407,14 +485,16 @@ export function AreaSparkline({
     const y = height - ((value - min) / range) * (height - 8) - 4;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
-  const line = points.map((point, index) => `${index === 0 ? "M" : "L"}${point}`).join(" ");
+  const line = points
+    .map((point, index) => `${index === 0 ? "M" : "L"}${point}`)
+    .join(" ");
   const area = `${line} L${width},${height} L0,${height} Z`;
   const gradientId = `area-${stroke.replace(/[^a-z0-9]/gi, "")}`;
 
   return (
     <div>
       <svg
-        className="h-24 w-full"
+        className="h-20 w-full"
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
       >
@@ -435,7 +515,7 @@ export function AreaSparkline({
         />
       </svg>
       {labels && labels.length > 0 ? (
-        <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+        <div className="mt-1 flex justify-between text-[9.5px] text-muted-foreground">
           {labels.map((label, index) => (
             <span key={`${label}-${index}`}>{label}</span>
           ))}
@@ -447,7 +527,7 @@ export function AreaSparkline({
 
 export function EmptyInline({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
+    <div className="rounded-lg border border-dashed border-border bg-muted/20 px-3 py-8 text-center text-[12.5px] text-muted-foreground">
       {label}
     </div>
   );
@@ -455,7 +535,7 @@ export function EmptyInline({ label }: { label: string }) {
 
 export function FilterBar({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/20 p-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-2.5 rounded-lg border border-border/70 bg-muted/20 p-2.5 lg:flex-row lg:items-center lg:justify-between">
       {children}
     </div>
   );
@@ -475,13 +555,13 @@ export function SearchField({
   return (
     <div
       className={cn(
-        "flex h-10 max-w-md flex-1 items-center gap-2 rounded-xl border border-border bg-card px-3 shadow-sm",
+        "flex h-9 max-w-md flex-1 items-center gap-2 rounded-lg border border-border bg-card px-2.5 shadow-sm",
         className,
       )}
     >
       <svg
         aria-hidden
-        className="size-4 shrink-0 text-muted-foreground"
+        className="size-3.5 shrink-0 text-muted-foreground"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -491,7 +571,7 @@ export function SearchField({
         <path d="m21 21-4.3-4.3" />
       </svg>
       <input
-        className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        className="w-full bg-transparent text-[12.5px] outline-none placeholder:text-muted-foreground"
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder ?? "Search..."}
         value={value}
@@ -511,22 +591,25 @@ function PagerButton({
   active,
   disabled,
   label,
+  onClick,
   tone = "platform",
 }: {
   active?: boolean;
   disabled?: boolean;
   label: string;
+  onClick?: () => void;
   tone?: PortalTone;
 }) {
   return (
     <button
       className={cn(
-        "flex size-7 items-center justify-center rounded-md text-xs",
+        "flex size-6 items-center justify-center rounded text-[11px] transition",
         active
           ? cn("font-semibold", pagerActiveTone[tone])
-          : "border border-border font-medium text-muted-foreground disabled:opacity-40",
+          : "border border-border font-medium text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent",
       )}
       disabled={disabled}
+      onClick={onClick}
       type="button"
     >
       {label}
@@ -534,38 +617,73 @@ function PagerButton({
   );
 }
 
+/**
+ * Pager for client-side sliced lists. `page`/`onPageChange` make it live;
+ * omitting them renders a static "showing 1 to N" summary.
+ */
 export function ListPager({
+  onPageChange,
+  page = 1,
   pageSize = 10,
   showPageSize = false,
   tone = "platform",
   total,
   unit,
 }: {
+  onPageChange?: (page: number) => void;
+  page?: number;
   pageSize?: number;
   showPageSize?: boolean;
   tone?: PortalTone;
   total: number;
   unit?: string;
 }) {
-  const shown = Math.min(pageSize, total);
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
+  const current = Math.min(Math.max(1, page), lastPage);
+  const from = total === 0 ? 0 : (current - 1) * pageSize + 1;
+  const to = Math.min(current * pageSize, total);
+
+  const pages: number[] = [];
+  for (let index = 1; index <= lastPage; index += 1) {
+    if (index === 1 || index === lastPage || Math.abs(index - current) <= 1) {
+      pages.push(index);
+    }
+  }
 
   return (
-    <div className="mt-4 flex flex-col gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+    <div className="mt-3 flex flex-col gap-2 border-t border-border/60 pt-2.5 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
       <span>
-        Showing {total === 0 ? 0 : 1} to {shown} of {total.toLocaleString()}
+        Showing {from} to {to} of {total.toLocaleString()}
         {unit ? ` ${unit}` : ""}
       </span>
       <div className="flex items-center gap-1">
-        <PagerButton disabled label="‹" tone={tone} />
-        <PagerButton active label="1" tone={tone} />
-        {lastPage >= 2 ? <PagerButton label="2" tone={tone} /> : null}
-        {lastPage >= 3 ? <PagerButton label="3" tone={tone} /> : null}
-        {lastPage > 4 ? <span className="px-1">…</span> : null}
-        {lastPage > 3 ? <PagerButton label={String(lastPage)} tone={tone} /> : null}
-        <PagerButton label="›" tone={tone} />
+        <PagerButton
+          disabled={current <= 1}
+          label="‹"
+          onClick={() => onPageChange?.(current - 1)}
+          tone={tone}
+        />
+        {pages.map((value, index) => (
+          <span className="flex items-center gap-1" key={value}>
+            {index > 0 && value - pages[index - 1] > 1 ? (
+              <span className="px-0.5">…</span>
+            ) : null}
+            <PagerButton
+              active={value === current}
+              label={String(value)}
+              onClick={() => onPageChange?.(value)}
+              tone={tone}
+            />
+          </span>
+        ))}
+        <PagerButton
+          disabled={current >= lastPage}
+          label="›"
+          onClick={() => onPageChange?.(current + 1)}
+          tone={tone}
+        />
         {showPageSize ? (
-          <span className="ml-2 inline-flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[11px] font-medium text-muted-foreground">
+          <span className="ml-1.5 inline-flex h-6 items-center gap-1 rounded border border-border px-1.5 text-[10.5px] font-medium text-muted-foreground">
             {pageSize} / page
             <ChevronDown className="size-3" />
           </span>
@@ -577,8 +695,8 @@ export function ListPager({
 
 export function RatingStars({ count, rating }: { count?: number; rating: number }) {
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground">
-      <Star className="size-3.5 fill-amber-400 text-amber-400" />
+    <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-foreground">
+      <Star className="size-3 fill-amber-400 text-amber-400" />
       {rating.toFixed(1)}
       {count != null ? (
         <span className="font-normal text-muted-foreground">({count})</span>
@@ -590,25 +708,293 @@ export function RatingStars({ count, rating }: { count?: number; rating: number 
 export function FilterSelect({
   className,
   defaultLabel,
+  label,
+  onChange,
   options = [],
+  value,
 }: {
   className?: string;
   defaultLabel: string;
-  options?: string[];
+  label?: string;
+  onChange?: (value: string) => void;
+  options?: Array<string | { label: string; value: string }>;
+  value?: string;
+}) {
+  const normalized = options.map((option) =>
+    typeof option === "string" ? { label: option, value: option } : option,
+  );
+
+  return (
+    <div className={cn("min-w-0", className)}>
+      {label ? (
+        <p className="mb-1 text-[10.5px] font-semibold text-muted-foreground">{label}</p>
+      ) : null}
+      <div className="relative">
+        <select
+          className="h-9 w-full appearance-none rounded-lg border border-border bg-card px-2.5 pr-7 text-[12.5px] text-foreground shadow-sm outline-none"
+          onChange={(event) => onChange?.(event.target.value)}
+          {...(onChange ? { value: value ?? "" } : { defaultValue: "" })}
+        >
+          <option value="">{defaultLabel}</option>
+          {normalized.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tabs, rails, and detail panels                                             */
+/* -------------------------------------------------------------------------- */
+
+export type TabDefinition = { count?: number; key: string; label: string };
+
+/** Underline tab strip with optional counts (Paid (78) / Unpaid (12) / …). */
+export function TabBar({
+  className,
+  onChange,
+  tabs,
+  tone = "platform",
+  value,
+}: {
+  className?: string;
+  onChange: (key: string) => void;
+  tabs: TabDefinition[];
+  tone?: PortalTone;
+  value: string;
 }) {
   return (
-    <div className={cn("relative", className)}>
-      <select
-        className="h-10 w-full appearance-none rounded-xl border border-border bg-card px-3 pr-8 text-sm text-foreground shadow-sm outline-none"
-        defaultValue=""
-      >
-        <option value="">{defaultLabel}</option>
-        {options.map((option) => (
-          <option key={option}>{option}</option>
-        ))}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div
+      className={cn(
+        "no-scrollbar flex gap-4 overflow-x-auto border-b border-border/60",
+        className,
+      )}
+    >
+      {tabs.map((tab) => {
+        const active = tab.key === value;
+
+        return (
+          <button
+            className={cn(
+              "-mb-px shrink-0 border-b-2 pb-2 text-[12.5px] transition-colors",
+              active
+                ? cn("font-semibold", roleBorderClasses[tone], roleTextClasses[tone])
+                : "border-transparent font-medium text-muted-foreground hover:text-foreground",
+            )}
+            key={tab.key}
+            onClick={() => onChange(tab.key)}
+            type="button"
+          >
+            {tab.label}
+            {tab.count != null ? ` (${tab.count})` : ""}
+          </button>
+        );
+      })}
     </div>
+  );
+}
+
+/** Right-hand inspector column used by the master–detail screens. */
+export function DetailPanel({
+  children,
+  className,
+  footer,
+  onClose,
+  subtitle,
+  title,
+}: {
+  children: ReactNode;
+  className?: string;
+  footer?: ReactNode;
+  onClose?: () => void;
+  subtitle?: ReactNode;
+  title: ReactNode;
+}) {
+  return (
+    <aside
+      className={cn(
+        "flex max-h-[calc(100vh-9rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm",
+        className,
+      )}
+    >
+      <div className="flex shrink-0 items-start gap-2 border-b border-border/60 p-3">
+        <div className="min-w-0 flex-1">
+          <div className="font-heading text-[14px] font-bold text-foreground">{title}</div>
+          {subtitle ? (
+            <div className="mt-0.5 text-[11.5px] text-muted-foreground">{subtitle}</div>
+          ) : null}
+        </div>
+        {onClose ? (
+          <button
+            aria-label="Close details"
+            className="rounded-md p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            onClick={onClose}
+            type="button"
+          >
+            <X className="size-3.5" />
+          </button>
+        ) : null}
+      </div>
+
+      <div className="no-scrollbar min-h-0 flex-1 space-y-2.5 overflow-y-auto p-3">
+        {children}
+      </div>
+
+      {footer ? (
+        <div className="shrink-0 border-t border-border/60 p-3">{footer}</div>
+      ) : null}
+    </aside>
+  );
+}
+
+/** Bordered sub-card inside a DetailPanel (Personal Information, Guardian, …). */
+export function DetailSection({
+  action,
+  children,
+  title,
+}: {
+  action?: ReactNode;
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <section className="rounded-lg border border-border/70 bg-muted/15 p-2.5">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <h3 className="text-[12px] font-bold text-foreground">{title}</h3>
+        {action}
+      </div>
+      <div className="space-y-1">{children}</div>
+    </section>
+  );
+}
+
+export function DetailField({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 text-[11.5px]">
+      <span className="shrink-0 text-muted-foreground">{label}</span>
+      <span className="min-w-0 text-right font-medium text-foreground">{value ?? "—"}</span>
+    </div>
+  );
+}
+
+/** Compact segmented tabs used inside a DetailPanel header. */
+export function PanelTabs({
+  onChange,
+  tabs,
+  tone = "platform",
+  value,
+}: {
+  onChange: (key: string) => void;
+  tabs: TabDefinition[];
+  tone?: PortalTone;
+  value: string;
+}) {
+  return (
+    <div className="no-scrollbar flex gap-3 overflow-x-auto border-b border-border/60">
+      {tabs.map((tab) => {
+        const active = tab.key === value;
+
+        return (
+          <button
+            className={cn(
+              "-mb-px shrink-0 border-b-2 pb-1.5 text-[11.5px] transition-colors",
+              active
+                ? cn("font-semibold", roleBorderClasses[tone], roleTextClasses[tone])
+                : "border-transparent font-medium text-muted-foreground hover:text-foreground",
+            )}
+            key={tab.key}
+            onClick={() => onChange(tab.key)}
+            type="button"
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Small labelled card for the right rail (Payment Proofs, Active Tickets, …). */
+export function RailCard({
+  action,
+  children,
+  title,
+}: {
+  action?: ReactNode;
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2.5">
+        <h3 className="font-heading text-[13px] font-bold text-foreground">{title}</h3>
+        {action}
+      </div>
+      <div className="space-y-2 p-2.5">{children}</div>
+    </section>
+  );
+}
+
+export function ToggleSwitch({
+  checked,
+  description,
+  label,
+  onChange,
+  tone = "platform",
+}: {
+  checked: boolean;
+  description?: string;
+  label: string;
+  onChange: (next: boolean) => void;
+  tone?: PortalTone;
+}) {
+  const onClasses: Record<PortalTone, string> = {
+    admin: "bg-role-admin",
+    guardian: "bg-role-guardian",
+    platform: "bg-role-platform",
+    resident: "bg-role-resident",
+  };
+
+  return (
+    <label className="flex cursor-pointer items-start justify-between gap-3 py-1.5">
+      <span className="min-w-0">
+        <span className="block text-[12.5px] font-semibold text-foreground">{label}</span>
+        {description ? (
+          <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
+            {description}
+          </span>
+        ) : null}
+      </span>
+      <button
+        aria-checked={checked}
+        aria-label={label}
+        className={cn(
+          "relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors",
+          checked ? onClasses[tone] : "bg-muted-foreground/30",
+        )}
+        onClick={() => onChange(!checked)}
+        role="switch"
+        type="button"
+      >
+        <span
+          className={cn(
+            "absolute top-0.5 size-4 rounded-full bg-white shadow transition-all",
+            checked ? "left-[18px]" : "left-0.5",
+          )}
+        />
+      </button>
+    </label>
   );
 }
 
@@ -622,6 +1008,9 @@ export function statusToneFromLabel(status: string): SoftTone {
     value.includes("inside") ||
     value.includes("resolved") ||
     value.includes("activated") ||
+    value.includes("completed") ||
+    value.includes("published") ||
+    value.includes("available") ||
     value.includes("normal")
   ) {
     return "green";
@@ -631,6 +1020,9 @@ export function statusToneFromLabel(status: string): SoftTone {
     value.includes("review") ||
     value.includes("due") ||
     value.includes("partial") ||
+    value.includes("busy") ||
+    value.includes("scheduled") ||
+    value.includes("draft") ||
     value.includes("not generated")
   ) {
     return "amber";
@@ -640,12 +1032,15 @@ export function statusToneFromLabel(status: string): SoftTone {
     value.includes("rejected") ||
     value.includes("unpaid") ||
     value.includes("outside") ||
+    value.includes("suspended") ||
+    value.includes("urgent") ||
+    value.includes("failed") ||
     value.includes("open")
   ) {
     return "rose";
   }
   if (value.includes("progress") || value.includes("submitted")) {
-    return "blue";
+    return "cyan";
   }
   return "slate";
 }

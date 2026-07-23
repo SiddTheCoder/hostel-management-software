@@ -38,6 +38,11 @@ type PublicHostelApplicationCreateInput = z.infer<
 type PlatformHostelListQuery = z.infer<typeof platformHostelListQuerySchema>;
 type HostelRejectInput = z.infer<typeof hostelRejectSchema>;
 type HostelRequestDocumentsInput = z.infer<typeof hostelRequestDocumentsSchema>;
+export type DocumentRequestNotification = {
+  reason?: "no_owner_email" | "not_configured" | "send_failed";
+  sent: boolean;
+  to?: string;
+};
 type HostelResubmitDocumentsInput = z.infer<typeof hostelResubmitDocumentsSchema>;
 type PublicHostelListQuery = z.infer<typeof publicHostelListQuerySchema>;
 type PublicHostelCompareQuery = z.infer<typeof publicHostelCompareQuerySchema>;
@@ -112,11 +117,15 @@ export type HostelRecord = {
 type HostelApplicationRecord = {
   _id: Types.ObjectId;
   applicantId: Types.ObjectId;
+  createdAt?: Date;
   hostelId: Types.ObjectId;
   infoRequestNote?: string;
   infoRequestedAt?: Date;
+  notes?: string;
   rejectionReason?: string;
   requestedDocuments?: { documentType: string; note?: string }[];
+  reviewedAt?: Date;
+  snapshot?: Record<string, unknown>;
   status: "PENDING" | "APPROVED" | "REJECTED" | "NEEDS_MORE_INFO";
   submittedBy: Types.ObjectId;
   updatedAt?: Date;
@@ -324,12 +333,19 @@ function serializeApplication(application: HostelApplicationRecord | null) {
     hostelId: application.hostelId.toString(),
     id: application._id.toString(),
     infoRequestNote: application.infoRequestNote ?? "",
+    infoRequestedAt: application.infoRequestedAt?.toISOString() ?? null,
+    notes: application.notes ?? "",
     rejectionReason: application.rejectionReason ?? "",
     requestedDocuments: (application.requestedDocuments ?? []).map((doc) => ({
       documentType: doc.documentType,
       note: doc.note ?? "",
     })),
+    reviewedAt: application.reviewedAt?.toISOString() ?? null,
+    // Exactly what the owner typed into the registration form, kept verbatim so
+    // a reviewer can compare it against the live hostel record.
+    snapshot: (application.snapshot ?? {}) as Record<string, unknown>,
     status: application.status,
+    submittedAt: application.createdAt?.toISOString() ?? null,
     submittedBy: application.submittedBy.toString(),
   };
 }
@@ -416,6 +432,40 @@ export async function findScopedHostel(principal: ApiPrincipal, requestedHostelI
   }
 
   return hostel;
+}
+
+/**
+ * Owner resolution for an authenticated submission. Approval mails credentials
+ * to the owner account's address, so a signed-in applicant is bound to their own
+ * account and the client-sent applicant contact is never consulted — otherwise a
+ * forged (or merely mistyped) email/phone in the request body could point the
+ * hostel at someone else's account and send the credentials there.
+ */
+async function resolveAuthenticatedHostelOwner(authUserId: string) {
+  const user = await UserModel.findOne({
+    _id: normalizeObjectId(authUserId),
+    isDeleted: { $ne: true },
+  }).lean<(UserOwnerRecord & { email?: string }) | null>();
+
+  if (!user) {
+    throw new HostelServiceError(
+      "Your account could not be found. Sign in again and retry.",
+      "HOSTEL_OWNER_NOT_FOUND",
+      401,
+    );
+  }
+
+  // Same rule as the contact-resolved path: PUBLIC upgrades to HOSTEL_ADMIN at
+  // approval time, existing HOSTEL_ADMINs may register more hostels.
+  if (user.role !== Role.HOSTEL_ADMIN && user.role !== Role.PUBLIC) {
+    throw new HostelServiceError(
+      "This account role cannot register a hostel.",
+      "HOSTEL_OWNER_CONTACT_CONFLICT",
+      409,
+    );
+  }
+
+  return user;
 }
 
 async function findOrCreatePublicHostelOwner(
@@ -582,15 +632,23 @@ export async function registerPublicHostelApplication(
 ) {
   await connectToDatabase();
 
-  const ownerId = await findOrCreatePublicHostelOwner(input.applicant);
-  const slug = await uniqueSlug(input.name, input.location.area);
+  // An authenticated submission is owned by the signed-in account, full stop;
+  // only anonymous submissions fall back to resolving an owner from the typed
+  // contact details. This is what guarantees the approval email reaches the
+  // person who filled the form — the request body cannot redirect it.
+  const authenticatedOwner = options.authUserId
+    ? await resolveAuthenticatedHostelOwner(options.authUserId)
+    : null;
 
-  // Tie the application to the signed-in account when we have one, so the owner
-  // can always see their submission status on return. The hostel's ownerId stays
-  // the contact-resolved owner (used by the approval → account-upgrade flow).
-  const applicantUserId = options.authUserId
-    ? normalizeObjectId(options.authUserId)
-    : ownerId;
+  // The reviewer should see the address the credentials will actually go to,
+  // not whatever the client posted.
+  const applicant = authenticatedOwner?.email
+    ? { ...input.applicant, email: authenticatedOwner.email }
+    : input.applicant;
+
+  const ownerId =
+    authenticatedOwner?._id ?? (await findOrCreatePublicHostelOwner(applicant));
+  const slug = await uniqueSlug(input.name, input.location.area);
 
   const hostel = await HostelModel.create({
     capacitySummary: input.capacitySummary,
@@ -614,11 +672,11 @@ export async function registerPublicHostelApplication(
   });
 
   const application = await HostelApplicationModel.create({
-    applicantId: applicantUserId,
+    applicantId: ownerId,
     hostelId: hostel._id,
     notes: input.notes,
     snapshot: {
-      applicant: input.applicant,
+      applicant,
       capacitySummary: input.capacitySummary,
       contact: input.contact,
       documents: input.documents,
@@ -629,7 +687,7 @@ export async function registerPublicHostelApplication(
       selectedPlan: input.selectedPlan,
     },
     status: "PENDING",
-    submittedBy: applicantUserId,
+    submittedBy: ownerId,
   });
 
   await HostelVerificationModel.create({
@@ -709,8 +767,61 @@ export async function listPlatformHostels(query: PlatformHostelListQuery) {
     .limit(100)
     .lean<HostelRecord[]>();
 
+  // The approval queue is about people as much as listings, so each row carries
+  // who filed it and when — resolved in one query rather than per row.
+  const owners = await UserModel.find({
+    _id: { $in: hostels.map((hostel) => hostel.ownerId) },
+  })
+    .select("name email phone")
+    .lean<Array<{ _id: Types.ObjectId; email?: string; name?: string; phone?: string }>>();
+
+  const ownerById = new Map(
+    owners.map((owner) => [
+      owner._id.toString(),
+      {
+        email: owner.email ?? "",
+        name: owner.name ?? "Unnamed owner",
+        phone: owner.phone ?? "",
+      },
+    ]),
+  );
+
+  const applications = await HostelApplicationModel.find({
+    hostelId: { $in: hostels.map((hostel) => hostel._id) },
+    isDeleted: false,
+  })
+    .sort({ createdAt: -1 })
+    .select("hostelId createdAt status")
+    .lean<
+      Array<{
+        createdAt?: Date;
+        hostelId: Types.ObjectId;
+        status: string;
+      }>
+    >();
+
+  const applicationByHostel = new Map<string, { status: string; submittedAt: string | null }>();
+  for (const application of applications) {
+    const key = application.hostelId.toString();
+    if (!applicationByHostel.has(key)) {
+      applicationByHostel.set(key, {
+        status: application.status,
+        submittedAt: application.createdAt?.toISOString() ?? null,
+      });
+    }
+  }
+
   return {
-    hostels: hostels.map(serializeHostel),
+    hostels: hostels.map((hostel) => {
+      const application = applicationByHostel.get(hostel._id.toString());
+
+      return {
+        ...serializeHostel(hostel),
+        applicationStatus: application?.status ?? "",
+        owner: ownerById.get(hostel.ownerId.toString()) ?? null,
+        submittedAt: application?.submittedAt ?? hostel.createdAt?.toISOString() ?? null,
+      };
+    }),
   };
 }
 
@@ -731,10 +842,51 @@ export async function getPlatformHostel(hostelId: string) {
     .sort({ createdAt: -1 })
     .lean<HostelDocumentRecord[]>();
 
+  // Who actually filed this listing. The applicant is the hostel owner; the
+  // submitter can differ when a staff member filed on their behalf, so both are
+  // surfaced to the reviewer.
+  const contactIds = [
+    hostel.ownerId,
+    ...(application ? [application.applicantId, application.submittedBy] : []),
+  ];
+  const contacts = await UserModel.find({ _id: { $in: contactIds } })
+    .select("name email phone role createdAt")
+    .lean<
+      Array<{
+        _id: Types.ObjectId;
+        createdAt?: Date;
+        email?: string;
+        name?: string;
+        phone?: string;
+        role?: string;
+      }>
+    >();
+
+  const contactById = new Map(
+    contacts.map((contact) => [
+      contact._id.toString(),
+      {
+        email: contact.email ?? "",
+        id: contact._id.toString(),
+        name: contact.name ?? "Unnamed user",
+        phone: contact.phone ?? "",
+        registeredAt: contact.createdAt?.toISOString() ?? null,
+        role: contact.role ?? "PUBLIC",
+      },
+    ]),
+  );
+
   return {
     application: serializeApplication(application),
+    applicant: application
+      ? (contactById.get(application.applicantId.toString()) ?? null)
+      : null,
     documents: documents.map(serializeHostelDocument),
     hostel: serializeHostel(hostel),
+    owner: contactById.get(hostel.ownerId.toString()) ?? null,
+    submitter: application
+      ? (contactById.get(application.submittedBy.toString()) ?? null)
+      : null,
   };
 }
 
@@ -973,8 +1125,24 @@ export async function requestPlatformHostelDocuments(
 
   const ownerInfo = await resolveHostelOwner(objectId);
 
-  if (ownerInfo) {
-    await sendEmail({
+  // The request itself has already been persisted, so a failed email must not
+  // fail the call — but it must not be invisible either. The reviewer is told
+  // whether the owner was actually notified, otherwise "Documents requested"
+  // reads as success while nobody was ever contacted.
+  let notification: DocumentRequestNotification;
+
+  if (!ownerInfo) {
+    console.warn(
+      JSON.stringify({
+        level: "warn",
+        action: "hostel_documents_requested_email_skipped",
+        message: "Hostel has no resolvable owner email; owner was not notified.",
+        hostelId: objectId.toString(),
+      }),
+    );
+    notification = { reason: "no_owner_email", sent: false };
+  } else {
+    const delivery = await sendEmail({
       to: ownerInfo.owner.email,
       ...hostelDocumentsRequestedEmail({
         documents: input.documents,
@@ -984,9 +1152,29 @@ export async function requestPlatformHostelDocuments(
         statusUrl: appHostelStatusUrl(),
       }),
     });
+
+    if (delivery.sent) {
+      notification = { sent: true, to: ownerInfo.owner.email };
+    } else {
+      console.warn(
+        JSON.stringify({
+          level: "warn",
+          action: "hostel_documents_requested_email_failed",
+          message: `Owner was not notified (${delivery.reason}).`,
+          detail: delivery.detail ?? null,
+          hostelId: objectId.toString(),
+          to: ownerInfo.owner.email,
+        }),
+      );
+      notification = {
+        reason: delivery.reason,
+        sent: false,
+        to: ownerInfo.owner.email,
+      };
+    }
   }
 
-  return { hostel: serializeHostel(hostel) };
+  return { hostel: serializeHostel(hostel), notification };
 }
 
 // Owner-facing: list the applications the signed-in user submitted, newest
